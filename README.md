@@ -1,6 +1,6 @@
 # PrismAI — cadrage technique SaaS
 
-Ce dépôt contient le cadrage initial demandé pour PrismAI, avant toute implémentation applicative.
+Ce dépôt contient le cadrage initial et le premier socle exécutable de PrismAI. L’implémentation avance par unités cohérentes, documentées et validées.
 
 > **Toutes les IA. Un seul Prisme.**
 
@@ -8,10 +8,22 @@ Ce dépôt contient le cadrage initial demandé pour PrismAI, avant toute implé
 
 - [`docs/prismai-architecture-report.md`](docs/prismai-architecture-report.md) : matrice des références, architecture cible, arborescence, dépendances, risques, décisions à approuver, plan de tests et feuille de route.
 - [`docs/source-requirements.txt`](docs/source-requirements.txt) : copie du cahier des charges fourni pour assurer la traçabilité.
+- [`plan.md`](plan.md) : plan et critères d’acceptation de l’unité courante.
+- [`TODO.md`](TODO.md) : résultats livrés et prochaines unités de travail.
+- [`apps/api/src/server.mjs`](apps/api/src/server.mjs) : API HTTP minimale avec `GET /health`.
+- [`apps/api/src/server.test.mjs`](apps/api/src/server.test.mjs) : tests du contrat de santé et des routes inconnues.
 
 ## Statut
 
-Étape de cadrage uniquement. Aucun code de production, aucune clé secrète, aucun déploiement Supabase/Cloudflare/fournisseur IA et aucun test end-to-end n’a été exécuté dans ce dépôt.
+Le cadrage est terminé et l’unité 1 est implémentée : monorepo minimal, API locale et tests natifs Node.js. Il n’y a encore aucune authentification, clé secrète, persistance, intégration Supabase/Cloudflare/fournisseur IA, crédit, paiement ou test end-to-end.
+
+## Unité 1 — socle exécutable
+
+Le socle utilise temporairement le module HTTP natif de Node.js pour réduire les dépendances initiales. L’API écoute par défaut sur `127.0.0.1:3001`, expose `GET /health` et retourne `404` avec une erreur JSON normalisée pour toute route inconnue.
+
+Depuis la racine du dépôt, exécuter `node --test` pour lancer les tests. Pour démarrer l’API, exécuter `PRISMAI_API_PORT=3001 node apps/api/src/server.mjs`, puis appeler `http://127.0.0.1:3001/health`. La valeur `PRISMAI_API_PORT` peut être placée dans un environnement local à partir de `.env.example`; aucune valeur secrète n’est requise à cette étape.
+
+Résultat de validation de cette unité : `node --test` a exécuté 2 tests avec 2 succès et 0 échec. Un démarrage réel de l’API a également confirmé `GET /health` en HTTP 200 avec `{"service":"prismai-api","status":"ok"}` et une route inconnue en HTTP 404 avec `{"error":"not_found"}`. `git diff --check` est propre.
 
 Les affirmations du rapport sont marquées `OBSERVÉ`, `PROPOSÉ` ou `NON VÉRIFIÉ` / `NON VÉRIFIABLE`. Les références open source ne sont pas copiées dans ce dépôt ; leurs licences et leurs dépendances doivent être revues avant toute réutilisation de code.
 
