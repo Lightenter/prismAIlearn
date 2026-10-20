@@ -78,3 +78,7 @@ Le code PrismAI reste original et n’embarque pas de copie de LibreChat, Open W
 ## Validation des intégrations
 
 Les scripts non destructifs `scripts/integration/test_supabase_connection.mjs` et `scripts/integration/test_r2_connection.mjs` valident respectivement les endpoints Supabase et le cycle temporaire Put/Head/Get/Delete R2. Ils retournent `SKIPPED` si les variables requises sont absentes et ne journalisent jamais les secrets. Utiliser `pnpm test:integration`, `pnpm test:integration:supabase` ou `pnpm test:integration:r2`. Le guide des clés Groq, Gemini et OpenRouter est dans [`docs/runbooks/provider-api-keys.md`](docs/runbooks/provider-api-keys.md).
+
+## Authentification du chat
+
+Les routes `/api/chat` et `/api/chat/stream` vérifient la session Supabase côté serveur avant d’exécuter un run. L’identifiant transmis au runtime vient exclusivement de `supabase.auth.getUser()` ; un `userId` envoyé par le navigateur est ignoré. Une session absente ou invalide retourne `401 UNAUTHORIZED`, sans divulguer les détails du jeton ou de la base.
