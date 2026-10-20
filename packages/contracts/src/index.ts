@@ -1,9 +1,13 @@
 import { z } from 'zod';
 export * from './run';
+export * from './sanitize';
+
+// Nettoie les caractères de contrôle avant stockage ou transmission au provider.
+const safeMessageContent = z.string().min(1).max(50_000).transform((value) => value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim()).refine((value) => value.length > 0, 'Le message ne peut pas être vide');
 
 export const chatMessageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant']),
-  content: z.string().min(1).max(50_000),
+  content: safeMessageContent,
 });
 
 export const chatRequestSchema = z.object({

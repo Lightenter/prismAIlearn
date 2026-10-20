@@ -1,0 +1,8 @@
+// Importe les primitives cryptographiques Node côté serveur uniquement.
+import { createHmac, timingSafeEqual } from 'node:crypto';
+// Compare deux signatures sans fuite temporelle exploitable.
+function safeEqual(left: string, right: string) { const a = Buffer.from(left, 'utf8'); const b = Buffer.from(right, 'utf8'); return a.length === b.length && timingSafeEqual(a, b); }
+// Vérifie une signature HMAC Campay/CinetPay sur le corps brut non modifié.
+export function verifyHmacWebhook(body: string, signature: string | null, secret: string | undefined) { if (!secret || !signature) return false; const received = signature.replace(/^sha256=/, '').trim(); const expected = createHmac('sha256', secret).update(body, 'utf8').digest('hex'); return safeEqual(expected, received); }
+// Vérifie la signature Stripe t=timestamp,v1=digest avec une tolérance anti-rejeu.
+export function verifyStripeWebhook(body: string, signature: string | null, secret: string | undefined, toleranceSeconds = 300) { if (!secret || !signature) return false; const parts = signature.split(',').map((part) => part.split('=')); const timestamp = parts.find(([key]) => key === 't')?.[1]; const digests = parts.filter(([key]) => key === 'v1').map(([, value]) => value); if (!timestamp || digests.length === 0) return false; const timestampNumber = Number(timestamp); if (!Number.isFinite(timestampNumber) || Math.abs(Math.floor(Date.now() / 1000) - timestampNumber) > toleranceSeconds) return false; const expected = createHmac('sha256', secret).update(`${timestamp}.${body}`, 'utf8').digest('hex'); return digests.some((digest) => safeEqual(expected, digest)); }

@@ -82,3 +82,14 @@ Les scripts non destructifs `scripts/integration/test_supabase_connection.mjs` e
 ## Authentification du chat
 
 Les routes `/api/chat` et `/api/chat/stream` vérifient la session Supabase côté serveur avant d’exécuter un run. L’identifiant transmis au runtime vient exclusivement de `supabase.auth.getUser()` ; un `userId` envoyé par le navigateur est ignoré. Une session absente ou invalide retourne `401 UNAUTHORIZED`, sans divulguer les détails du jeton ou de la base.
+
+
+## Durcissement sécurité MVP
+
+La migration additive [`supabase/migrations/002_security_hardening.sql`](supabase/migrations/002_security_hardening.sql) ajoute le RBAC `user`/`premium`/`admin`, protège le changement de rôle par RLS, révoque les RPC de crédits pour les JWT utilisateur et réserve les crédits via des verrous PostgreSQL. Le runtime suit désormais `reserve_credits → provider → complete_credits` ou `refund_credits`; la clé d’idempotence doit être conservée lors d’un retry HTTP via l’en-tête `Idempotency-Key`.
+
+Les cookies Supabase SSR sont httpOnly et Secure hors développement. La rotation des refresh tokens est déléguée à `@supabase/ssr` et déclenchée par la vérification serveur `auth.getUser()`. Le rate limiting chat est atomique en base, à 30 requêtes par utilisateur et par fenêtre de 60 secondes. Le client DB backend refuse tout fallback vers la clé anon publique.
+
+Les routes `/api/webhooks/stripe`, `/api/webhooks/campay` et `/api/webhooks/cinetpay` vérifient la signature du corps brut avant parsing, valident le payload et dédupliquent les transactions par `tx_id` via `credit_payment_v2`. Les secrets `STRIPE_WEBHOOK_SECRET`, `CAMPAY_WEBHOOK_SECRET` et `CINETPAY_WEBHOOK_SECRET` sont strictement serveur. Les messages sont validés par Zod, nettoyés des caractères de contrôle et rendus par React sans HTML non échappé; le corps brut d’un webhook n’est jamais sanitizé avant vérification cryptographique.
+
+Avant application en production, exécuter la migration 002 sur un projet Supabase de staging isolé et réaliser les tests transactionnels réels avec deux sessions/utilisateurs. Les tests locaux vérifient les contrats et mocks, mais ne prouvent pas à eux seuls les garanties de concurrence PostgreSQL.

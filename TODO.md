@@ -44,3 +44,14 @@
 - Niveau de sandbox pour OCR/STT/RAG/MCP/Code Interpreter ; ces fonctions ne sont pas simulées.
 - Offre commerciale Free/Pro/Créateur, CinetPay/Stripe et règles de crédits mensuels/supplémentaires.
 - Revue juridique finale des licences et SBOM des futures dépendances tierces.
+
+
+## Durcissement sécurité — unité courante
+
+- [x] Cookies Supabase SSR httpOnly/Secure avec rotation des refresh tokens gérée par `@supabase/ssr`.
+- [x] RBAC `user`/`premium`/`admin` dans `profiles.role`, avec protection RLS contre l’auto-élévation.
+- [x] RPC crédits réconciliées sur `reserve_credits`, `complete_credits` et `refund_credits`, avec révocation des anciens appels directs pour `authenticated`.
+- [x] Rate limiting SQL atomique des routes chat/SSE : 30 requêtes par utilisateur sur 60 secondes.
+- [x] Vérification HMAC/Stripe des webhooks avant parsing et crédit de paiement idempotent par `tx_id`.
+- [x] Validation Zod et nettoyage des caractères de contrôle sur les messages entrants, sans modifier les corps signés avant vérification.
+- [ ] Exécuter la migration 002 et les tests de concurrence avec un Supabase staging réel ; les tests locaux ne prouvent pas les verrous PostgreSQL.

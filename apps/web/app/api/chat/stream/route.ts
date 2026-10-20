@@ -1,9 +1,13 @@
 // Importe la réponse Next.js pour les erreurs JSON hors flux SSE.
 import { NextResponse } from 'next/server';
+// Importe une clé de repli pour les requêtes qui ne fournissent pas d’idempotency key.
+import { randomUUID } from 'node:crypto';
 // Importe le contrat d’entrée chat partagé.
 import { chatRequestSchema } from '@prismai/contracts';
 // Importe le runtime et les encodeurs d’événements SSE.
 import { createRunEvents, encodeSse, createRunId, runChatTurn } from '@prismai/chat-runtime';
+// Importe le rate limiting atomique côté backend.
+import { consumeRateLimit } from '@prismai/db';
 // Importe le client Supabase serveur et sa session vérifiée.
 import { createSupabaseServerClient } from '../../../../lib/supabaseServer';
 // Importe la politique commune de codes et de réponses sûres.
@@ -38,12 +42,21 @@ export async function POST(request: Request) {
   if (authResult.error) return unexpectedChatErrorResponse('CHAT_STREAM_FAILED');
   // Refuse une réponse Supabase dépourvue d’utilisateur authentifié.
   if (!authResult.data.user) return unauthorizedResponse();
+  // Limite les appels SSE par utilisateur dans une fenêtre SQL atomique.
+  try {
+    if (!(await consumeRateLimit(`chat-stream:${authResult.data.user.id}`, 60, 30))) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
+  } catch {
+    // Une panne du contrôle de sécurité ne doit pas autoriser silencieusement le trafic.
+    return unexpectedChatErrorResponse('CHAT_STREAM_FAILED');
+  }
   // Encadre la validation, l’exécution et l’encodage du run.
   try {
     // Valide le corps de requête après le contrôle d’identité.
     const input = chatRequestSchema.parse(await request.json());
+    // Réutilise la même clé lors des retries SSE explicites du client.
+    const idempotencyKey = request.headers.get('idempotency-key') ?? `chat-stream:${authResult.data.user.id}:${randomUUID()}`;
     // Exécute le runtime avec l’identifiant vérifié, jamais avec une valeur du navigateur.
-    const response = await runChatTurn(authResult.data.user.id, input.messages);
+    const response = await runChatTurn(authResult.data.user.id, input.messages, { idempotencyKey });
     // Construit les événements SSE typés avec un identifiant de run nouveau.
     const body = createRunEvents(createRunId(), input.messages, response.content, response.provider_used, response.balance < 0 ? 0 : response.tokens).map(encodeSse).join('');
     // Retourne le flux avec les en-têtes nécessaires au streaming sans cache.

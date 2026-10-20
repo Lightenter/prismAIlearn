@@ -1,9 +1,13 @@
 // Importe la réponse Next.js pour conserver le format HTTP actuel.
 import { NextResponse } from 'next/server';
+// Importe une clé aléatoire de repli lorsque le client n’envoie pas d’idempotency key.
+import { randomUUID } from 'node:crypto';
 // Importe le contrat qui valide uniquement les champs fonctionnels du chat.
 import { chatRequestSchema } from '@prismai/contracts';
 // Importe le runtime qui reçoit désormais l’identité vérifiée côté serveur.
 import { runChatTurn } from '@prismai/chat-runtime';
+// Importe le rate limiting atomique côté backend.
+import { consumeRateLimit } from '@prismai/db';
 // Importe le client Supabase configuré pour lire les cookies de session serveur.
 import { createSupabaseServerClient } from '../../../lib/supabaseServer';
 // Importe la politique partagée de réponses sûres.
@@ -38,12 +42,21 @@ export async function POST(request: Request) {
   if (authResult.error) return unexpectedChatErrorResponse('CHAT_FAILED');
   // Refuse une réponse sans utilisateur même si Supabase n’a pas fourni d’erreur.
   if (!authResult.data.user) return unauthorizedResponse();
+  // Limite les appels chat par utilisateur dans une fenêtre SQL atomique.
+  try {
+    if (!(await consumeRateLimit(`chat:${authResult.data.user.id}`, 60, 30))) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
+  } catch {
+    // Une panne du contrôle de sécurité ne doit pas autoriser silencieusement le trafic.
+    return unexpectedChatErrorResponse('CHAT_FAILED');
+  }
   // Valide le contenu fonctionnel après le contrôle d’identité.
   try {
     // Parse le corps sans accepter d’identifiant utilisateur comme preuve d’identité.
     const input = chatRequestSchema.parse(await request.json());
     // Transmet exclusivement l’identifiant issu de Supabase au runtime sensible.
-    return NextResponse.json(await runChatTurn(authResult.data.user.id, input.messages));
+    // Réutilise la même clé lors des retries HTTP explicites du client.
+    const idempotencyKey = request.headers.get('idempotency-key') ?? `chat:${authResult.data.user.id}:${randomUUID()}`;
+    return NextResponse.json(await runChatTurn(authResult.data.user.id, input.messages, { idempotencyKey }));
   } catch (error: unknown) {
     // Préserve les codes métier autorisés et masque tous les autres détails.
     return runtimeChatErrorResponse(error, 'CHAT_FAILED');
