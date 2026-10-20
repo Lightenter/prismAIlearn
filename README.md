@@ -12,10 +12,14 @@ Ce dépôt contient le cadrage initial et le premier socle exécutable de PrismA
 - [`TODO.md`](TODO.md) : résultats livrés et prochaines unités de travail.
 - [`apps/api/src/server.mjs`](apps/api/src/server.mjs) : API HTTP minimale avec `GET /health`.
 - [`apps/api/src/server.test.mjs`](apps/api/src/server.test.mjs) : tests du contrat de santé et des routes inconnues.
+- [`docs/frontend-reference.md`](docs/frontend-reference.md) : analyse de la maquette frontend retrouvée dans Google Drive.
+- [`docs/assets/prismai-frontend-reference.png`](docs/assets/prismai-frontend-reference.png) : image de référence visuelle versionnée.
 
 ## Statut
 
 Le cadrage est terminé et l’unité 1 est implémentée : monorepo minimal, API locale et tests natifs Node.js. Il n’y a encore aucune authentification, clé secrète, persistance, intégration Supabase/Cloudflare/fournisseur IA, crédit, paiement ou test end-to-end.
+
+La référence frontend a été retrouvée dans Google Drive et enregistrée dans le dépôt. Elle définit une direction mobile-first sombre et néon pour les écrans de connexion, d’inscription et de vérification d’e-mail. Les détails sont décrits dans [`docs/frontend-reference.md`](docs/frontend-reference.md) ; l’image guide l’implémentation mais ne doit pas être copiée pixel par pixel.
 
 ## Unité 1 — socle exécutable
 
