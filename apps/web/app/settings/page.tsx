@@ -1,0 +1,3 @@
+import { SiteNav } from '../components/SiteNav';
+
+export default function SettingsPage() { return <div className="page"><SiteNav /><main className="page-main container"><div className="eyebrow">Compte et sécurité</div><h1>Mes <span>paramètres</span>.</h1><div className="panel"><h3>Préférences personnelles</h3><p>Les préférences, rôles et sessions seront persistés via Supabase Auth et PostgreSQL. Aucune clé fournisseur n’est stockée dans le navigateur.</p><div className="notice">La gestion des sessions, de la suppression de compte et des organisations sera activée avec l’environnement Supabase de staging.</div></div></main></div>; }

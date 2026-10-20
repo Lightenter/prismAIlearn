@@ -2,42 +2,45 @@
 
 ## Livré dans cette unité
 
-### Socle exécutable et reproductible
+### Monorepo reproductible
 
-- Initialiser le monorepo avec `package.json` et `pnpm-workspace.yaml`.
-- Fournir un `.env.example` sans secret réel.
-- Créer l’application API minimale avec `GET /health`.
-- Retourner une erreur JSON `404` explicite pour toute route inconnue.
-- Ajouter les tests automatisés du contrat de santé et de la route inconnue.
-- Documenter les fichiers, les commandes, les résultats et les limites dans le README.
+- [x] Monorepo pnpm/Turborepo avec `apps/web`, `apps/api`, `apps/workers`, `apps/edge` et les packages de l’architecture cible.
+- [x] TypeScript strict, lockfile, ESLint non interactif, `.env.example` sans secret réel et policy pnpm 11 pour les scripts nécessaires.
+- [x] README, plan, docs d’architecture existantes, runbooks et traçabilité conservés dans le dépôt cible.
 
-## À venir après validation
+### Domaine, contrats et exécution
 
-### Authentification et autorisation
+- [x] Contrats Zod pour messages, paiements, runs et événements SSE avec séquence/idempotence.
+- [x] Classification de capacité séparée du choix du fournisseur ; fallback borné Groq/Gemini/OpenRouter/Mistral et circuit breaker.
+- [x] Runtime chat avec vérification, réservation, finalisation et remboursement explicites côté domaine.
+- [x] Registre d’outils allowlisté ; aucune exécution arbitraire, commande système, SSRF ou plugin privilégié par défaut.
+- [x] Ledger Evidence append-only avec hash, provenance, couverture et inconnues explicites.
 
-- Implémenter l’inscription, la connexion, la session et les routes privées avec Supabase Auth.
-- Définir le modèle tenant/org/rôles et les politiques RLS.
-- Ajouter les tests d’isolation entre utilisateurs et tenants.
+### Supabase, R2 et sécurité
 
-### Conversation et streaming
+- [x] Migration Supabase sans MongoDB : organisations/membres, profils, conversations, parts, runs, crédits, opérations, paiements, pièces jointes et Evidence.
+- [x] RLS deny-by-default et policies d’ownership ; RPC de crédits atomiques, idempotence de paiement et finalisation de run.
+- [x] Adaptateur R2 privé avec préfixes tenant/type, clés générées serveur et URLs signées courte durée.
+- [x] Secrets serveur uniquement ; aucun provider/R2/service role dans le bundle frontend.
 
-- Définir les contrats Conversation, MessagePart et Run.
-- Ajouter le premier parcours de chat avec streaming SSE, arrêt, reprise et idempotence.
-- Tester les erreurs, les reconnexions et la finalisation unique.
+### Web et studios
 
-### Routage et fournisseurs IA
+- [x] Landing, login, signup, vérification e-mail, pricing, chat, dashboard, settings et shell dark neon responsive.
+- [x] Studios texte, image, vidéo, code et document avec disponibilité explicite lorsque le provider n’est pas configuré.
+- [x] Manifeste `manus-routes.json` synchronisé avec les routes pages principales.
 
-- Définir `ProviderAdapter` et la matrice de capacités réelle.
-- Décider LiteLLM séparé ou routeur interne.
-- Ajouter les timeouts, retries bornés, fallbacks, budgets et journaux de décision.
+### Validation locale
 
-### Crédits, fichiers et studios
+- [x] Lint, typecheck, tests unitaires/contrats et build à exécuter dans ce dépôt cible avant commit.
+- [ ] Exécuter `supabase test db` sur un projet local/staging et prouver les allow/deny inter-tenant.
+- [ ] Tester un vrai flux Auth, provider, SSE, R2 et Campay avec secrets de staging séparés.
+- [ ] Activer Redis/LiteLLM/Workers Cloudflare seulement après décision opérationnelle, coûts, régions et permissions.
+- [ ] Réaliser les E2E mobile/clavier/contraste et tests de reprise multi-instance.
 
-- Concevoir le ledger de crédits côté serveur et ses tests de concurrence.
-- Ajouter le BlobStore et l’intégration R2 après validation des choix de sécurité.
-- Ajouter les studios MVP un par un, sans simuler une capacité fournisseur absente.
+## Décisions toujours ouvertes
 
-### Paiements et production
-
-- Préparer les webhooks idempotents CinetPay/Stripe.
-- Ajouter les tests de sécurité, de résilience, de performance et de déploiement.
+- Résidence des données, SLO/RPO/RTO, quotas et politique de rétention.
+- LiteLLM séparé ou providers directs selon les résultats de staging.
+- Niveau de sandbox pour OCR/STT/RAG/MCP/Code Interpreter ; ces fonctions ne sont pas simulées.
+- Offre commerciale Free/Pro/Créateur, CinetPay/Stripe et règles de crédits mensuels/supplémentaires.
+- Revue juridique finale des licences et SBOM des futures dépendances tierces.

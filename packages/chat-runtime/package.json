@@ -1,0 +1,24 @@
+{
+  "name": "@prismai/chat-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prismai/contracts": "workspace:*",
+    "@prismai/db": "workspace:*",
+    "@prismai/domain": "workspace:*",
+    "@prismai/provider-router": "workspace:*"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  }
+}

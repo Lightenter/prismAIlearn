@@ -2,14 +2,29 @@
   "name": "prismai",
   "version": "0.1.0",
   "private": true,
-  "description": "Socle technique initial de PrismAI.",
-  "type": "module",
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
-    "test": "node --test",
-    "start:api": "node apps/api/src/server.mjs"
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "bash scripts/integration/test_integrations.sh",
+    "test:integration:supabase": "node scripts/integration/test_supabase_connection.mjs",
+    "test:integration:r2": "node scripts/integration/test_r2_connection.mjs",
+    "format:check": "prettier --check .",
+    "supabase:reset": "supabase db reset"
   },
-  "engines": {
-    "node": ">=22"
-  },
-  "packageManager": "pnpm@10.33.0"
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
 }

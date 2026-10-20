@@ -1,0 +1,10 @@
+{
+  "name": "prismai-edge",
+  "main": "apps/edge/src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "r2_buckets": [{ "binding": "PRISMAI_BUCKET", "bucket_name": "prismai-staging" }],
+  "env": {
+    "staging": { "name": "prismai-edge-staging" },
+    "production": { "name": "prismai-edge-production" }
+  }
+}
