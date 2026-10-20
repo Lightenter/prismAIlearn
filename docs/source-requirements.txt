@@ -1,0 +1,566 @@
+# PROJET : PRISMAI
+## Reconstruction complète d'une plateforme SaaS d'intelligence artificielle
+
+Tu agis comme un architecte logiciel senior, un ingénieur full-stack
+et un responsable de la qualité logicielle.
+
+Ta mission est de concevoir et de construire PrismAI depuis une base
+propre, en utilisant plusieurs projets open source comme références.
+
+Le projet existant est considéré comme techniquement peu fiable.
+Ne suppose pas que son architecture actuelle est correcte.
+
+Nous voulons repartir sur une architecture propre, documentée,
+sécurisée, testable et évolutive.
+
+IMPORTANT :
+Ne commence pas immédiatement à écrire tout le code.
+Tu dois d'abord étudier les références, définir l'architecture,
+présenter le plan de construction, puis avancer étape par étape.
+
+==================================================
+1. VISION DU PRODUIT
+==================================================
+
+PrismAI est une plateforme SaaS d'intelligence artificielle
+multimodale conçue initialement pour le marché africain.
+
+Slogan :
+"Toutes les IA. Un seul Prisme."
+
+Le produit doit offrir une expérience unifiée permettant aux
+utilisateurs d'accéder à différentes capacités IA sans devoir
+comprendre la complexité technique des fournisseurs.
+
+L'interface doit être moderne, responsive, rapide et accessible
+sur ordinateur comme sur téléphone.
+
+Les fournisseurs IA ne doivent pas être exposés inutilement
+dans l'interface utilisateur.
+
+Le choix du fournisseur et du modèle doit être effectué
+par le backend en fonction des capacités requises, de la
+disponibilité, des coûts et des politiques de PrismAI.
+
+==================================================
+2. DÉPÔTS DE RÉFÉRENCE OBLIGATOIRES
+==================================================
+
+Étudie les dépôts suivants :
+
+A. LibreChat
+https://github.com/LibreChat-AI/LibreChat
+
+Rôle :
+Référence principale pour l'interface de chat, les conversations,
+le streaming, les agents, les pièces jointes et les interactions IA.
+
+B. REA
+https://github.com/morluto/rea
+
+Rôle :
+Référence méthodologique pour l'investigation de code,
+la compréhension des dépendances et la reconstruction vérifiable
+de fonctionnalités.
+
+Ne prétends pas que REA fournit directement toute l'architecture
+d'une plateforme SaaS.
+
+C. Open WebUI
+https://github.com/open-webui/open-webui
+
+Rôle :
+Étudier les interactions de chat, la navigation, les paramètres
+et les possibilités d'extension.
+
+D. LobeChat
+https://github.com/lobehub/lobehub
+
+Rôle :
+Étudier l'expérience utilisateur, les assistants spécialisés,
+les composants visuels et l'organisation des conversations.
+
+E. Vercel AI SDK
+https://github.com/vercel/ai
+
+Rôle :
+Évaluer les mécanismes de streaming, la gestion des états
+de génération et l'intégration des outils IA.
+
+F. LiteLLM
+https://github.com/BerriAI/litellm
+
+Rôle :
+Évaluer la couche d'accès aux fournisseurs, les mécanismes
+de reprise, le suivi des coûts et le routage des requêtes.
+
+G. Supabase
+https://github.com/supabase/supabase
+
+Rôle :
+Étudier les mécanismes d'authentification, de gestion des données
+et de contrôle d'accès.
+
+H. Cloudflare Workers SDK
+https://github.com/cloudflare/workers-sdk
+
+Rôle :
+Évaluer uniquement les outils utiles au déploiement et à
+l'intégration éventuelle de services Cloudflare.
+
+I. Documentation Cloudflare R2
+https://developers.cloudflare.com/r2/
+
+Rôle :
+Définir une stratégie de stockage sécurisé des fichiers.
+
+==================================================
+3. MÉTHODE D'ANALYSE DES RÉFÉRENCES
+==================================================
+
+Pour chaque dépôt :
+
+1. Consulte son README, sa licence et sa documentation.
+2. Identifie la stack réellement utilisée.
+3. Examine l'arborescence et les modules pertinents.
+4. Identifie les fichiers et fonctions qui implémentent
+   les fonctionnalités recherchées.
+5. Décris les dépendances entre ces composants.
+6. Identifie les contraintes et limites de chaque approche.
+7. Vérifie la compatibilité avec l'architecture PrismAI.
+8. Propose une adaptation minimale et justifiée.
+
+Produis un tableau comprenant :
+
+- Dépôt de référence.
+- Fonctionnalité recherchée.
+- Fichiers ou modules pertinents.
+- Comportement observé.
+- Adaptation proposée.
+- Dépendances nécessaires.
+- Licence applicable.
+- Tests nécessaires.
+- Risques techniques.
+
+N'invente jamais le contenu d'un fichier que tu n'as pas pu consulter.
+
+Si le dépôt est inaccessible ou si une fonctionnalité n'est pas
+vérifiable, indique-le explicitement.
+
+Ne copie pas aveuglément des dépôts entiers.
+
+Réutilise les bibliothèques et composants uniquement lorsque
+leur utilité, leur compatibilité et leurs conditions de licence
+ont été vérifiées.
+
+Privilégie les interfaces publiques documentées.
+
+==================================================
+4. ARCHITECTURE CIBLE
+==================================================
+
+Conçois une architecture séparant clairement :
+
+A. FRONTEND
+
+Responsabilités :
+- Landing page.
+- Inscription et connexion.
+- Tableau de bord.
+- Interface de conversation.
+- Studios de génération.
+- Historique.
+- Gestion du compte.
+- Affichage des crédits et abonnements.
+- Gestion des états de chargement et des erreurs.
+
+Le frontend ne doit jamais détenir les clés secrètes des fournisseurs.
+
+B. BACKEND
+
+Responsabilités :
+- Authentification et autorisation.
+- Gestion des utilisateurs.
+- Gestion des conversations.
+- Classification des intentions.
+- Routage IA.
+- Gestion des fournisseurs.
+- Gestion des crédits.
+- Gestion des tâches longues.
+- Gestion des fichiers.
+- Journalisation technique.
+- Gestion des erreurs.
+- Contrôles de sécurité.
+
+C. SUPABASE
+
+Utilisation prévue :
+- Authentification.
+- Données personnelles et métier nécessaires.
+- Conversations et historique si cette solution est retenue
+  après validation de l'architecture.
+- Comptabilité des crédits.
+- Abonnements et paramètres utilisateur.
+
+D. CLOUDFLARE R2
+
+Utilisation prévue :
+- Stockage des fichiers volumineux.
+- Images.
+- Documents.
+- Vidéos générées lorsque cela est approprié.
+
+Ne conserve pas les fichiers volumineux dans les tables SQL.
+
+E. FOURNISSEURS IA
+
+Construis une couche d'abstraction qui permette de connecter
+et de remplacer les fournisseurs sans réécrire les studios.
+
+Chaque intégration doit préciser les capacités réellement prises
+en charge : texte, image, vidéo, outils ou autres fonctions.
+
+N'invente jamais la prise en charge d'une capacité.
+
+==================================================
+5. ROUTEUR INTELLIGENT PRISMAI
+==================================================
+
+Conçois un routeur backend indépendant du frontend.
+
+Il reçoit :
+- Le message de l'utilisateur.
+- Les métadonnées nécessaires.
+- Les références des fichiers autorisés.
+- Le contexte conversationnel pertinent.
+
+Il détermine :
+- La capacité requise.
+- La complexité estimée.
+- Les éventuels outils nécessaires.
+- Les contraintes de coût et de disponibilité.
+
+Sépare la classification de l'intention du choix du fournisseur.
+
+Le classificateur retourne une capacité, par exemple :
+TEXT, CODE, IMAGE, VIDEO, DOCUMENT, AGENT ou SEARCH.
+
+Il peut également retourner un niveau de complexité :
+LOW, MEDIUM ou HIGH.
+
+Le fournisseur est ensuite sélectionné par une couche distincte,
+selon les capacités réelles, la disponibilité, les quotas,
+les coûts et les règles de sécurité.
+
+Prévois :
+- Des délais d'attente.
+- Une gestion contrôlée des nouvelles tentatives.
+- Des fournisseurs de secours compatibles.
+- Des journaux de décision.
+- Des erreurs normalisées.
+- Une protection contre les appels en double.
+
+Ne réessaie pas aveuglément une opération payante si son résultat
+est incertain.
+
+==================================================
+6. SYSTÈME DE CRÉDITS
+==================================================
+
+Construis un système de crédits fiable côté serveur.
+
+Il doit distinguer :
+- Les crédits mensuels.
+- Les crédits supplémentaires.
+- Les crédits réservés.
+- Les crédits consommés.
+- Les crédits remboursés.
+
+Le système doit suivre un cycle explicite :
+
+CREATED
+RESERVED
+PROCESSING
+COMPLETED ou FAILED
+
+Les états doivent être adaptés au type d'opération.
+
+La réservation doit précéder l'opération lorsque cela est nécessaire.
+
+Une opération réussie consomme les crédits correspondants.
+
+Une opération échouée suit une politique de remboursement explicite.
+
+Prévois :
+- L'idempotence.
+- La gestion des requêtes répétées.
+- La protection contre les doubles débits.
+- La gestion des tâches concurrentes.
+- Un journal comptable vérifiable.
+- Des tests de concurrence.
+
+Les prix et quotas sont définis côté serveur.
+
+Le frontend ne peut pas décider du montant des crédits consommés.
+
+==================================================
+7. AUTHENTIFICATION ET SÉCURITÉ
+==================================================
+
+L'inscription doit conduire à une expérience cohérente.
+
+Le parcours attendu est :
+
+Inscription
+→ confirmation de l'adresse électronique selon la politique choisie
+→ création ou récupération de session valide
+→ accès autorisé au tableau de bord.
+
+Ne redirige pas automatiquement un nouvel utilisateur vers
+une page de conversation si le tableau de bord est attendu.
+
+Les routes privées doivent vérifier l'identité et les autorisations.
+
+Ne fais pas confiance à un identifiant utilisateur ou tenant
+fourni librement par le frontend.
+
+Ne stocke aucune clé secrète dans le frontend.
+
+Ne crée pas de compte administrateur par une règle fragile
+fondée sur le fait qu'un utilisateur serait le premier inscrit.
+
+Prévois des contrôles d'accès, une limitation des requêtes
+et une validation stricte des données.
+
+N'utilise jamais des données de test pour contourner les
+vérifications de sécurité en production.
+
+==================================================
+8. LES CINQ STUDIOS DU MVP
+==================================================
+
+STUDIO 1 : TEXTE ARENA
+
+- Chat IA.
+- Streaming.
+- Historique.
+- Prompts prédéfinis.
+- Résumés et rédaction.
+- Gestion des erreurs.
+- Affichage des crédits.
+
+STUDIO 2 : IMAGE STUDIO
+
+- Saisie de prompts.
+- Génération d'images.
+- Affichage des résultats.
+- Gestion des fichiers.
+- Gestion des tâches longues si nécessaire.
+
+STUDIO 3 : VIDEO STUDIO
+
+- Soumission de tâches de génération vidéo.
+- Suivi du statut.
+- Affichage de la progression lorsque disponible.
+- Récupération du résultat.
+- Gestion des échecs et des crédits.
+
+STUDIO 4 : CODE STUDIO
+
+- Génération de code.
+- Explication.
+- Correction.
+- Analyse de code fourni.
+- Affichage lisible du code.
+
+STUDIO 5 : DOCUMENT AI
+
+- Importation de documents.
+- Extraction de texte.
+- Résumé.
+- Questions-réponses sur le contenu.
+- Respect des autorisations d'accès aux fichiers.
+
+La musique est exclue du MVP initial.
+
+Ne présente jamais une fonction simulée comme une génération
+réelle opérationnelle.
+
+Si un fournisseur ne prend pas en charge une capacité,
+affiche une indisponibilité explicite.
+
+==================================================
+9. ABONNEMENTS ET PAIEMENTS
+==================================================
+
+Prépare une architecture permettant de proposer :
+
+- Free.
+- Pro/Créateur.
+- Une future formule Développeur.
+
+Le prix envisagé de Pro/Créateur est de 5 000 FCFA par mois.
+
+Les tarifs, quotas et limites doivent être configurables.
+
+Prépare une intégration future de CinetPay et Stripe.
+
+Ne considère jamais une transaction comme payée sur la seule
+base d'une réponse du frontend.
+
+Les confirmations de paiement doivent être vérifiées côté serveur,
+avec contrôle des signatures ou mécanismes équivalents documentés.
+
+Les webhooks doivent être idempotents.
+
+==================================================
+10. INTERFACE UTILISATEUR
+==================================================
+
+Conçois une identité visuelle propre à PrismAI.
+
+Slogan :
+"Toutes les IA. Un seul Prisme."
+
+L'interface doit comporter :
+
+- Landing page.
+- Inscription.
+- Connexion.
+- Tableau de bord.
+- Studios.
+- Historique.
+- Gestion du compte.
+- Gestion des crédits.
+- Paramètres.
+
+Le design doit être cohérent, responsive et accessible.
+
+Ne reproduis pas pixel par pixel les interfaces des références.
+
+Réutilise les enseignements architecturaux et les composants
+compatibles avec leurs licences.
+
+Évite les composants dupliqués et les styles contradictoires.
+
+==================================================
+11. DOCUMENTATION ET TESTS
+==================================================
+
+Maintiens un README.md à jour à chaque étape.
+
+Documente :
+- L'architecture.
+- L'installation.
+- Les variables d'environnement.
+- Les migrations.
+- Les tests.
+- Les intégrations.
+- Les limites connues.
+- Les procédures de déploiement.
+
+Ne place aucune vraie clé API dans le dépôt.
+
+Fournis un fichier .env.example sans secret réel.
+
+Les tests doivent couvrir au minimum :
+
+- Inscription et connexion.
+- Accès aux routes privées.
+- Isolation des données utilisateur.
+- Création de conversations.
+- Routage des requêtes.
+- Échecs des fournisseurs.
+- Streaming.
+- Réservation et remboursement des crédits.
+- Requêtes répétées.
+- Autorisations sur les fichiers.
+- Tâches longues.
+- Paiements simulés en environnement de test.
+
+N'affirme pas qu'un test a réussi sans l'avoir exécuté
+et vérifié son résultat.
+
+==================================================
+12. MÉTHODE DE CONSTRUCTION OBLIGATOIRE
+==================================================
+
+Travaille par étapes indépendantes et validées.
+
+ÉTAPE 1 :
+Analyser les références et produire la matrice des fonctionnalités.
+
+ÉTAPE 2 :
+Proposer l'architecture cible et expliquer les décisions.
+
+ÉTAPE 3 :
+Définir l'arborescence et les conventions du projet.
+
+ÉTAPE 4 :
+Initialiser une base propre et reproductible.
+
+ÉTAPE 5 :
+Implémenter l'authentification.
+
+ÉTAPE 6 :
+Implémenter le tableau de bord et la navigation.
+
+ÉTAPE 7 :
+Implémenter le premier parcours de chat fonctionnel.
+
+ÉTAPE 8 :
+Implémenter le routage IA.
+
+ÉTAPE 9 :
+Implémenter les crédits et leurs tests.
+
+ÉTAPE 10 :
+Ajouter les studios supplémentaires un par un.
+
+ÉTAPE 11 :
+Ajouter les paiements et les fonctions commerciales.
+
+ÉTAPE 12 :
+Préparer les tests de sécurité et le déploiement.
+
+À chaque étape :
+
+1. Explique les fichiers concernés.
+2. Présente les modifications prévues.
+3. Implémente une unité de travail cohérente.
+4. Exécute les tests pertinents.
+5. Corrige les erreurs constatées.
+6. Mets à jour le README.
+7. Présente les résultats et les limites.
+8. Attends la validation avant de poursuivre.
+
+Ne modifie pas plusieurs couches sans nécessité.
+
+Ne masque pas une erreur par une solution temporaire non documentée.
+
+Ne supprime pas des fonctionnalités sans expliquer leur impact.
+
+Ne prétends pas avoir validé une intégration externe sans test réel.
+
+==================================================
+13. PREMIÈRE ACTION ATTENDUE
+==================================================
+
+Pour le moment, ne construis pas l'application.
+
+Commence par analyser les références et produire :
+
+1. Une matrice des fonctionnalités par dépôt.
+2. Une proposition d'architecture.
+3. Une arborescence cible.
+4. Une liste des dépendances envisagées.
+5. Les risques techniques.
+6. Les décisions nécessitant mon approbation.
+7. Un plan de tests.
+
+Distingue clairement :
+- Les fonctionnalités observées.
+- Les fonctionnalités proposées.
+- Les fonctionnalités non vérifiées.
+
+N'entame l'implémentation qu'après validation du plan.
