@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   resolve: {
-    alias: [{ find: /^@prismai\/(.*)$/, replacement: '/home/ubuntu/prismai-architecture-git/packages/$1/src/index.ts' }],
+    alias: [{ find: /^@prismai\/(.*)$/, replacement: resolve(process.cwd(), 'packages/$1/src/index.ts') }],
   },
   test: {
     environment: 'node',
