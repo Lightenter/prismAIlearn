@@ -59,7 +59,8 @@
 
 ## Authentification — écran PrismAI
 
-- [x] Recréer l’écran de connexion et d’inscription à partir de la maquette fournie : identité PrismAI, prisme lumineux, fond bleu nuit/violet, panneaux côte à côte sur grand écran et adaptation responsive mobile.
+- [x] Conserver l’identité visuelle de la maquette — PrismAI, prisme lumineux et fond bleu nuit/violet — sur deux pages cohérentes et responsive, chacune avec son panneau de marque et son formulaire dédié.
+- [x] Séparer les routes `/login` et `/signup` en pages dédiées : chaque page ne montre que son propre formulaire, avec « Créer mon espace » vers l’inscription et « Se connecter » vers la connexion.
 - [x] Relier les routes de connexion et d’inscription au backend Supabase : e-mail/mot de passe, nom, confirmation du mot de passe, messages d’erreur/succès et liens réciproques.
 - [x] Ajouter les endpoints backend de récupération du mot de passe, renvoi du lien de vérification et Google OAuth ; les sessions et cookies PKCE restent httpOnly, Secure et SameSite=None en HTTPS.
 - [x] Mettre à jour les README des dépôts `prismAIlearn` et `prismai-architecture` avec le fonctionnement et les prérequis Supabase, y compris `APP_BASE_URL` et les callbacks autorisés.

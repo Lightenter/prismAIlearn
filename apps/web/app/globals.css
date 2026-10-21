@@ -339,3 +339,39 @@ p { color: var(--muted); line-height: 1.65; }
   .auth-footer { display: grid; justify-content: center; text-align: center; padding: 14px 20px 18px; }
   .auth-toast { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
 }
+
+/* Pages Auth séparées : un seul formulaire est rendu selon la route /login ou /signup. */
+.auth-single-page { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; width: min(100%, 1440px); min-height: calc(100vh - 132px); }
+.auth-single-page .auth-panel { align-items: center; }
+.auth-brand-panel { border-right: 1px solid rgba(132, 122, 255, .28); background: linear-gradient(110deg, rgba(13, 17, 54, .2), rgba(10, 13, 43, .05)); }
+.auth-brand-inner { width: min(100%, 490px); display: flex; flex-direction: column; align-items: stretch; }
+.auth-brand-inner .auth-prism-art { height: clamp(190px, 26vw, 290px); }
+.auth-brand-inner .auth-welcome { margin: 0; }
+.auth-brand-inner .auth-welcome h1 { font-size: clamp(1.7rem, 2.6vw, 2.25rem); }
+.auth-brand-switch { padding-top: 14px; }
+.auth-form-panel { background: linear-gradient(250deg, rgba(20, 15, 62, .28), rgba(9, 11, 35, .08)); }
+.auth-form-inner { width: min(100%, 490px); padding: 12px 0; }
+.auth-form-title { margin: 0; text-align: center; font-size: clamp(1.65rem, 2.5vw, 2.15rem); line-height: 1.15; letter-spacing: -.055em; }
+.auth-form-switch { margin-top: 16px; }
+@media (max-width: 1000px) {
+  .auth-single-page { grid-template-columns: 1fr; max-width: 760px; }
+  .auth-single-page .auth-panel { padding: 30px clamp(25px, 8vw, 72px); }
+  .auth-brand-panel { border-right: 0; border-bottom: 1px solid rgba(132, 122, 255, .28); }
+  .auth-brand-inner { width: min(100%, 520px); }
+  .auth-form-inner { width: min(100%, 520px); }
+  .auth-brand-inner .auth-prism-art { height: 200px; }
+}
+@media (max-width: 620px) {
+  .auth-single-page .auth-panel { padding: 24px 20px; }
+  .auth-brand-inner .auth-prism-art { height: 165px; margin: 0 auto; }
+  .auth-brand-inner .auth-welcome h1 { font-size: 1.55rem; }
+  .auth-form-title { font-size: 1.7rem; }
+  .auth-form-inner { padding: 8px 0; }
+}
+
+/* Laisse les deux parcours d’authentification accessibles dans la navigation mobile. */
+@media (max-width: 700px) {
+  .nav-links { gap: 8px; }
+  .nav-links a.nav-login { display: inline-flex; white-space: nowrap; font-size: .73rem; }
+  .nav-links a.btn { padding: 10px 11px; white-space: nowrap; font-size: .73rem; }
+}
