@@ -427,3 +427,15 @@ p { color: var(--muted); line-height: 1.65; }
   .auth-card .auth-submit, .auth-card .auth-google { min-height: 46px; }
   .auth-legal-footer { padding: 13px 8px 16px; font-size: .72rem; }
 }
+
+
+/* Aligne l’action promo sans provoquer de débordement sur mobile. */
+.auth-promo-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; gap: 8px; }
+.auth-promo-row input { min-width: 0; }
+.auth-promo-apply { min-height: 46px; padding: 0 18px; border: 1px solid rgba(163, 131, 255, .46); border-radius: 8px; color: #fff; background: linear-gradient(105deg, #5427c9, #782ddd); font-size: .86rem; font-weight: 700; cursor: pointer; }
+.auth-promo-apply:hover { background: linear-gradient(105deg, #6331dd, #8e3be8); }
+.auth-promo-apply:disabled { cursor: not-allowed; opacity: .58; }
+@media (max-width: 620px) {
+  .auth-promo-row { gap: 6px; }
+  .auth-promo-apply { min-height: 44px; padding: 0 13px; font-size: .8rem; }
+}

@@ -100,6 +100,13 @@ export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
     } finally { setPending(null); }
   }
 
+  function handleApplyReferral() {
+    const code = referralCode.trim();
+    if (!code) { setNotice({ tone: 'info', text: 'Saisis d’abord un code promo ou de parrainage.' }); return; }
+    setReferralCode(code);
+    setNotice({ tone: 'info', text: 'Le code sera transmis avec ton inscription ; son application dépend des règles de promotion configurées sur la plateforme.' });
+  }
+
   function handleGoogleSignIn(action: 'google-login' | 'google-signup') {
     setPending(action); setNotice(null);
     window.location.assign('/api/auth/google?next=%2Fchat');
@@ -138,7 +145,10 @@ export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
               <label htmlFor="confirm-password">Confirmer le mot de passe</label>
               <input autoComplete="new-password" id="confirm-password" minLength={8} name="confirm-password" onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Répète ton mot de passe" required type="password" value={confirmPassword}/>
               <label htmlFor="referral-code">Code promo ou code de parrainage <span>(facultatif)</span></label>
-              <input autoComplete="off" id="referral-code" name="referral-code" onChange={(event) => setReferralCode(event.target.value)} placeholder="Tu as un code ? Ajoute-le ici." value={referralCode}/>
+              <div className="auth-promo-row">
+                <input autoComplete="off" id="referral-code" name="referral-code" onChange={(event) => setReferralCode(event.target.value)} placeholder="Tu as un code ? Ajoute-le ici." value={referralCode}/>
+                <button className="auth-promo-apply" disabled={pending !== null} onClick={handleApplyReferral} type="button">Appliquer</button>
+              </div>
               <p className="auth-code-note">Le code est enregistré avec ta demande ; son application dépend des règles de promotion configurées sur la plateforme.</p>
               <button className="auth-submit" disabled={pending !== null} type="submit">{pending === 'signup' ? 'Création du compte…' : 'Créer mon compte'}</button>
             </form>
