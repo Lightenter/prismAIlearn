@@ -51,9 +51,12 @@ function PrismIllustration() {
   );
 }
 
+function BackArrow() {
+  return <Link className="auth-back-link" href="/" aria-label="Retour à la page d’accueil"><span aria-hidden="true">←</span></Link>;
+}
+
 export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
-  const mode = initialMode;
-  const isSignup = mode === 'signup';
+  const isSignup = initialMode === 'signup';
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -116,85 +119,57 @@ export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
   }
 
   return (
-    <main className="auth-page" data-mode={mode}>
-      <header className="auth-topbar">
-        <Link className="wordmark auth-wordmark" href="/" aria-label="PrismAI, accueil"><span className="prism" aria-hidden="true"/>Prism<span>AI</span></Link>
-        <nav className="auth-nav" aria-label="Navigation de l’authentification">
-          <Link href="/#fonctionnalites">Fonctionnalités</Link>
-          <Link href="/#etapes">Comment ça marche</Link>
-          <Link href="/pricing">Tarifs</Link>
-          {isSignup
-            ? <Link className="auth-nav-cta" href="/login">Se connecter <span aria-hidden="true">→</span></Link>
-            : <Link className="auth-nav-cta" href="/signup">Créer mon espace <span aria-hidden="true">→</span></Link>}
-        </nav>
-      </header>
-
-      <div className="auth-columns auth-single-page">
-        <section className="auth-panel auth-brand-panel" aria-label="Bienvenue chez PrismAI">
-          <div className="auth-brand-inner">
+    <main className={`auth-page auth-page-${initialMode}`}>
+      <BackArrow />
+      <div className="auth-page-content">
+        {isSignup ? (
+          <section className="auth-card auth-card-signup" aria-labelledby="signup-title">
+            <p className="auth-eyebrow auth-card-eyebrow">PrismAI · Un seul prisme</p>
+            <h1 id="signup-title" className="auth-card-title">Crée ton compte PrismAI</h1>
+            <p className="auth-card-intro">Rejoins ton espace pour explorer et travailler avec l’IA.</p>
+            <div className="auth-register-rule" />
+            <form className="auth-form auth-signup-form" onSubmit={handleSignup}>
+              <label htmlFor="signup-name">Nom complet</label>
+              <input autoComplete="name" id="signup-name" name="name" onChange={(event) => setFullName(event.target.value)} placeholder="Ton nom" required value={fullName}/>
+              <label htmlFor="signup-email">Adresse e-mail</label>
+              <input autoComplete="email" id="signup-email" name="email" onChange={(event) => setSignupEmail(event.target.value)} placeholder="nom@exemple.com" required type="email" value={signupEmail}/>
+              <label htmlFor="signup-password">Mot de passe</label>
+              <input autoComplete="new-password" id="signup-password" minLength={8} name="password" onChange={(event) => setSignupPassword(event.target.value)} placeholder="Crée un mot de passe" required type="password" value={signupPassword}/>
+              <label htmlFor="confirm-password">Confirmer le mot de passe</label>
+              <input autoComplete="new-password" id="confirm-password" minLength={8} name="confirm-password" onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Répète ton mot de passe" required type="password" value={confirmPassword}/>
+              <label htmlFor="referral-code">Code promo ou code de parrainage <span>(facultatif)</span></label>
+              <input autoComplete="off" id="referral-code" name="referral-code" onChange={(event) => setReferralCode(event.target.value)} placeholder="Tu as un code ? Ajoute-le ici." value={referralCode}/>
+              <p className="auth-code-note">Le code est enregistré avec ta demande ; son application dépend des règles de promotion configurées sur la plateforme.</p>
+              <button className="auth-submit" disabled={pending !== null} type="submit">{pending === 'signup' ? 'Création du compte…' : 'Créer mon compte'}</button>
+            </form>
+            <div className="auth-divider"><span>ou continuer avec</span></div>
+            <button className="auth-google" disabled={pending !== null} onClick={() => handleGoogleSignIn('google-signup')} type="button"><GoogleMark/>{pending === 'google-signup' ? 'Redirection…' : 'Continuer avec Google'}</button>
+            <p className="auth-switch">Déjà un compte ? <Link href="/login">Se connecter</Link></p>
+          </section>
+        ) : (
+          <section className="auth-card auth-card-login" aria-labelledby="login-title">
+            <Link className="wordmark auth-card-wordmark" href="/" aria-label="PrismAI, accueil"><span className="prism" aria-hidden="true"/>Prism<span>AI</span></Link>
             <p className="auth-slogan">Toutes les IA. Un seul Prisme.</p>
             <PrismIllustration />
-            <div className="auth-welcome">
-              <p className="auth-eyebrow">Ton espace IA, unifié</p>
-              <h1>{isSignup ? 'Bienvenue sur PrismAI.' : 'Content de te revoir.'}</h1>
-              <p>{isSignup ? 'Crée ton espace pour explorer et travailler avec l’IA.' : 'Connecte-toi pour retrouver tes projets et reprendre là où tu t’es arrêté.'}</p>
-            </div>
-            <p className="auth-switch auth-brand-switch">
-              {isSignup ? <>Tu as déjà un compte ? <Link href="/login">Se connecter</Link></> : <>Pas encore de compte ? <Link href="/signup">Créer mon espace</Link></>}
-            </p>
-          </div>
-        </section>
-
-        <section className="auth-panel auth-form-panel" aria-labelledby={isSignup ? 'signup-title' : 'login-title'}>
-          <div className="auth-form-inner">
-            {isSignup ? (
-              <>
-                <p className="auth-eyebrow auth-register-eyebrow">PrismAI · Un seul prisme</p>
-                <h2 id="signup-title" className="auth-form-title">Crée ton compte PrismAI</h2>
-                <p className="auth-intro">Rejoins ton espace pour explorer et travailler avec l’IA.</p>
-                <div className="auth-register-rule" />
-                <form className="auth-form auth-signup-form" onSubmit={handleSignup}>
-                  <label htmlFor="signup-name">Nom complet</label>
-                  <input autoComplete="name" id="signup-name" name="name" onChange={(event) => setFullName(event.target.value)} placeholder="Ton nom" required value={fullName}/>
-                  <label htmlFor="signup-email">Adresse e-mail</label>
-                  <input autoComplete="email" id="signup-email" name="email" onChange={(event) => setSignupEmail(event.target.value)} placeholder="nom@exemple.com" required type="email" value={signupEmail}/>
-                  <label htmlFor="signup-password">Mot de passe</label>
-                  <input autoComplete="new-password" id="signup-password" minLength={8} name="password" onChange={(event) => setSignupPassword(event.target.value)} placeholder="8 caractères minimum" required type="password" value={signupPassword}/>
-                  <label htmlFor="confirm-password">Confirmer le mot de passe</label>
-                  <input autoComplete="new-password" id="confirm-password" minLength={8} name="confirm-password" onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Répète ton mot de passe" required type="password" value={confirmPassword}/>
-                  <label htmlFor="referral-code">Code promo ou de parrainage <span>(facultatif)</span></label>
-                  <input autoComplete="off" id="referral-code" name="referral-code" onChange={(event) => setReferralCode(event.target.value)} placeholder="Saisis ton code, si tu en as un" value={referralCode}/>
-                  <p className="auth-code-note">Le code est enregistré avec ta demande ; son application dépend des règles de promotion configurées sur la plateforme.</p>
-                  <button className="auth-submit" disabled={pending !== null} type="submit">{pending === 'signup' ? 'Création du compte…' : 'Créer mon compte'}</button>
-                </form>
-                <div className="auth-divider"><span>ou continuer avec</span></div>
-                <button className="auth-google" disabled={pending !== null} onClick={() => handleGoogleSignIn('google-signup')} type="button"><GoogleMark/>{pending === 'google-signup' ? 'Redirection…' : 'Continuer avec Google'}</button>
-                <p className="auth-switch auth-form-switch">Déjà un compte ? <Link href="/login">Se connecter</Link></p>
-              </>
-            ) : (
-              <>
-                <p className="auth-eyebrow auth-register-eyebrow">PrismAI · Un seul prisme</p>
-                <h2 id="login-title" className="auth-form-title">Se connecter à PrismAI</h2>
-                <p className="auth-intro">Content de te revoir. Reprends là où tu t’es arrêté.</p>
-                <div className="auth-register-rule" />
-                <form className="auth-form" onSubmit={handleLogin}>
-                  <label htmlFor="login-email">Adresse e-mail</label>
-                  <input autoComplete="email" id="login-email" name="email" onChange={(event) => setLoginEmail(event.target.value)} placeholder="nom@exemple.com" required type="email" value={loginEmail}/>
-                  <div className="auth-password-label"><label htmlFor="login-password">Mot de passe</label><button className="auth-text-button" disabled={pending !== null} onClick={handlePasswordReset} type="button">Mot de passe oublié ?</button></div>
-                  <input autoComplete="current-password" id="login-password" name="password" onChange={(event) => setLoginPassword(event.target.value)} placeholder="Ton mot de passe" required type="password" value={loginPassword}/>
-                  <button className="auth-submit" disabled={pending !== null} type="submit">{pending === 'login' ? 'Connexion…' : 'Se connecter'}</button>
-                </form>
-                <div className="auth-divider"><span>ou continuer avec</span></div>
-                <button className="auth-google" disabled={pending !== null} onClick={() => handleGoogleSignIn('google-login')} type="button"><GoogleMark/>{pending === 'google-login' ? 'Redirection…' : 'Continuer avec Google'}</button>
-                <p className="auth-switch auth-form-switch">Pas encore de compte ? <Link href="/signup">Créer mon espace</Link></p>
-              </>
-            )}
-          </div>
-        </section>
+            <p className="auth-eyebrow auth-login-eyebrow">Ton espace IA, unifié</p>
+            <h1 id="login-title" className="auth-card-title">Content de te revoir.</h1>
+            <p className="auth-card-intro">Connecte-toi pour retrouver ton espace IA.</p>
+            <form className="auth-form auth-login-form" onSubmit={handleLogin}>
+              <label htmlFor="login-email">Adresse e-mail</label>
+              <input autoComplete="email" id="login-email" name="email" onChange={(event) => setLoginEmail(event.target.value)} placeholder="Adresse e-mail" required type="email" value={loginEmail}/>
+              <div className="auth-password-label"><label htmlFor="login-password">Mot de passe</label><button className="auth-text-button" disabled={pending !== null} onClick={handlePasswordReset} type="button">Mot de passe oublié ?</button></div>
+              <input autoComplete="current-password" id="login-password" name="password" onChange={(event) => setLoginPassword(event.target.value)} placeholder="Mot de passe" required type="password" value={loginPassword}/>
+              <button className="auth-submit" disabled={pending !== null} type="submit">{pending === 'login' ? 'Connexion…' : 'Se connecter'}</button>
+            </form>
+            <div className="auth-divider"><span>ou continuer avec</span></div>
+            <button className="auth-google" disabled={pending !== null} onClick={() => handleGoogleSignIn('google-login')} type="button"><GoogleMark/>{pending === 'google-login' ? 'Redirection…' : 'Continuer avec Google'}</button>
+            <p className="auth-switch">Pas encore de compte ? <Link href="/signup">Créer mon espace</Link></p>
+          </section>
+        )}
       </div>
 
       {notice && <div className={`auth-toast auth-toast-${notice.tone}`} role={notice.tone === 'error' ? 'alert' : 'status'}>{notice.text}{notice.tone === 'success' && notice.text.startsWith('Compte créé.') && <Link href="/verify-email">Renvoyer l’e-mail de vérification</Link>}</div>}
-      <footer className="auth-footer"><span>PrismAI © {new Date().getFullYear()}</span><span>Conditions d’utilisation · Confidentialité</span></footer>
+      <footer className="auth-footer auth-legal-footer"><span>Conditions d’utilisation</span><span aria-hidden="true">·</span><span>Confidentialité</span></footer>
     </main>
   );
 }

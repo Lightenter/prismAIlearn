@@ -375,3 +375,55 @@ p { color: var(--muted); line-height: 1.65; }
   .nav-links a.nav-login { display: inline-flex; white-space: nowrap; font-size: .73rem; }
   .nav-links a.btn { padding: 10px 11px; white-space: nowrap; font-size: .73rem; }
 }
+
+
+/* Maquette Auth corrigée : pages séparées, sans navigation globale, centrées sur le formulaire. */
+.auth-page { min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto; padding: 0 clamp(16px, 4vw, 42px); }
+.auth-back-link { position: absolute; z-index: 5; top: clamp(20px, 4vw, 42px); left: clamp(20px, 4vw, 64px); display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; color: #a994ff; font-size: 2rem; line-height: 1; transition: color .18s ease, background .18s ease, transform .18s ease; }
+.auth-back-link:hover { color: #fff; background: rgba(137, 102, 255, .15); transform: translateX(-2px); }
+.auth-page-content { flex: 1; display: flex; justify-content: center; align-items: center; width: 100%; padding: 88px 0 36px; }
+.auth-card { width: min(100%, 500px); margin: 0 auto; }
+.auth-card-signup { padding: 0 8px 16px; }
+.auth-card-login { display: flex; flex-direction: column; align-items: stretch; padding: 0 8px 16px; }
+.auth-card-wordmark { align-self: center; margin: 0 0 18px; font-size: 1.7rem; }
+.auth-card-wordmark .prism { width: 30px; height: 30px; }
+.auth-card .auth-slogan { margin: 0; text-align: center; color: #e5e5ff; font-size: clamp(1.2rem, 2.3vw, 1.5rem); letter-spacing: -.035em; }
+.auth-card .auth-prism-art { display: block; width: min(100%, 500px); height: clamp(160px, 22vw, 220px); margin: 4px auto 5px; }
+.auth-card-eyebrow, .auth-login-eyebrow { margin: 0 0 11px; color: #b69bff; text-align: center; font-size: .77rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.auth-card-title { margin: 0 0 10px; text-align: center; font-size: clamp(1.8rem, 4vw, 2.2rem); line-height: 1.14; letter-spacing: -.055em; }
+.auth-card-intro { margin: 0 auto 20px; color: #afb4d6; text-align: center; font-size: .95rem; line-height: 1.55; }
+.auth-card .auth-register-rule { margin: 18px 0 17px; }
+.auth-card .auth-form { gap: 8px; }
+.auth-card .auth-form label { margin-top: 4px; font-size: .88rem; }
+.auth-card .auth-form input { min-height: 48px; padding: 11px 14px; border-radius: 7px; }
+.auth-card .auth-password-label { margin-top: 4px; }
+.auth-card .auth-password-label label { margin-top: 0; }
+.auth-card .auth-submit, .auth-card .auth-google { width: 100%; min-height: 50px; border-radius: 8px; }
+.auth-card .auth-submit { margin-top: 10px; font-size: 1rem; }
+.auth-card .auth-google { min-height: 48px; }
+.auth-card .auth-divider { margin: 16px 0 12px; }
+.auth-card .auth-switch { margin: 17px 0 0; text-align: center; }
+.auth-card .auth-signup-form { gap: 6px; }
+.auth-card .auth-signup-form label { margin-top: 3px; }
+.auth-card .auth-signup-form input { min-height: 46px; }
+.auth-card .auth-signup-form .auth-submit { margin-top: 8px; }
+.auth-card .auth-code-note { margin: 0; font-size: .7rem; line-height: 1.35; }
+.auth-legal-footer { flex: 0 0 auto; justify-content: center; align-items: center; gap: 9px; width: 100%; padding: 15px 12px 18px; border-top: 1px solid rgba(132, 142, 204, .13); color: #a4a8c7; font-size: .76rem; }
+@media (max-width: 620px) {
+  .auth-page { padding: 0 14px; }
+  .auth-back-link { top: 14px; left: 14px; width: 38px; height: 38px; }
+  .auth-page-content { align-items: flex-start; padding: 72px 0 26px; }
+  .auth-card { width: min(100%, 500px); }
+  .auth-card-signup, .auth-card-login { padding: 0 4px 15px; }
+  .auth-card-wordmark { margin-bottom: 12px; font-size: 1.5rem; }
+  .auth-card-wordmark .prism { width: 27px; height: 27px; }
+  .auth-card .auth-prism-art { height: 155px; margin: 2px auto 4px; }
+  .auth-card .auth-slogan { font-size: 1.17rem; }
+  .auth-card-title { font-size: 1.7rem; }
+  .auth-card-intro { margin-bottom: 15px; font-size: .88rem; }
+  .auth-card .auth-register-rule { margin: 14px 0 12px; }
+  .auth-card .auth-form input { min-height: 46px; }
+  .auth-card .auth-signup-form input { min-height: 44px; }
+  .auth-card .auth-submit, .auth-card .auth-google { min-height: 46px; }
+  .auth-legal-footer { padding: 13px 8px 16px; font-size: .72rem; }
+}
