@@ -12,8 +12,8 @@ export function SiteNav() {
         <Link href="#fonctionnalites">Fonctionnalités</Link>
         <Link href="#etapes">Comment ça marche</Link>
         <Link href="/pricing">Tarifs</Link>
-        <Link href="/login">Connexion</Link>
-        <Link className="btn btn-primary" href="/signup">Commencer</Link>
+        <Link className="nav-login" href="/login">Se connecter</Link>
+        <Link className="btn btn-primary" href="/signup">Créer mon espace</Link>
       </div>
     </nav>
   );

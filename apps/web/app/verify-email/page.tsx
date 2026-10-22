@@ -1,4 +1,5 @@
-import Link from 'next/link';
-import { SiteNav } from '../components/SiteNav';
+import { ResendVerificationForm } from '../components/ResendVerificationForm';
 
-export default function VerifyEmailPage() { return <div className="page"><SiteNav /><main className="page-main container"><div className="panel" style={{ maxWidth: 590, margin: '50px auto', textAlign: 'center' }}><div style={{ fontSize: '4rem', filter: 'drop-shadow(0 0 18px var(--cyan))' }}>✉</div><div className="eyebrow">Étape 2 · Vérification</div><h2>Vérifiez votre <span>boîte mail</span></h2><p>Nous avons envoyé un lien de vérification à votre adresse. Confirmez-la pour accéder à tous vos studios et crédits.</p><div className="notice" style={{ textAlign: 'left', margin: '25px 0' }}>Vérifiez vos spams, assurez-vous que l’adresse est correcte et demandez un nouvel envoi si nécessaire.</div><button className="btn btn-ghost" type="button" style={{ width: '100%' }}>Renvoyer l’e-mail</button><p><Link href="/login" style={{ color: 'var(--cyan)' }}>Retour à la connexion</Link></p></div></main></div>; }
+export default function VerifyEmailPage({ searchParams }: { searchParams?: { email?: string } }) {
+  return <ResendVerificationForm initialEmail={searchParams?.email ?? ''} />;
+}

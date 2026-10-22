@@ -35,7 +35,7 @@ export default function HomePage() {
             <h1>Toutes les <span>IA.</span><br />Un seul Prisme.</h1>
             <p className="hero-copy">Réunis tes outils d’intelligence artificielle dans un espace unique. Crée, explore et travaille plus intelligemment avec PrismAI.</p>
             <div className="actions">
-              <Link className="btn btn-primary" href="/signup">Commencer gratuitement</Link>
+              <Link className="btn btn-primary" href="/signup">Créer mon espace</Link>
               <Link className="btn btn-quiet" href="/chat">Découvrir PrismAI <span aria-hidden="true">→</span></Link>
             </div>
             <p className="hero-note"><span className="note-dot" aria-hidden="true" />Un compte. Un espace. De nouvelles possibilités.</p>

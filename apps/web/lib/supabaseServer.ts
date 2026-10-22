@@ -12,8 +12,8 @@ export function createSupabaseServerClient() {
   if (!url || !key) return null;
   // Accède au magasin de cookies associé à la requête courante.
   const cookieStore = cookies();
-  // Active Secure hors développement et SameSite=None pour le Preview HTTPS embarqué.
-  const secureCookies = process.env.NODE_ENV !== 'development' || process.env.SUPABASE_COOKIE_SECURE === 'true';
+  // La politique explicite couvre aussi les previews HTTPS terminées avant le serveur Node.
+  const secureCookies = process.env.SUPABASE_COOKIE_SECURE === 'true';
   // Retourne un client SSR qui gère la vérification et la rotation des refresh tokens.
   return createServerClient(url, key, {
     // Branche explicitement les opérations de lecture et d’écriture sur Next.js.
