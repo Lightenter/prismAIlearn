@@ -335,3 +335,155 @@ p { color: var(--muted); line-height: 1.65; }
 @media (max-width: 900px) { .auth-main { width: min(680px, calc(100% - 40px)); grid-template-columns: 1fr; gap: 20px; } .auth-visual { min-height: 470px; } .auth-form-panel { min-height: auto; padding: 42px clamp(28px, 8vw, 70px); } .auth-visual-slogan { margin-top: 32px; } }
 /* Optimise la maquette Auth pour les téléphones. */
 @media (max-width: 520px) { .auth-top { width: calc(100% - 28px); padding-top: 18px; } .auth-main { width: calc(100% - 28px); padding-top: 10px; } .auth-visual { min-height: 400px; padding: 25px 17px; } .auth-brand { font-size: 1.65rem; } .auth-visual-slogan { margin-top: 29px; font-size: 1.15rem; } .auth-prism-art { height: 175px; } .auth-prism-shape { width: 140px; height: 160px; } .auth-visual h1 { font-size: 1.85rem; } .auth-form-panel { padding: 31px 20px 28px; } .auth-heading h2 { font-size: 1.85rem; } .promo-row { grid-template-columns: 1fr; } .promo-button { min-height: 46px; } .auth-footer { flex-wrap: wrap; gap: 10px 18px; padding-bottom: 20px; } }
+
+/* Affiche les retours d’état du formulaire sans déplacer brutalement les CTA. */
+.auth-message { margin: 4px 0 0; padding: 10px 12px; border-radius: 6px; font-size: .78rem; line-height: 1.45; }
+/* Colore les erreurs sans révéler les détails internes. */
+.auth-error { color: #ffc5d5; border: 1px solid rgba(255, 102, 153, .35); background: rgba(125, 22, 67, .24); }
+/* Colore les confirmations non privées. */
+.auth-notice { color: #b9f5e7; border: 1px solid rgba(55, 224, 185, .35); background: rgba(20, 120, 110, .2); }
+/* Diminue visuellement les CTA pendant l’envoi. */
+.auth-submit:disabled, .promo-button:disabled { cursor: wait; opacity: .65; }
+/* Pose le Dashboard sur un fond bleu-noir plein écran. */
+.dashboard-page { min-height: 100vh; color: #eff2ff; background: #020d28; }
+/* Aligne la marque et les informations de session dans l’en-tête. */
+.dashboard-header { min-height: 72px; display: flex; align-items: center; gap: 17px; padding: 0 30px; border-bottom: 1px solid rgba(80, 111, 190, .25); background: #03102f; }
+/* Style le wordmark Dashboard. */
+.dashboard-wordmark { display: inline-flex; align-items: center; gap: 10px; color: #fbfaff; font-size: 1.48rem; font-weight: 800; letter-spacing: -.045em; }
+/* Réduit le prisme du wordmark Dashboard. */
+.dashboard-wordmark .prism { width: 28px; height: 28px; }
+/* Style la signature sous le wordmark. */
+.dashboard-header > p { margin: 0; color: #b5b9e1; font-size: .79rem; }
+/* Repousse les contrôles de session à droite. */
+.dashboard-header-actions { display: flex; align-items: center; gap: 18px; margin-left: auto; }
+/* Affiche une cloche légère sans dépendance externe. */
+.dashboard-bell { color: #aac5ff; font-size: 1.8rem; transform: rotate(-25deg); }
+/* Encadre le solde aperçu dans l’en-tête. */
+.dashboard-top-credit { padding: 11px 17px; border: 1px solid rgba(99, 127, 207, .35); border-radius: 8px; color: #eef1ff; font-size: .82rem; }
+/* Affiche le nom réel ou le profil neutre. */
+.dashboard-user-chip { padding-left: 18px; border-left: 1px solid rgba(99, 127, 207, .25); color: #f5f5ff; font-size: .86rem; font-weight: 700; }
+/* Place le rôle sous le nom utilisateur. */
+.dashboard-user-chip small { display: block; margin-top: 3px; color: #989fc8; font-size: .7rem; font-weight: 500; }
+/* Organise les trois zones de l’interface de référence. */
+.dashboard-layout { display: grid; grid-template-columns: 258px minmax(0, 1fr) 300px; min-height: calc(100vh - 72px); }
+/* Style le rail de navigation gauche. */
+.dashboard-sidebar { padding: 18px 16px 24px; border-right: 1px solid rgba(80, 111, 190, .25); background: #041436; }
+/* Aligne tous les liens du rail. */
+.dashboard-sidebar nav, .dashboard-sidebar > a { display: flex; flex-direction: column; gap: 3px; }
+/* Style chaque lien du rail sans masquer sa destination. */
+.dashboard-sidebar nav a, .dashboard-sidebar > a { display: flex; align-items: center; gap: 14px; min-height: 42px; padding: 0 15px; border-radius: 8px; color: #b7c3ec; font-size: .84rem; transition: color .2s ease, background .2s ease; }
+/* Illumine le lien actif comme sur la maquette. */
+.dashboard-sidebar nav a.dashboard-nav-active { color: #fff; background: linear-gradient(100deg, #4325c3, #342194); box-shadow: 0 7px 22px rgba(77, 44, 206, .24); }
+/* Colore les liens du rail au survol. */
+.dashboard-sidebar nav a:hover, .dashboard-sidebar > a:hover { color: #fff; background: rgba(89, 75, 201, .2); }
+/* Sépare les groupes de navigation. */
+.dashboard-sidebar-divider { height: 1px; margin: 17px 15px; background: rgba(95, 123, 202, .2); }
+/* Style le libellé du groupe secondaire. */
+.dashboard-sidebar-label { margin: 0 15px 7px; color: #eff2ff; font-size: .75rem; font-weight: 700; }
+/* Pose la carte de montée en gamme en bas du rail. */
+.dashboard-upgrade { margin-top: 27px; padding: 17px; border: 1px solid rgba(114, 79, 241, .55); border-radius: 9px; background: radial-gradient(circle at 70% 0, rgba(172, 42, 255, .42), transparent 65%), #13155a; }
+/* Affiche le prisme de la carte de montée en gamme. */
+.dashboard-upgrade .prism { display: block; width: 27px; height: 27px; margin-bottom: 14px; }
+/* Style le titre de la carte de montée en gamme. */
+.dashboard-upgrade strong { display: block; font-size: .89rem; }
+/* Style le texte de la carte de montée en gamme. */
+.dashboard-upgrade p { margin: 8px 0 13px; color: #c0c4e8; font-size: .71rem; line-height: 1.45; }
+/* Rend le CTA de la carte de montée en gamme pleine largeur. */
+.dashboard-upgrade .btn { width: 100%; min-height: 34px; font-size: .75rem; }
+/* Centre le contenu principal dans son espace de travail. */
+.dashboard-content { min-width: 0; padding: 31px 28px 60px; background: radial-gradient(circle at 56% 11%, rgba(23, 59, 155, .23), transparent 30rem); }
+/* Style le petit label du Dashboard. */
+.dashboard-kicker { margin: 0 0 9px; color: #8e9ad3; font-size: .67rem; font-weight: 800; letter-spacing: .14em; }
+/* Style le titre personnalisé du Dashboard. */
+.dashboard-content > h1 { margin: 0; color: #f5f5ff; font-size: clamp(1.7rem, 3vw, 2rem); letter-spacing: -.06em; }
+/* Accentue l’étoile de bienvenue. */
+.dashboard-content > h1 span { color: #ffc86a; }
+/* Style la question de bienvenue. */
+.dashboard-subtitle { margin: 6px 0 19px; color: #b7c3eb; font-size: .88rem; }
+/* Compose le hero avec un motif lumineux sans image non disponible. */
+.dashboard-hero { position: relative; display: flex; justify-content: space-between; min-height: 276px; overflow: hidden; padding: 38px 28px; border: 1px solid rgba(77, 124, 232, .55); border-radius: 9px; background: radial-gradient(circle at 85% 48%, rgba(87, 35, 221, .55), transparent 30%), linear-gradient(110deg, #0d285e, #071b49 55%, #1a1552); }
+/* Ajoute une trame légère sur le hero. */
+.dashboard-hero::before { content: ''; position: absolute; inset: 0; opacity: .3; background: linear-gradient(130deg, transparent 42%, rgba(48, 133, 255, .3) 43%, transparent 44%), linear-gradient(35deg, transparent 56%, rgba(177, 51, 255, .26) 57%, transparent 58%); }
+/* Garde le contenu textuel du hero au-dessus des effets. */
+.dashboard-hero > div:first-child { position: relative; z-index: 1; max-width: 480px; }
+/* Style le titre principal de la référence. */
+.dashboard-hero h2 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); letter-spacing: -.045em; line-height: 1.2; }
+/* Applique le gradient PrismAI au second fragment du hero. */
+.dashboard-hero h2 span { color: #45dcff; background: linear-gradient(90deg, #35cfff, #ad57ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+/* Style la description du hero. */
+.dashboard-hero p { max-width: 430px; margin: 18px 0 25px; color: #c0c8ed; font-size: .85rem; line-height: 1.6; }
+/* Aligne les deux actions du hero. */
+.dashboard-hero-actions { display: flex; gap: 13px; }
+/* Ajuste la taille des boutons du hero. */
+.dashboard-hero-actions .btn { min-height: 42px; padding: 0 17px; font-size: .78rem; }
+/* Réserve le motif prismatique droit du hero. */
+.dashboard-hero-prism { position: relative; width: 260px; min-width: 190px; }
+/* Dessine le halo du prisme hero. */
+.dashboard-hero-glow { position: absolute; top: 55%; left: 0; width: 100%; height: 35px; border-radius: 50%; background: #2edcff; filter: blur(16px); opacity: .7; transform: rotate(-10deg); }
+/* Dessine le grand prisme du hero. */
+.dashboard-hero-shape { position: absolute; top: 4%; right: 14%; width: 145px; height: 190px; background: linear-gradient(140deg, #2ce5ff, #318eff 34%, #c948ff 68%, #ff80e8); clip-path: polygon(50% 0, 100% 74%, 51% 100%, 0 74%); filter: drop-shadow(0 0 16px #37caff) drop-shadow(0 0 27px rgba(201, 55, 255, .7)); }
+/* Organise chaque section Dashboard. */
+.dashboard-section { margin-top: 29px; }
+/* Aligne les titres de section et leurs liens réels. */
+.dashboard-section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+/* Style les titres de section. */
+.dashboard-section-heading h2 { margin: 0; color: #e7ecff; font-size: 1rem; letter-spacing: -.03em; }
+/* Style les liens « tout voir » sans inventer de route projet. */
+.dashboard-section-heading a { color: #92a7ed; font-size: .72rem; }
+/* Pose les six accès studios en rangée responsive. */
+.dashboard-studio-grid { display: grid; grid-template-columns: repeat(6, minmax(105px, 1fr)); gap: 13px; }
+/* Style chaque carte studio avec sa couleur de capacité. */
+.dashboard-studio-card { position: relative; display: flex; flex-direction: column; min-height: 163px; padding: 15px; overflow: hidden; border: 1px solid rgba(109, 126, 216, .35); border-radius: 9px; color: #fff; transition: transform .2s ease, border-color .2s ease; }
+/* Donne un retour visuel aux cartes studio. */
+.dashboard-studio-card:hover { border-color: rgba(188, 167, 255, .75); transform: translateY(-3px); }
+/* Colore l’icône de chaque studio. */
+.dashboard-studio-card b { display: grid; place-items: center; width: 31px; height: 31px; margin-bottom: 25px; border-radius: 8px; background: rgba(255, 255, 255, .18); font-size: .84rem; }
+/* Style le nom du studio. */
+.dashboard-studio-card strong { font-size: .75rem; }
+/* Style la description du studio. */
+.dashboard-studio-card span { margin-top: 6px; color: rgba(255, 255, 255, .72); font-size: .64rem; line-height: 1.35; }
+/* Pose la flèche d’accès studio en bas de carte. */
+.dashboard-studio-card i { position: absolute; bottom: 12px; left: 15px; display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: rgba(255, 255, 255, .22); font-style: normal; }
+/* Applique les gradients de la référence aux studios. */
+.studio-chat { background: linear-gradient(145deg, #3e2bc7, #24206b); }
+.studio-image { background: linear-gradient(145deg, #98255e, #36208c); }
+.studio-video { background: linear-gradient(145deg, #0768d4, #132e9b); }
+.studio-code { background: linear-gradient(145deg, #087f81, #125b70); }
+.studio-document { background: linear-gradient(145deg, #a94d2e, #6a2c36); }
+.studio-search { background: linear-gradient(145deg, #0c74b6, #124e98); }
+/* Rend l’état sans projets explicite plutôt que simulé. */
+.dashboard-empty { padding: 22px; border: 1px dashed rgba(108, 134, 221, .42); border-radius: 8px; color: #9eabd4; background: rgba(11, 31, 74, .65); font-size: .8rem; }
+/* Style la colonne droite de statistiques. */
+.dashboard-right { padding: 28px 20px; border-left: 1px solid rgba(80, 111, 190, .25); background: #03102f; }
+/* Compose chaque bloc d’information avec les données réelles. */
+.dashboard-info-card { margin-bottom: 16px; padding: 17px; border: 1px solid rgba(86, 118, 198, .4); border-radius: 9px; background: linear-gradient(145deg, rgba(17, 34, 84, .82), rgba(6, 20, 54, .92)); }
+/* Style l’icône d’information droite. */
+.dashboard-info-icon { float: left; display: grid; place-items: center; width: 35px; height: 35px; margin: 0 12px 13px 0; border-radius: 50%; color: #e9dcff; background: #4c2ab5; }
+/* Colore l’icône de plan. */
+.dashboard-info-icon.gold { color: #ffd96b; background: rgba(180, 125, 15, .28); }
+/* Style les petits libellés de droite. */
+.dashboard-info-card > p, .dashboard-info-card > h3 { margin: 0 0 5px; color: #b7c3ea; font-size: .75rem; font-weight: 500; }
+/* Style les valeurs principales de droite. */
+.dashboard-info-card > strong { display: block; margin-bottom: 16px; color: #f2f3ff; font-size: 1.15rem; }
+/* Rend le bouton de recharge pleine largeur. */
+.dashboard-info-card .btn { width: 100%; min-height: 39px; font-size: .75rem; }
+/* Dessine le bouton secondaire de forfait. */
+.dashboard-outline-button { display: flex; justify-content: space-between; padding: 11px 12px; border: 1px solid rgba(105, 137, 221, .35); border-radius: 8px; color: #dfe5ff; font-size: .73rem; }
+/* Style l’état vide d’utilisation. */
+.dashboard-muted { padding-top: 11px; color: #818db6 !important; line-height: 1.45; }
+/* Supprime les puces et espace la liste d’activité réelle. */
+.dashboard-activity { display: grid; gap: 12px; margin: 15px 0 0; padding: 0; list-style: none; }
+/* Aligne chaque entrée d’activité. */
+.dashboard-activity li { display: flex; justify-content: space-between; gap: 8px; color: #dce4ff; font-size: .72rem; }
+/* Style les détails d’activité. */
+.dashboard-activity small { color: #8491bc; font-size: .64rem; text-align: right; }
+/* Style la carte d’aide sans la présenter comme fonctionnalité backend. */
+.dashboard-help { min-height: 146px; }
+/* Pose l’icône aide à gauche du titre. */
+.dashboard-help-icon { float: left; display: grid; place-items: center; width: 32px; height: 32px; margin: 0 10px 8px 0; border-radius: 50%; color: #fff; background: #7333df; font-size: 1.2rem; }
+/* Style le lien d’aide. */
+.dashboard-help a { display: block; margin-top: 17px; color: #9b87ff; font-size: .7rem; }
+/* Réorganise le Dashboard sur les écrans intermédiaires. */
+@media (max-width: 1180px) { .dashboard-layout { grid-template-columns: 220px minmax(0, 1fr); } .dashboard-right { grid-column: 2; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 28px 30px; border-top: 1px solid rgba(80, 111, 190, .25); border-left: 0; } .dashboard-right .dashboard-info-card { margin: 0; } .dashboard-studio-grid { grid-template-columns: repeat(3, 1fr); } }
+/* Rend le rail et les colonnes lisibles sur mobile. */
+@media (max-width: 720px) { .dashboard-header { flex-wrap: wrap; gap: 8px 13px; padding: 13px 16px; } .dashboard-header > p { display: none; } .dashboard-header-actions { width: 100%; justify-content: space-between; margin-left: 0; } .dashboard-layout { display: block; } .dashboard-sidebar { display: none; } .dashboard-content { padding: 24px 15px 36px; } .dashboard-hero { min-height: 390px; padding: 27px 20px; } .dashboard-hero-prism { position: absolute; right: -40px; bottom: -35px; opacity: .65; } .dashboard-hero-actions { flex-direction: column; align-items: stretch; } .dashboard-hero-actions .btn { justify-content: center; } .dashboard-studio-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-right { display: block; padding: 0 15px 25px; } .dashboard-right .dashboard-info-card { margin-bottom: 13px; } }

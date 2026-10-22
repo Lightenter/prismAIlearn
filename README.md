@@ -103,3 +103,9 @@ Pour configurer l’application Web en développement, copier `apps/web/.env.exa
 Dans Supabase Auth, configurer l’URL du site et autoriser précisément `${APP_BASE_URL}/auth/callback` dans la liste des URL de redirection ; le callback rejette les chemins de retour externes. Pour Google, activer le fournisseur dans Supabase Auth et autoriser le même callback. Sur le projet de staging utilisé pendant cette tâche, le endpoint Auth a répondu, l’inscription est activée, Google est activé et la confirmation e-mail est requise. Le chemin de login avec identifiants invalides a renvoyé une erreur contrôlée ; aucun compte n’a été créé et une inscription/login réussie reste à tester avec une boîte e-mail contrôlée. Employer un staging isolé, jamais une base de production.
 
 Le serveur web peut être lancé depuis la racine avec `pnpm --filter @prismai/web dev`; il écoute par défaut sur `http://localhost:3000`.
+
+## Parcours Auth vers Dashboard
+
+Les handlers `/api/auth/signup` et `/api/auth/login` ne renvoient `sessionEstablished: true` qu’après vérification de l’utilisateur par `supabase.auth.getUser()`. Les pages `/signup` et `/login` redirigent vers `/dashboard` uniquement dans ce cas ; une inscription nécessitant la confirmation e-mail affiche un message de confirmation et ne rend aucune donnée privée.
+
+Le Dashboard vérifie à nouveau la session côté serveur avant son rendu, puis lit `profiles`, `credits` et `credit_transactions` avec le client SSR soumis à RLS. Les projets ne sont pas encore présents dans le schéma utilisé : l’interface affiche donc un état vide explicite et ne simule ni projets, ni solde, ni activité, ni forfait. Le test positif complet avec une boîte e-mail de staging reste à effectuer avec des variables Supabase réelles.
