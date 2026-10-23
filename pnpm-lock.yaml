@@ -51,6 +51,9 @@ importers:
       '@prismai/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@prismai/provider-router':
+        specifier: workspace:*
+        version: link:../../packages/provider-router
       '@supabase/ssr':
         specifier: ^0.5.2
         version: 0.5.2(@supabase/supabase-js@2.118.0)

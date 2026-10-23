@@ -1,13 +1,14 @@
 // Importe les primitives Vitest pour tester les réponses d’erreur SSE isolément.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 // Prépare des doubles partagés pour Supabase et le runtime chat.
-const mocks = vi.hoisted(() => ({ createClient: vi.fn(), getUser: vi.fn(), runChatTurn: vi.fn(), consumeRateLimit: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createClient: vi.fn(), getUser: vi.fn(), runChatTurn: vi.fn(), consumeRateLimit: vi.fn(), getConfiguredModels: vi.fn() }));
 // Remplace le client Supabase serveur pour piloter chaque état de session.
 vi.mock('../../apps/web/lib/supabaseServer', () => ({ createSupabaseServerClient: () => mocks.createClient() }));
 // Remplace le runtime afin qu’aucun provider réel ne soit appelé.
 vi.mock('@prismai/chat-runtime', () => ({ createRunEvents: vi.fn(() => []), encodeSse: vi.fn(), createRunId: vi.fn(() => 'run-test'), runChatTurn: mocks.runChatTurn }));
 // Remplace le rate limiter SQL afin que les tests se concentrent sur le contrat HTTP.
 vi.mock('@prismai/db', () => ({ consumeRateLimit: mocks.consumeRateLimit }));
+vi.mock('@prismai/provider-router', () => ({ getConfiguredModels: mocks.getConfiguredModels }));
 // Importe la route SSE après installation des mocks.
 import { POST } from '../../apps/web/app/api/chat/stream/route';
 // Construit une requête SSE fonctionnelle.
@@ -15,7 +16,7 @@ function request() { return new Request('http://localhost/api/chat/stream', { me
 // Regroupe les scénarios de sécurité du flux SSE.
 describe('POST /api/chat/stream erreurs', () => {
   // Réinitialise les doubles et fournit un client Supabase par défaut.
-  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser } }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.runChatTurn.mockResolvedValue({ content: 'ok', provider_used: 'test', tokens: 1, balance: 9 }); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser } }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.getConfiguredModels.mockReturnValue([{ id: 'groq:llama-test', provider: 'groq', model: 'llama-test' }]); mocks.runChatTurn.mockResolvedValue({ content: 'ok', provider_used: 'test', tokens: 1, balance: 9 }); });
   // Vérifie qu’une erreur inattendue de getUser devient 500 et ne fuit pas son message.
   it('retourne 500 sans divulguer une exception getUser', async () => { mocks.getUser.mockRejectedValue(new Error('secret stream auth detail')); const response = await POST(request()); const body = await response.text(); expect(response.status).toBe(500); expect(body).toBe('{"error":"CHAT_STREAM_FAILED"}'); expect(body).not.toContain('secret stream auth detail'); });
   // Vérifie qu’une erreur Supabase explicitement 401 reste une réponse d’authentification.
