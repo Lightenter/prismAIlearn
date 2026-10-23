@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ChatMessage } from '@prismai/contracts';
 import { calculateCreditCost, insufficientCredits } from '@prismai/domain';
 import { reserveCredits, claimCreditOperation, completeCredits, refundCredits, getSupabaseAdminClient } from '@prismai/db';
-import { chatWithFallback, getConfiguredModels, type FallbackOptions, type PlanTier } from '@prismai/provider-router';
+import { chatWithFallback, classifyCapability, estimateInputTokens, getConfiguredModels, selectRoutedModels, type FallbackOptions, type PlanTier } from '@prismai/provider-router';
 export * from './stream';
 
 export type ChatRuntimeOptions = {
@@ -16,15 +16,14 @@ export type ChatRuntimeOptions = {
 };
 
 export async function runChatTurn(userId: string, messages: ChatMessage[], options: ChatRuntimeOptions = {}) {
-  const estimatedTokens = options.estimatedTokens ?? Math.max(100, Math.ceil(messages.reduce((sum, message) => sum + message.content.length / 4, 0)));
+  const estimatedTokens = options.estimatedTokens ?? Math.max(100, estimateInputTokens(messages));
   const idempotencyKey = options.idempotencyKey ?? randomUUID();
   const models = options.fallback?.models ?? getConfiguredModels();
-  const availableProviders = new Set([
-    ...models.map((model) => model.provider),
-    ...Object.keys(options.fallback?.providers ?? []),
-  ]);
-  if (!availableProviders.size) throw Object.assign(new Error('NO_PROVIDER_CONFIGURED'), { code: 'NO_PROVIDER_CONFIGURED' });
-  const estimatedCost = Math.max(...Array.from(availableProviders, (provider) => calculateCreditCost(provider, estimatedTokens)));
+  const planTier = options.planTier ?? options.fallback?.planTier ?? 'FREE';
+  const routedCandidates = selectRoutedModels(classifyCapability(messages), estimatedTokens, models, planTier);
+  const maxFallbacks = Math.min(1, Math.max(0, options.fallback?.maxFallbacks ?? 1));
+  const reservableCandidates = routedCandidates.slice(0, maxFallbacks + 1);
+  const estimatedCost = Math.max(...reservableCandidates.map((model) => calculateCreditCost(model.provider, estimatedTokens)));
   const operationId = await reserveCredits(userId, idempotencyKey, estimatedCost, options.runId);
   let finalized = false;
   try {
@@ -35,8 +34,9 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
     }
     const response = await chatWithFallback(messages, userId, {
       ...options.fallback,
-      models,
-      planTier: options.planTier ?? 'FREE',
+      models: reservableCandidates,
+      planTier,
+      maxFallbacks,
       signal: options.signal ?? options.fallback?.signal,
     });
     const finalCost = calculateCreditCost(response.provider_used, response.tokens || estimatedTokens);

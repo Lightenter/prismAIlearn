@@ -25,7 +25,9 @@ export function classifyCapability(messages: ChatMessage[]): CapabilityDecision 
   if (/\b(image|illustration|logo|visuel|dessin)\b/.test(text) && /\b(crée|génère|dessine|produis|fais|faire)\b/.test(text)) {
     return { capability: 'IMAGE', complexity: 'MEDIUM', reason: 'image generation request' };
   }
-  if (/\b(pdf|document|fichier joint|pièce jointe|contrat à analyser)\b/.test(text)) {
+  const documentAttachment = /\b(pdf|fichier joint|pièce jointe|contrat à analyser)\b/.test(text)
+    || (/\b(analyse|résume|lis|extrais|extrait)\b/.test(text) && /\b(document|fichier)\b/.test(text));
+  if (documentAttachment) {
     return { capability: 'DOCUMENT', complexity: 'MEDIUM', reason: 'document task request' };
   }
   if (/\b(recherche sur le web|cherche sur internet|sources récentes|actualité|en temps réel|web search)\b/.test(text)) {
