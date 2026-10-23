@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ChatMessage } from '@prismai/contracts';
 import { calculateCreditCost, insufficientCredits } from '@prismai/domain';
 import { reserveCredits, claimCreditOperation, completeCredits, refundCredits, getSupabaseAdminClient } from '@prismai/db';
-import { chatWithFallback, getConfiguredModelById, getConfiguredModels, type FallbackOptions } from '@prismai/provider-router';
+import { chatWithFallback, getConfiguredModels, type FallbackOptions, type PlanTier } from '@prismai/provider-router';
 export * from './stream';
 
 export type ChatRuntimeOptions = {
@@ -11,18 +11,17 @@ export type ChatRuntimeOptions = {
   idempotencyKey?: string;
   runId?: string;
   conversationId?: string;
-  model?: string;
+  planTier?: PlanTier;
   signal?: AbortSignal;
 };
 
 export async function runChatTurn(userId: string, messages: ChatMessage[], options: ChatRuntimeOptions = {}) {
   const estimatedTokens = options.estimatedTokens ?? Math.max(100, Math.ceil(messages.reduce((sum, message) => sum + message.content.length / 4, 0)));
   const idempotencyKey = options.idempotencyKey ?? randomUUID();
-  const selectedModel = options.model ? getConfiguredModelById(options.model) : undefined;
-  if (options.model && !selectedModel) throw Object.assign(new Error('MODEL_UNAVAILABLE'), { code: 'MODEL_UNAVAILABLE' });
+  const models = options.fallback?.models ?? getConfiguredModels();
   const availableProviders = new Set([
-    ...getConfiguredModels().map((model) => model.provider),
-    ...Object.keys(options.fallback?.providers ?? {}),
+    ...models.map((model) => model.provider),
+    ...Object.keys(options.fallback?.providers ?? []),
   ]);
   if (!availableProviders.size) throw Object.assign(new Error('NO_PROVIDER_CONFIGURED'), { code: 'NO_PROVIDER_CONFIGURED' });
   const estimatedCost = Math.max(...Array.from(availableProviders, (provider) => calculateCreditCost(provider, estimatedTokens)));
@@ -36,8 +35,8 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
     }
     const response = await chatWithFallback(messages, userId, {
       ...options.fallback,
-      preferredProvider: selectedModel?.provider ?? options.fallback?.preferredProvider,
-      preferredModel: selectedModel?.model ?? options.fallback?.preferredModel,
+      models,
+      planTier: options.planTier ?? 'FREE',
       signal: options.signal ?? options.fallback?.signal,
     });
     const finalCost = calculateCreditCost(response.provider_used, response.tokens || estimatedTokens);
@@ -68,7 +67,7 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
       }
     } catch { persistenceWarning = true; }
 
-    return { ...response, balance: completed.balance, creditsSpent: finalCost, conversationId: conversationId ?? null, persistenceWarning };
+    return { content: response.content, provider_used: response.provider_used, model: response.model, tokens: response.tokens, fallback_used: response.fallback_used ?? false, balance: completed.balance, creditsSpent: finalCost, conversationId: conversationId ?? null, persistenceWarning };
   } catch (error) {
     if (!finalized) {
       try { await refundCredits(operationId, 'provider_or_runtime_failure'); } catch { /* La base reste l’autorité si le remboursement échoue. */ }

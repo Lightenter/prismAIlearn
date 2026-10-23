@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   const { data: conversation, error } = await auth.supabase.from('conversations').select('id,title,created_at,updated_at').eq('id', params.id).eq('user_id', auth.user.id).maybeSingle();
   if (error) return unexpectedChatErrorResponse('CHAT_FAILED');
   if (!conversation) return NextResponse.json({ error: 'CONVERSATION_NOT_FOUND' }, { status: 404 });
-  const { data: messages, error: messagesError } = await auth.supabase.from('messages').select('id,role,content,provider_used,model_used,tokens,created_at').eq('conversation_id', params.id).eq('user_id', auth.user.id).order('created_at', { ascending: true }).limit(200);
+  const { data: messages, error: messagesError } = await auth.supabase.from('messages').select('id,role,content,tokens,created_at').eq('conversation_id', params.id).eq('user_id', auth.user.id).order('created_at', { ascending: true }).limit(200);
   if (messagesError) return unexpectedChatErrorResponse('CHAT_FAILED');
   return NextResponse.json({ conversation, messages: messages ?? [] }, { headers: { 'cache-control': 'no-store' } });
 }

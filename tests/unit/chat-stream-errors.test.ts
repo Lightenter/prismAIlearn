@@ -16,7 +16,7 @@ function request() { return new Request('http://localhost/api/chat/stream', { me
 // Regroupe les scénarios de sécurité du flux SSE.
 describe('POST /api/chat/stream erreurs', () => {
   // Réinitialise les doubles et fournit un client Supabase par défaut.
-  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser } }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.getConfiguredModels.mockReturnValue([{ id: 'groq:llama-test', provider: 'groq', model: 'llama-test' }]); mocks.runChatTurn.mockResolvedValue({ content: 'ok', provider_used: 'test', tokens: 1, balance: 9 }); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser }, from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { role: 'user' }, error: null }) }) }) }) }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.getConfiguredModels.mockReturnValue([{ id: 'groq:llama-test', provider: 'groq', model: 'llama-test' }]); mocks.runChatTurn.mockResolvedValue({ content: 'ok', fallback_used: false, creditsSpent: 1, balance: 9 }); });
   // Vérifie qu’une erreur inattendue de getUser devient 500 et ne fuit pas son message.
   it('retourne 500 sans divulguer une exception getUser', async () => { mocks.getUser.mockRejectedValue(new Error('secret stream auth detail')); const response = await POST(request()); const body = await response.text(); expect(response.status).toBe(500); expect(body).toBe('{"error":"CHAT_STREAM_FAILED"}'); expect(body).not.toContain('secret stream auth detail'); });
   // Vérifie qu’une erreur Supabase explicitement 401 reste une réponse d’authentification.

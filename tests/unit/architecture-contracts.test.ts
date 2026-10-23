@@ -8,10 +8,13 @@ describe('contrats de l’architecture PrismAI', () => {
   it('sépare la capacité de l’implémentation fournisseur', () => {
     expect(classifyCapability([{ role: 'user', content: 'Explique ce code TypeScript' }]).capability).toBe('CODE');
   });
-  it('produit des événements SSE ordonnés et valides', () => {
-    const events = createRunEvents(crypto.randomUUID(), [{ role: 'user', content: 'Bonjour' }], 'Réponse', 'groq', 1);
+  it('produit des événements SSE ordonnés et ne divulgue pas le fournisseur', () => {
+    const events = createRunEvents(crypto.randomUUID(), [{ role: 'user', content: 'Bonjour' }], 'Réponse', true, 1);
     expect(events.map((event) => event.sequence)).toEqual([0, 1, 2]);
     expect(encodeSse(events[0])).toContain('event: run.started');
+    expect(events[2]).toMatchObject({ type: 'run.completed', fallbackUsed: true });
+    expect(events[2]).not.toHaveProperty('provider');
+    expect(events[2]).not.toHaveProperty('model');
   });
   it('refuse une transition de run incohérente', () => {
     expect(transitionRun('CREATED', 'RESERVED')).toBe('RESERVED');

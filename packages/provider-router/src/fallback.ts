@@ -1,14 +1,11 @@
 import type { ChatMessage, ProviderResponse } from '@prismai/contracts';
-import { classifyCapability, selectTextProvider } from './capabilities';
-import { getConfiguredModels, PROVIDER_DEFINITIONS } from './config';
+import { classifyCapability, estimateInputTokens, selectRoutedModels } from './capabilities';
+import { getConfiguredModels, PROVIDER_DEFINITIONS, type ConfiguredModel, type PlanTier } from './config';
 import type { FallbackOptions, ProviderClient, ProviderName } from './types';
 
-const ORDER: ProviderName[] = ['groq', 'gemini', 'openrouter', 'mistral'];
 const CIRCUIT_FAILURE_LIMIT = 3;
 const CIRCUIT_WINDOW_MS = 60_000;
 const CIRCUIT_COOLDOWN_MS = 5 * 60_000;
-const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
 type CircuitState = { failures: number[]; openedAt?: number };
 const circuits = new Map<ProviderName, CircuitState>();
 function stateFor(provider: ProviderName) { const state = circuits.get(provider) ?? { failures: [] }; circuits.set(provider, state); return state; }
@@ -20,16 +17,17 @@ function isOpen(provider: ProviderName, now: number) {
   return false;
 }
 function recordFailure(provider: ProviderName, now: number) {
-  const state = stateFor(provider); state.failures.push(now); state.failures = state.failures.filter((failureAt) => now - failureAt < CIRCUIT_WINDOW_MS);
+  const state = stateFor(provider);
+  state.failures.push(now);
+  state.failures = state.failures.filter((failureAt) => now - failureAt < CIRCUIT_WINDOW_MS);
   if (state.failures.length >= CIRCUIT_FAILURE_LIMIT) state.openedAt = now;
 }
 function recordSuccess(provider: ProviderName) { const state = stateFor(provider); state.failures = []; state.openedAt = undefined; }
 function errorStatus(error: unknown) { if (typeof error === 'object' && error && 'status' in error) return Number(error.status); return 0; }
-function shouldRetry(error: unknown) {
-  const status = errorStatus(error);
-  // Une erreur de transport/timeout ne prouve pas que le provider n’a pas exécuté la génération facturable.
-  return [408, 429, 502, 503, 504].includes(status);
-}
+// Seules des réponses HTTP explicites de limitation ou indisponibilité autorisent un repli.
+// Les timeouts réseau et erreurs de transport restent ambigus et n’entraînent aucun second appel.
+function allowsFallback(error: unknown) { return [429, 503].includes(errorStatus(error)); }
+function safeProviderError() { return Object.assign(new Error('PROVIDER_UNAVAILABLE'), { code: 'PROVIDER_UNAVAILABLE' }); }
 
 function openAiClient(provider: ProviderName, apiKey: string, endpoint: string, model: string, timeoutMs: number): ProviderClient {
   return async (messages, signal) => {
@@ -50,52 +48,54 @@ function geminiClient(apiKey: string, model: string, timeoutMs: number): Provide
     return { content, provider_used: 'gemini', model, tokens: Number(json.usageMetadata?.totalTokenCount ?? 0) };
   };
 }
-function defaultProviders(timeoutMs: number, preferredProvider?: ProviderName, preferredModel?: string): Partial<Record<ProviderName, ProviderClient>> {
-  const models = getConfiguredModels();
-  const clients: Partial<Record<ProviderName, ProviderClient>> = {};
-  for (const configured of models) {
-    const definition = PROVIDER_DEFINITIONS.find((item) => item.provider === configured.provider)!;
-    const apiKey = process.env[definition.apiKeyEnv]!;
-    const model = configured.provider === preferredProvider && preferredModel ? preferredModel : configured.model;
-    if (configured.provider === 'gemini') clients.gemini = geminiClient(apiKey, model, timeoutMs);
-    else if (configured.provider === 'groq') clients.groq = openAiClient('groq', apiKey, 'https://api.groq.com/openai/v1/chat/completions', model, timeoutMs);
-    else if (configured.provider === 'openrouter') clients.openrouter = openAiClient('openrouter', apiKey, 'https://openrouter.ai/api/v1/chat/completions', model, timeoutMs);
-    else if (configured.provider === 'mistral') clients.mistral = openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', model, timeoutMs);
-  }
-  return clients;
+function createProviderClient(configured: ConfiguredModel, timeoutMs: number): ProviderClient | undefined {
+  const definition = PROVIDER_DEFINITIONS.find((item) => item.provider === configured.provider);
+  const apiKey = definition ? process.env[definition.apiKeyEnv]?.trim() : '';
+  if (!apiKey) return undefined;
+  if (configured.provider === 'gemini') return geminiClient(apiKey, configured.model, timeoutMs);
+  if (configured.provider === 'groq') return openAiClient('groq', apiKey, 'https://api.groq.com/openai/v1/chat/completions', configured.model, timeoutMs);
+  if (configured.provider === 'openrouter') return openAiClient('openrouter', apiKey, 'https://openrouter.ai/api/v1/chat/completions', configured.model, timeoutMs);
+  return openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', configured.model, timeoutMs);
 }
+
 export function resetCircuitBreakers() { circuits.clear(); }
 export function getCircuitState(provider: ProviderName) { return { ...stateFor(provider), failures: [...stateFor(provider).failures] }; }
 
 export async function chatWithFallback(messages: ChatMessage[], _userId: string, options: FallbackOptions = {}): Promise<ProviderResponse> {
-  const now = options.now ?? (() => Date.now()); const sleep = options.sleep ?? defaultSleep;
-  const maxRetries = options.maxRetries ?? 1; const timeoutMs = options.timeoutMs ?? Number(process.env.AI_TIMEOUT_MS ?? 30_000);
-  const configured = defaultProviders(timeoutMs, options.preferredProvider, options.preferredModel);
-  const providers = { ...configured, ...options.providers };
-  const available = ORDER.filter((provider) => Boolean(providers[provider]));
-  const preferred = options.preferredProvider ?? (available.length ? selectTextProvider(classifyCapability(messages), available).provider : undefined);
-  const candidates = preferred ? [preferred, ...available.filter((provider) => provider !== preferred)] : available;
-  const errors: string[] = [];
+  const now = options.now ?? (() => Date.now());
+  const timeoutMs = options.timeoutMs ?? Number(process.env.AI_TIMEOUT_MS ?? 30_000);
+  const planTier: PlanTier = options.planTier ?? 'FREE';
+  const models = options.models ?? getConfiguredModels();
+  const decision = classifyCapability(messages);
+  const candidates = selectRoutedModels(decision, estimateInputTokens(messages), models, planTier);
+  const maxFallbacks = Math.min(1, Math.max(0, options.maxFallbacks ?? 1));
+  const eligible = candidates.slice(0, maxFallbacks + 1);
 
-  for (const provider of candidates) {
+  for (let index = 0; index < eligible.length; index += 1) {
+    const selected = eligible[index];
     if (options.signal?.aborted) throw new DOMException('The operation was aborted', 'AbortError');
-    if (isOpen(provider, now())) { errors.push(`${provider}:circuit-open`); continue; }
-    const client = providers[provider]; if (!client) continue;
-    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-      try {
-        const signal = options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs);
-        const response = await client(messages, signal);
-        recordSuccess(provider);
-        return response;
-      } catch (error) {
-        if (options.signal?.aborted) throw new DOMException('The operation was aborted', 'AbortError');
-        const retryable = shouldRetry(error);
-        if (!retryable) throw error;
-        recordFailure(provider, now()); errors.push(`${provider}:${error instanceof Error ? error.message : String(error)}`);
-        if (attempt < maxRetries) { await sleep(250 * 2 ** attempt); continue; }
-        break;
+    if (isOpen(selected.provider, now())) continue;
+    const client = options.providers?.[selected.provider] ?? createProviderClient(selected, timeoutMs);
+    if (!client) continue;
+    const signal = options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs);
+    try {
+      const response = await client(messages, signal);
+      recordSuccess(selected.provider);
+      const fallbackUsed = index > 0;
+      console.info(JSON.stringify({ event: 'prismai.provider.route', capability: decision.capability, complexity: decision.complexity, provider: selected.provider, model: response.model || selected.model, outcome: 'success', fallbackUsed }));
+      return { ...response, provider_used: selected.provider, model: response.model || selected.model, fallback_used: fallbackUsed };
+    } catch (error) {
+      if (options.signal?.aborted) throw new DOMException('The operation was aborted', 'AbortError');
+      const status = errorStatus(error);
+      if (allowsFallback(error) && index < eligible.length - 1) {
+        recordFailure(selected.provider, now());
+        console.warn(JSON.stringify({ event: 'prismai.provider.route', capability: decision.capability, complexity: decision.complexity, provider: selected.provider, model: selected.model, outcome: 'fallback', status }));
+        continue;
       }
+      console.error(JSON.stringify({ event: 'prismai.provider.route', capability: decision.capability, complexity: decision.complexity, provider: selected.provider, model: selected.model, outcome: 'failed', status: status || undefined }));
+      throw safeProviderError();
     }
   }
-  throw new Error(`ALL_PROVIDERS_FAILED ${errors.join(' | ')}`);
+  console.warn(JSON.stringify({ event: 'prismai.provider.route', capability: decision.capability, complexity: decision.complexity, outcome: 'no_eligible_provider' }));
+  throw safeProviderError();
 }

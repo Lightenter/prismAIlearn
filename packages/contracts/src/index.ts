@@ -7,9 +7,8 @@ export const chatMessageSchema = z.object({ role: z.enum(['system', 'user', 'ass
 export const chatRequestSchema = z.object({
   conversationId: z.string().uuid().optional(),
   messages: z.array(chatMessageSchema).min(1).max(100),
-  model: z.string().min(1).max(240).optional(),
 });
-export const providerResponseSchema = z.object({ content: z.string(), provider_used: z.string(), model: z.string(), tokens: z.number().int().nonnegative(), request_id: z.string().optional() });
+export const providerResponseSchema = z.object({ content: z.string(), provider_used: z.string(), model: z.string(), tokens: z.number().int().nonnegative(), request_id: z.string().optional(), fallback_used: z.boolean().optional() });
 export const paymentWebhookSchema = z.object({ userId: z.string().uuid(), txId: z.string().min(1), amount: z.coerce.number().positive(), status: z.enum(['SUCCESSFUL', 'SUCCESS', 'FAILED', 'PENDING']).default('SUCCESSFUL'), reference: z.string().optional() });
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
