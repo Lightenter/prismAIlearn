@@ -52,13 +52,25 @@ describe('auth vers dashboard', () => {
   });
 
   // Vérifie que le Dashboard ne contient plus les anciennes valeurs simulées.
-  it('protège le Dashboard et utilise les tables RLS réelles', () => {
+  it('protège le Dashboard et utilise le résumé crédit de l’utilisateur courant', () => {
     const dashboardSource = readFileSync('apps/web/app/dashboard/page.tsx', 'utf8');
     expect(dashboardSource).toContain("supabase.auth.getUser()");
     expect(dashboardSource).toContain("supabase.from('profiles')");
-    expect(dashboardSource).toContain("supabase.from('credits')");
+    expect(dashboardSource).toContain("supabase.rpc('get_my_credit_summary')");
+    expect(dashboardSource).toContain('wallet_available');
+    expect(dashboardSource).toContain('daily_available');
+    expect(dashboardSource).not.toContain("supabase.from('credits')");
     expect(dashboardSource).toContain('dashboard-empty');
     expect(dashboardSource).not.toContain('10 000');
     expect(dashboardSource).not.toContain('Essentiel');
+  });
+
+  // Vérifie que la RPC ne prend pas d’identifiant client et est accordée à authenticated seulement.
+  it('limite la RPC résumé crédit à auth.uid()', () => {
+    const migration = readFileSync('supabase/migrations/006_user_credit_summary.sql', 'utf8').toLowerCase();
+    expect(migration).toContain('security definer');
+    expect(migration).toContain('auth.uid()');
+    expect(migration).toContain('revoke all on function public.get_my_credit_summary() from public, anon');
+    expect(migration).toContain('grant execute on function public.get_my_credit_summary() to authenticated');
   });
 });

@@ -465,6 +465,8 @@ p { color: var(--muted); line-height: 1.65; }
 .dashboard-info-card > p, .dashboard-info-card > h3 { margin: 0 0 5px; color: #b7c3ea; font-size: .75rem; font-weight: 500; }
 /* Style les valeurs principales de droite. */
 .dashboard-info-card > strong { display: block; margin-bottom: 16px; color: #f2f3ff; font-size: 1.15rem; }
+/* Ventile le total réel entre portefeuille permanent et quota quotidien. */
+.dashboard-info-card > .dashboard-credit-breakdown { display: block; margin: -8px 0 15px; color: #aebce1; font-size: .68rem; line-height: 1.5; }
 /* Rend le bouton de recharge pleine largeur. */
 .dashboard-info-card .btn { width: 100%; min-height: 39px; font-size: .75rem; }
 /* Dessine le bouton secondaire de forfait. */

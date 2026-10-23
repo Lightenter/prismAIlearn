@@ -7,8 +7,8 @@ import { createSupabaseServerClient } from '../../lib/supabaseServer';
 
 // Décrit les champs réellement lus dans la table profiles.
 type ProfileRow = { display_name: string | null; email: string | null; role: string | null };
-// Décrit les champs réellement lus dans la table credits.
-type CreditsRow = { balance: number | string | null };
+// Décrit les montants renvoyés par la RPC limitée à l’utilisateur authentifié.
+type CreditSummaryRow = { wallet_available: number | string; daily_available: number | string; total_available: number | string; quota_date: string };
 // Décrit les champs réellement lus dans l’historique de crédits.
 type TransactionRow = { id: string; amount: number | string; type: string; model_used: string | null; created_at: string };
 
@@ -41,10 +41,10 @@ export default async function DashboardPage() {
   }
   // Redirige toute requête sans identité authentifiée.
   if (!user) redirect('/login?next=/dashboard');
-  // Charge uniquement les lignes appartenant à l’utilisateur courant grâce à RLS.
-  const [profileResult, creditsResult, transactionResult] = await Promise.all([
+  // Charge le profil et l’activité par RLS, et le total par une RPC liée à auth.uid().
+  const [profileResult, creditSummaryResult, transactionResult] = await Promise.all([
     supabase.from('profiles').select('display_name,email,role').eq('id', user.id).maybeSingle<ProfileRow>(),
-    supabase.from('credits').select('balance').eq('user_id', user.id).maybeSingle<CreditsRow>(),
+    supabase.rpc('get_my_credit_summary'),
     supabase.from('credit_transactions').select('id,amount,type,model_used,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
   ]);
   // Utilise le profil réel lorsqu’il existe, sinon les métadonnées Auth connues côté serveur.
@@ -53,8 +53,12 @@ export default async function DashboardPage() {
   const fullName = profile?.display_name || String(user.user_metadata?.display_name || user.user_metadata?.full_name || '').trim();
   // Prépare un nom lisible sans exposer l’adresse comme nom par défaut.
   const firstName = fullName ? fullName.split(' ')[0] : 'PrismAI';
-  // Convertit le solde réel sans afficher zéro comme une valeur inventée en cas d’erreur.
-  const balance = creditsResult.data?.balance === null || creditsResult.data?.balance === undefined ? null : Number(creditsResult.data.balance);
+  // La RPC renvoie une ligne par utilisateur, sans jamais accepter un user_id client.
+  const creditSummary = ((creditSummaryResult.data || []) as CreditSummaryRow[])[0] || null;
+  // Affiche le total disponible ainsi que ses deux compartiments réels.
+  const balance = creditSummary ? Number(creditSummary.total_available) : null;
+  const walletAvailable = creditSummary ? Number(creditSummary.wallet_available) : null;
+  const dailyAvailable = creditSummary ? Number(creditSummary.daily_available) : null;
   // Conserve uniquement les transactions réellement renvoyées par Supabase.
   const transactions = (transactionResult.data || []) as TransactionRow[];
   // Déclare explicitement l’absence de table projects dans le schéma courant.
@@ -71,7 +75,7 @@ export default async function DashboardPage() {
         {/* Zone principale avec accueil, studios rapides et projets réels ou vides. */}
         <main className="dashboard-content"><p className="dashboard-kicker">TON TABLEAU DE BORD</p><h1>Bienvenue, {firstName} <span aria-hidden="true">✦</span></h1><p className="dashboard-subtitle">Prêt à explorer, créer et avancer avec l’IA ?</p><section className="dashboard-hero"><div><h2>Votre intelligence artificielle,<br /><span>plus puissante que jamais.</span></h2><p>Un seul espace. Toutes les IA. Des outils créatifs, productifs et intelligents pour donner vie à vos idées.</p><div className="dashboard-hero-actions"><Link className="btn btn-primary" href="/chat">▣ Commencer à discuter</Link><Link className="btn btn-quiet" href="/studio">▷ Découvrir les capacités</Link></div></div><div className="dashboard-hero-prism" aria-hidden="true"><div className="dashboard-hero-glow" /><div className="dashboard-hero-shape" /></div></section><section className="dashboard-section"><div className="dashboard-section-heading"><h2>ϟ Accès rapide aux studios</h2><Link href="/studio">Tout voir →</Link></div><div className="dashboard-studio-grid"><Link className="dashboard-studio-card studio-chat" href="/chat"><b>▣</b><strong>Chat PrismAI</strong><span>Assistant IA polyvalent</span><i>→</i></Link><Link className="dashboard-studio-card studio-image" href="/studio/image"><b>▧</b><strong>Image Studio</strong><span>Créez des images uniques.</span><i>→</i></Link><Link className="dashboard-studio-card studio-video" href="/studio/video"><b>◫</b><strong>Vidéo Studio</strong><span>Générez des vidéos avec l’IA</span><i>→</i></Link><Link className="dashboard-studio-card studio-code" href="/studio/code"><b>&lt;/&gt;</b><strong>Code Studio</strong><span>Développez plus vite</span><i>→</i></Link><Link className="dashboard-studio-card studio-document" href="/studio/document"><b>▤</b><strong>Document Studio</strong><span>Analysez vos documents</span><i>→</i></Link><Link className="dashboard-studio-card studio-search" href="/chat"><b>⌕</b><strong>Recherche</strong><span>Trouvez l’information pertinente</span><i>→</i></Link></div></section><section className="dashboard-section"><div className="dashboard-section-heading"><h2>□ Vos projets récents</h2>{projectsAvailable && <Link href="/dashboard">Tout voir →</Link>}</div>{projectsAvailable ? <div /> : <div className="dashboard-empty">Aucun projet n’est encore disponible dans le backend. Crée ton premier espace depuis un studio pour le retrouver ici.</div>}</section></main>
         {/* Colonne latérale alimentée uniquement par les données RLS réellement disponibles. */}
-        <aside className="dashboard-right"><section className="dashboard-info-card credit-card"><span className="dashboard-info-icon">◆</span><p>Crédits disponibles</p><strong>{balance === null ? 'Non disponible' : `${balance.toLocaleString('fr-FR')} crédits`}</strong><Link className="btn btn-primary" href="/pricing">Recharger</Link></section><section className="dashboard-info-card"><span className="dashboard-info-icon gold">♕</span><p>Plan actuel</p><strong>{planLabel(profile?.role)}</strong><Link className="dashboard-outline-button" href="/pricing">Voir les détails <span>›</span></Link></section><section className="dashboard-info-card"><h3>Utilisation récente</h3>{transactions.length === 0 ? <p className="dashboard-muted">Aucune utilisation enregistrée.</p> : <ul className="dashboard-activity">{transactions.map((transaction) => <li key={transaction.id}><span>{transaction.type}</span><small>{transaction.amount} crédits · {formatDate(transaction.created_at)}</small></li>)}</ul>}</section><section className="dashboard-info-card dashboard-help"><span className="dashboard-help-icon">?</span><h3>Besoin d’aide ?</h3><p>Consultez notre centre d’aide ou contactez notre équipe.</p><Link href="/">Accéder au centre d’aide →</Link></section></aside>
+        <aside className="dashboard-right"><section className="dashboard-info-card credit-card"><span className="dashboard-info-icon">◆</span><p>Crédits disponibles</p><strong>{balance === null ? 'Non disponible' : `${balance.toLocaleString('fr-FR')} crédits`}</strong>{balance !== null && <small className="dashboard-credit-breakdown">Portefeuille permanent : {walletAvailable?.toLocaleString('fr-FR')} · Quota du jour : {dailyAvailable?.toLocaleString('fr-FR')}</small>}<Link className="btn btn-primary" href="/pricing">Recharger</Link></section><section className="dashboard-info-card"><span className="dashboard-info-icon gold">♕</span><p>Plan actuel</p><strong>{planLabel(profile?.role)}</strong><Link className="dashboard-outline-button" href="/pricing">Voir les détails <span>›</span></Link></section><section className="dashboard-info-card"><h3>Utilisation récente</h3>{transactions.length === 0 ? <p className="dashboard-muted">Aucune utilisation enregistrée.</p> : <ul className="dashboard-activity">{transactions.map((transaction) => <li key={transaction.id}><span>{transaction.type}</span><small>{transaction.amount} crédits · {formatDate(transaction.created_at)}</small></li>)}</ul>}</section><section className="dashboard-info-card dashboard-help"><span className="dashboard-help-icon">?</span><h3>Besoin d’aide ?</h3><p>Consultez notre centre d’aide ou contactez notre équipe.</p><Link href="/">Accéder au centre d’aide →</Link></section></aside>
       </div>
     </div>
   );
