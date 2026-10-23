@@ -84,7 +84,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [mobileHistory, setMobileHistory] = useState(false);
-  const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({});
+  const [railCollapsed, setRailCollapsed] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -220,18 +220,21 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
   }
 
   return (
-    <div className="chat-app">
+    <div className={`chat-app ${railCollapsed ? 'chat-app-collapsed' : ''}`}>
+      {!railCollapsed && <>
       <aside className={`chat-rail ${mobileHistory ? 'chat-rail-open' : ''}`} aria-label="Navigation PrismAI">
-        <div className="chat-brand"><Link href="/dashboard" className="chat-brand-link"><span className="prism" aria-hidden="true" /> PrismAI</Link><button type="button" className="chat-icon-button chat-collapse" aria-label="Fermer l’historique" onClick={() => setMobileHistory(false)}>×</button></div>
+        <div className="chat-brand"><Link href="/dashboard" className="chat-brand-link"><span className="prism" aria-hidden="true" /> PrismAI</Link><button type="button" className="chat-icon-button chat-collapse" aria-label="Réduire la barre latérale" onClick={() => { if (window.matchMedia('(max-width: 650px)').matches) setMobileHistory(false); else setRailCollapsed(true); }}>×</button></div>
         <button type="button" className="chat-new-button" onClick={startNew}><span aria-hidden="true">＋</span> Nouvelle conversation</button>
         <label className="chat-search"><span aria-hidden="true">⌕</span><input aria-label="Rechercher une conversation" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher" /></label>
         <div className="chat-history" aria-label="Historique des conversations">
           {Object.entries(grouped).map(([group, items]) => <section className="chat-history-group" key={group}><h2>{group}</h2>{items.map((conversation) => <div className={`chat-history-row ${activeId === conversation.id ? 'active' : ''}`} key={conversation.id}><button type="button" className="chat-history-title" onClick={() => void openConversation(conversation)}>{conversation.title || 'Nouvelle conversation'}</button><details className="chat-history-menu"><summary aria-label={`Actions pour ${conversation.title}`}>•••</summary><div><button type="button" onClick={() => void renameConversation(conversation)}>Renommer</button><button type="button" onClick={() => void deleteConversation(conversation)}>Supprimer</button></div></details></div>)}</section>)}
           {Object.keys(grouped).length === 0 && <p className="chat-sidebar-empty">{search ? 'Aucun résultat.' : 'Tes discussions apparaîtront ici.'}</p>}
         </div>
-        <nav className="chat-space-links" aria-label="Autres espaces"><span>ESPACES</span><Link href="/studio/image">▧ Image Studio</Link><Link href="/studio/video">◫ Vidéo Studio</Link><Link href="/studio/code">&lt;/&gt; Code Studio</Link><Link href="/studio/document">▤ Document Studio</Link><Link href="/chat">⌕ Recherche</Link><Link href="/chat">♧ Agents &amp; Mémoire</Link><Link href="/dashboard">□ Projets</Link></nav>
+        <nav className="chat-space-links" aria-label="Autres espaces"><span>ESPACES</span><Link href="/studio/image">▧ Image Studio</Link><Link href="/studio/video">◫ Vidéo Studio</Link><Link href="/studio/code">&lt;/&gt; Code Studio</Link><Link href="/studio/document">▤ Document Studio</Link><Link href="/studio">⌕ Recherche</Link><Link href="/dashboard">♧ Agents &amp; Mémoire</Link><Link href="/dashboard">□ Projets</Link></nav>
         <Link className="chat-profile" href="/dashboard"><span className="chat-avatar">P</span><span>Mon espace<small>{balance === null ? 'Crédits indisponibles' : `${balance.toLocaleString('fr-FR')} crédits`}</small></span><span aria-hidden="true">⚙</span></Link>
       </aside>
+      </>}
+      {railCollapsed && <button type="button" className="chat-icon-button chat-open-rail" aria-label="Afficher la barre latérale" onClick={() => setRailCollapsed(false)}>☰</button>}
 
       <main className="chat-main-pane">
         <header className="chat-toolbar"><button type="button" className="chat-icon-button chat-mobile-history" aria-label="Ouvrir l’historique" onClick={() => setMobileHistory(true)}>☰</button><div className="chat-conversation-heading"><strong>{activeTitle}</strong><span>Conversation privée</span></div><div className="chat-toolbar-actions"><label className="chat-model-select"><span>Modèle</span><select aria-label="Choisir un modèle d’intelligence artificielle" value={selectedModel} onChange={(event) => setSelectedModel(event.target.value)}><option value="auto">Automatique</option>{models.map((model) => <option value={model.id} key={model.id}>{model.label}</option>)}</select></label><span className="chat-credit-chip" title="Solde fourni par Supabase">◆ {balance === null ? '—' : balance.toLocaleString('fr-FR')}</span><Link className="chat-avatar chat-toolbar-avatar" href="/dashboard" aria-label="Profil et paramètres">P</Link></div></header>
@@ -240,7 +243,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
             <div className="chat-suggestions">{SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendText(suggestion)} disabled={!hasModels}>{suggestion}<span aria-hidden="true">↗</span></button>)}</div>
             {!hasModels && <div className="chat-provider-empty"><strong>Aucun modèle IA n’est configuré.</strong><span>Ajoute une clé fournisseur côté serveur (Groq, Gemini, OpenRouter ou Mistral) pour activer l’envoi. Aucun modèle fictif n’est affiché.</span></div>}
           </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong>{message.role === 'assistant' && message.provider_used && <span>{message.provider_used}{message.model ? ` · ${message.model}` : ''}</span>}</div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
-              {message.role === 'assistant' && message.content && <div className="chat-message-actions"><button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copier la réponse">Copier</button>{index === messages.length - 1 && <button type="button" onClick={() => regenerate(index)} disabled={busy || !hasModels}>Régénérer</button>}<button type="button" className={feedback[message.id] === 'up' ? 'selected' : ''} onClick={() => setFeedback((current) => ({ ...current, [message.id]: 'up' }))} aria-label="Réponse utile">Utile</button><button type="button" className={feedback[message.id] === 'down' ? 'selected' : ''} onClick={() => setFeedback((current) => ({ ...current, [message.id]: 'down' }))} aria-label="Réponse à améliorer">À améliorer</button></div>}
+              {message.role === 'assistant' && message.content && <div className="chat-message-actions"><button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copier la réponse">Copier</button>{index === messages.length - 1 && <button type="button" onClick={() => regenerate(index)} disabled={busy || !hasModels}>Régénérer</button>}</div>}
             </div></article>)}</div>}
           {error && <div className="chat-alert" role="alert">{error}{!hasModels && error.includes('Aucun fournisseur') ? null : <button type="button" onClick={() => setError('')}>Fermer</button>}</div>}
           {notice && <p className="chat-status" role="status">{notice}</p>}
