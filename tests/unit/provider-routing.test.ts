@@ -47,6 +47,11 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(decision.complexity).toBe('HIGH');
   });
 
+  it('classe une demande de synthèse de fichier comme document mais laisse rédiger un document en texte', () => {
+    expect(classifyCapability([{ role: 'user', content: 'Résume ce document en trois points.' }]).capability).toBe('DOCUMENT');
+    expect(classifyCapability([{ role: 'user', content: 'Rédige un document de présentation pour mon projet.' }]).capability).toBe('TEXT');
+  });
+
   it('préfère le coût en crédits le plus bas pour Free et la qualité configurée pour Pro complexe', () => {
     const decision = classifyCapability([{ role: 'user', content: 'Compare ces approches étape par étape.' }]);
     const orderedFree = selectRoutedModels(decision, 100, models, 'FREE');
@@ -61,7 +66,7 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(() => selectRoutedModels(decision, 100, models, 'FREE')).toThrow(expect.objectContaining({ code: 'CAPABILITY_UNAVAILABLE' }));
   });
 
-  it('bascule une seule fois sur une réponse HTTP 429 explicite et masque le fournisseur au contrat public', async () => {
+  it('bascule une seule fois sur une réponse HTTP 429 explicite et marque le fallback en interne', async () => {
     const calls: string[] = [];
     const rateLimited = Object.assign(new Error('rate limited'), { status: 429 });
     const response = await chatWithFallback(messages, 'user', { models: fallbackModels, maxFallbacks: 1, providers: {
@@ -71,6 +76,18 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(calls).toEqual(['groq', 'gemini']);
     expect(response.content).toBe('Salut');
     expect(response.fallback_used).toBe(true);
+  });
+
+  it('ne tente pas un troisième fournisseur après l’unique fallback autorisé', async () => {
+    const calls: string[] = [];
+    const unavailable = Object.assign(new Error('unavailable'), { status: 503 });
+    const threeModels: ConfiguredModel[] = [...fallbackModels, { id: 'mistral:third', provider: 'mistral', model: 'third', capabilities: ['TEXT'], contextWindowTokens: 8_000, plans: ['FREE'], qualityRank: 5 }];
+    await expect(chatWithFallback(messages, 'user', { models: threeModels, providers: {
+      groq: async () => { calls.push('groq'); throw unavailable; },
+      gemini: async () => { calls.push('gemini'); throw unavailable; },
+      mistral: async () => { calls.push('mistral'); return answer; },
+    } })).rejects.toMatchObject({ code: 'PROVIDER_UNAVAILABLE' });
+    expect(calls).toEqual(['groq', 'gemini']);
   });
 
   it('ne déclenche pas de fallback sur une erreur d’authentification provider', async () => {
