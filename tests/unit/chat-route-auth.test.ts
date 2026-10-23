@@ -1,13 +1,14 @@
 // Importe les primitives de test Vitest pour isoler la route HTTP.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 // Prépare les doubles avant l’import de la route afin d’éviter tout accès réseau réel.
-const mocks = vi.hoisted(() => ({ createClient: vi.fn(), getUser: vi.fn(), runChatTurn: vi.fn(), consumeRateLimit: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createClient: vi.fn(), getUser: vi.fn(), runChatTurn: vi.fn(), consumeRateLimit: vi.fn(), getConfiguredModels: vi.fn() }));
 // Remplace le client Supabase par un faux client dont l’identité est contrôlée par le test.
 vi.mock('../../apps/web/lib/supabaseServer', () => ({ createSupabaseServerClient: () => mocks.createClient() }));
 // Remplace le runtime coûteux par un espion pour vérifier l’identité transmise.
 vi.mock('@prismai/chat-runtime', () => ({ runChatTurn: mocks.runChatTurn }));
 // Remplace le rate limiter SQL afin que les tests se concentrent sur le contrat HTTP.
 vi.mock('@prismai/db', () => ({ consumeRateLimit: mocks.consumeRateLimit }));
+vi.mock('@prismai/provider-router', () => ({ getConfiguredModels: mocks.getConfiguredModels }));
 // Importe la route après l’installation des mocks.
 import { POST } from '../../apps/web/app/api/chat/route';
 // Construit une requête valide réutilisable entre les scénarios.
@@ -15,7 +16,7 @@ function request(body: Record<string, unknown> = { messages: [{ role: 'user', co
 // Regroupe les scénarios obligatoires d’isolation et de gestion d’erreurs.
 describe('POST /api/chat authentification et erreurs', () => {
   // Réinitialise les doubles et la configuration par défaut avant chaque scénario.
-  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser } }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.runChatTurn.mockResolvedValue({ content: 'ok', provider_used: 'test', tokens: 1, balance: 9 }); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.createClient.mockReturnValue({ auth: { getUser: mocks.getUser } }); mocks.consumeRateLimit.mockResolvedValue(true); mocks.getConfiguredModels.mockReturnValue([{ id: 'groq:llama-test', provider: 'groq', model: 'llama-test' }]); mocks.runChatTurn.mockResolvedValue({ content: 'ok', provider_used: 'test', tokens: 1, balance: 9 }); });
   // Vérifie que l’absence de configuration reste distinguée d’une panne serveur.
   it('retourne 503 lorsque Supabase est explicitement non configuré', async () => { mocks.createClient.mockReturnValue(null); const response = await POST(request()); expect(response.status).toBe(503); expect(await response.json()).toEqual({ error: 'SUPABASE_CONFIG_MISSING' }); });
   // Vérifie qu’une session absente est refusée avant l’appel runtime.

@@ -12,11 +12,12 @@
     "@prismai/chat-runtime": "workspace:*",
     "@prismai/contracts": "workspace:*",
     "@prismai/db": "workspace:*",
+    "@prismai/provider-router": "workspace:*",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.48.1",
     "next": "14.2.35",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.48.1"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

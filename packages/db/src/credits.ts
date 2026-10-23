@@ -4,6 +4,8 @@ import { getSupabaseAdminClient } from './client';
 export async function checkCredits(userId: string, estimatedCost: number) { const { data, error } = await getSupabaseAdminClient().rpc('check_credits', { p_user_id: userId, p_estimated_cost: estimatedCost }); if (error) throw error; return Boolean(data); }
 // Réserve atomiquement des crédits avant l’appel d’un fournisseur IA.
 export async function reserveCredits(userId: string, idempotencyKey: string, estimatedAmount: number, runId?: string) { const { data, error } = await getSupabaseAdminClient().rpc('reserve_credits', { p_user_id: userId, p_idempotency_key: idempotencyKey, p_estimated_amount: estimatedAmount, p_run_id: runId ?? null }); if (error) throw error; return String(data); }
+// Réclame une réservation une seule fois avant l’appel IA; un rejeu reçoit false sans relancer le provider.
+export async function claimCreditOperation(userId: string, operationId: string) { const { data, error } = await getSupabaseAdminClient().rpc('claim_credit_operation', { p_user_id: userId, p_operation_id: operationId }); if (error) throw error; return Boolean(data); }
 // Finalise la réservation avec le coût réel via le nom exact de la RPC SQL.
 export async function completeCredits(operationId: string, finalAmount: number) { const { data, error } = await getSupabaseAdminClient().rpc('complete_credits', { p_operation_id: operationId, p_final_amount: finalAmount }); if (error) throw error; return { balance: Number(data ?? 0) }; }
 // Conserve un alias explicite pour les appelants historiques, sans appeler une RPC inexistante.
