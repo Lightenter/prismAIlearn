@@ -27,13 +27,22 @@ beforeEach(() => {
   mocks.calculateCreditCost.mockImplementation((provider: string) => ({ groq: 1, gemini: 2, mistral: 99 }[provider] ?? 1));
   mocks.reserveCredits.mockResolvedValue('operation-1');
   mocks.claimCreditOperation.mockResolvedValue(false);
+  mocks.insufficientCredits.mockReturnValue(Object.assign(new Error('INSUFFICIENT_CREDITS'), { code: 'INSUFFICIENT_CREDITS' }));
 });
 
 describe('protection idempotente du runtime chat', () => {
-  it('refuse un rejeu avant appel provider et ne rembourse pas une opération déjà revendiquée', async () => {
+  it('refuse un rejeu avant appel provider et réserve seulement le coût maximal des candidats exécutables', async () => {
     await expect(runChatTurn('user-1', [{ role: 'user', content: 'Bonjour' }], { idempotencyKey: 'chat-request-1234' })).rejects.toMatchObject({ code: 'IDEMPOTENCY_REPLAY' });
     expect(mocks.claimCreditOperation).toHaveBeenCalledWith('user-1', 'operation-1');
     expect(mocks.reserveCredits).toHaveBeenCalledWith('user-1', 'chat-request-1234', 2, undefined);
+    expect(mocks.chatWithFallback).not.toHaveBeenCalled();
+    expect(mocks.refundCredits).not.toHaveBeenCalled();
+  });
+
+  it('arrête avant le provider quand la réservation refuse un solde insuffisant', async () => {
+    mocks.reserveCredits.mockRejectedValue(Object.assign(new Error('INSUFFICIENT_CREDITS'), { code: 'INSUFFICIENT_CREDITS' }));
+    await expect(runChatTurn('user-1', [{ role: 'user', content: 'Bonjour' }], { idempotencyKey: 'chat-request-credit' })).rejects.toMatchObject({ code: 'INSUFFICIENT_CREDITS' });
+    expect(mocks.claimCreditOperation).not.toHaveBeenCalled();
     expect(mocks.chatWithFallback).not.toHaveBeenCalled();
     expect(mocks.refundCredits).not.toHaveBeenCalled();
   });
