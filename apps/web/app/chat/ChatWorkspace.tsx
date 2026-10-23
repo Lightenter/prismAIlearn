@@ -3,10 +3,9 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 
-type ModelOption = { id: string; provider: string; providerLabel: string; model: string; label: string };
 type Conversation = { id: string; title: string; created_at: string; updated_at: string };
-type Message = { id: string; role: 'user' | 'assistant'; content: string; provider_used?: string | null; model?: string | null };
-type StoredMessage = { id: string; role: string; content: string; provider_used?: string | null; model_used?: string | null };
+type Message = { id: string; role: 'user' | 'assistant'; content: string };
+type StoredMessage = { id: string; role: string; content: string };
 
 const SUGGESTIONS = ['Aide-moi à structurer une idée', 'Explique-moi un sujet simplement', 'Écris un plan clair pour mon projet'];
 const newId = () => typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
@@ -58,8 +57,10 @@ function MarkdownMessage({ content }: { content: string }) {
 
 function errorLabel(code: string) {
   const labels: Record<string, string> = {
-    NO_PROVIDER_CONFIGURED: 'Aucun fournisseur IA n’est configuré côté serveur. Ajoute au moins une clé API fournisseur pour activer le chat.',
-    MODEL_UNAVAILABLE: 'Ce modèle n’est plus configuré. Choisis un modèle disponible puis réessaie.',
+    NO_PROVIDER_CONFIGURED: 'Le Chat PrismAI n’est pas encore disponible. Réessaie un peu plus tard.',
+    CAPABILITY_UNAVAILABLE: 'Cette capacité n’est pas active dans le Chat. Tu peux coller le texte à traiter directement dans la conversation.',
+    NO_MODEL_FOR_CAPABILITY: 'Aucun modèle PrismAI configuré ne peut traiter cette demande pour le moment.',
+    PROVIDER_UNAVAILABLE: 'PrismAI n’a pas pu traiter la demande. Aucun crédit non utilisé ne sera débité.',
     INSUFFICIENT_CREDITS: 'Crédits insuffisants pour démarrer cette génération.',
     RATE_LIMITED: 'Trop de requêtes rapprochées. Patiente un instant avant de réessayer.',
     REQUEST_ALREADY_PROCESSED: 'Cette requête a déjà été revendiquée ou traitée. PrismAI ne relance pas un appel potentiellement facturable ; envoie une nouvelle requête seulement après avoir vérifié l’historique.',
@@ -70,13 +71,11 @@ function errorLabel(code: string) {
   return labels[code] ?? 'La requête n’a pas abouti. Réessaie dans un instant.';
 }
 
-export function ChatWorkspace({ initialConversations, initialBalance }: { initialConversations: Conversation[]; initialBalance: number | null }) {
-  const [models, setModels] = useState<ModelOption[]>([]);
+export function ChatWorkspace({ initialConversations, initialBalance, chatAvailable }: { initialConversations: Conversation[]; initialBalance: number | null; chatAvailable: boolean }) {
   const [conversations, setConversations] = useState(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeTitle, setActiveTitle] = useState('Nouvelle conversation');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedModel, setSelectedModel] = useState('auto');
   const [balance, setBalance] = useState(initialBalance);
   const [draft, setDraft] = useState('');
   const [search, setSearch] = useState('');
@@ -98,14 +97,8 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
   }, []);
 
   useEffect(() => {
-    let alive = true;
-    fetch('/api/chat/models', { cache: 'no-store' }).then(async (response) => {
-      if (response.status === 401) { window.location.assign('/login?next=%2Fchat'); return null; }
-      if (!response.ok) return null;
-      return response.json();
-    }).then((payload) => { if (alive && payload) setModels(payload.models ?? []); }).catch(() => undefined);
     refreshConversations();
-    return () => { alive = false; abortRef.current?.abort(); };
+    return () => { abortRef.current?.abort(); };
   }, [refreshConversations]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy]);
@@ -117,7 +110,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
       return groups;
     }, {});
   }, [conversations, search]);
-  const hasModels = models.length > 0;
+  const hasModels = chatAvailable;
 
   function startNew() {
     abortRef.current?.abort(); setActiveId(null); setActiveTitle('Nouvelle conversation'); setMessages([]); setDraft(''); setError(''); setNotice(''); setMobileHistory(false);
@@ -129,7 +122,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
     if (!response.ok) { setError(errorLabel('CONVERSATION_NOT_FOUND')); return; }
     const payload = await response.json();
     setActiveId(conversation.id); setActiveTitle(payload.conversation.title); setError(''); setNotice('');
-    setMessages((payload.messages as StoredMessage[]).filter((item) => item.role === 'user' || item.role === 'assistant').map((item) => ({ id: item.id, role: item.role as 'user' | 'assistant', content: item.content, provider_used: item.provider_used, model: item.model_used })));
+    setMessages((payload.messages as StoredMessage[]).filter((item) => item.role === 'user' || item.role === 'assistant').map((item) => ({ id: item.id, role: item.role as 'user' | 'assistant', content: item.content })));
     setMobileHistory(false);
   }
 
@@ -163,7 +156,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
       const response = await fetch('/api/chat/stream', {
         method: 'POST', signal: controller.signal,
         headers: { 'content-type': 'application/json', 'idempotency-key': `chat-ui:${newId()}` },
-        body: JSON.stringify({ conversationId: activeId ?? undefined, model: selectedModel, messages: next.map(({ role, content }) => ({ role, content })) }),
+        body: JSON.stringify({ conversationId: activeId ?? undefined, messages: next.map(({ role, content }) => ({ role, content })) }),
       });
       if (response.status === 401) { window.location.assign('/login?next=%2Fchat'); return; }
       if (!response.ok) {
@@ -176,17 +169,17 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
       if (Number.isFinite(returnedBalance)) setBalance(returnedBalance);
       const reader = response.body?.getReader();
       if (!reader) throw new Error('CHAT_STREAM_FAILED');
-      const decoder = new TextDecoder(); let buffer = ''; let answer = ''; let usedModel = ''; let usedProvider = '';
+      const decoder = new TextDecoder(); let buffer = ''; let answer = ''; let fallbackUsed = false;
       const handleEvent = (frame: string) => {
         const dataLine = frame.split('\n').find((line) => line.startsWith('data:'));
         if (!dataLine) return;
         const event = JSON.parse(dataLine.slice(5).trim());
         if (event.type === 'message.delta') {
           answer += event.text;
-          setMessages([...next, { ...assistantMessage, content: answer, model: usedModel || null, provider_used: usedProvider || null }]);
+          setMessages([...next, { ...assistantMessage, content: answer }]);
         } else if (event.type === 'run.completed') {
-          usedProvider = event.provider || ''; usedModel = event.model || '';
-          setMessages([...next, { ...assistantMessage, content: answer, model: usedModel || null, provider_used: usedProvider || null }]);
+          fallbackUsed = event.fallbackUsed === true;
+          setMessages([...next, { ...assistantMessage, content: answer }]);
         }
       };
       while (true) {
@@ -198,7 +191,7 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
       }
       buffer += decoder.decode(); if (buffer.trim()) handleEvent(buffer);
       if (!answer) setMessages(next);
-      if (usedModel || usedProvider) setNotice(`Réponse produite par ${usedProvider}${usedModel ? ` · ${usedModel}` : ''}.`);
+      if (fallbackUsed) setNotice('PrismAI a utilisé une solution de repli pour terminer la demande.');
       await refreshConversations();
     } catch (caught) {
       if (caught instanceof Error && caught.name === 'AbortError') { setMessages((current) => current.filter((message) => message.id !== assistantMessage.id)); setNotice('Génération arrêtée.'); }
@@ -237,19 +230,19 @@ export function ChatWorkspace({ initialConversations, initialBalance }: { initia
       {railCollapsed && <button type="button" className="chat-icon-button chat-open-rail" aria-label="Afficher la barre latérale" onClick={() => setRailCollapsed(false)}>☰</button>}
 
       <main className="chat-main-pane">
-        <header className="chat-toolbar"><button type="button" className="chat-icon-button chat-mobile-history" aria-label="Ouvrir l’historique" onClick={() => setMobileHistory(true)}>☰</button><div className="chat-conversation-heading"><strong>{activeTitle}</strong><span>Conversation privée</span></div><div className="chat-toolbar-actions"><label className="chat-model-select"><span>Modèle</span><select aria-label="Choisir un modèle d’intelligence artificielle" value={selectedModel} onChange={(event) => setSelectedModel(event.target.value)}><option value="auto">Automatique</option>{models.map((model) => <option value={model.id} key={model.id}>{model.label}</option>)}</select></label><span className="chat-credit-chip" title="Solde fourni par Supabase">◆ {balance === null ? '—' : balance.toLocaleString('fr-FR')}</span><Link className="chat-avatar chat-toolbar-avatar" href="/dashboard" aria-label="Profil et paramètres">P</Link></div></header>
+        <header className="chat-toolbar"><button type="button" className="chat-icon-button chat-mobile-history" aria-label="Ouvrir l’historique" onClick={() => setMobileHistory(true)}>☰</button><div className="chat-conversation-heading"><strong>{activeTitle}</strong><span>Conversation privée</span></div><div className="chat-toolbar-actions"><span className="chat-credit-chip" title="Crédits disponibles">◆ {balance === null ? '—' : balance.toLocaleString('fr-FR')}</span><Link className="chat-avatar chat-toolbar-avatar" href="/dashboard" aria-label="Profil et paramètres">P</Link></div></header>
         <section className="chat-thread" aria-label="Messages de la conversation" aria-live="polite">
-          {messages.length === 0 ? <div className="chat-welcome"><div className="chat-welcome-prism"><span className="prism" aria-hidden="true" /></div><p className="chat-eyebrow">CHAT PRISMAI</p><h1>Une idée, plusieurs perspectives.</h1><p className="chat-welcome-copy">Pose ta question. PrismAI choisira un modèle configuré, ou suivra ton choix manuel avec un fallback contrôlé.</p>
+          {messages.length === 0 ? <div className="chat-welcome"><div className="chat-welcome-prism"><span className="prism" aria-hidden="true" /></div><p className="chat-eyebrow">CHAT PRISMAI</p><h1>Une idée, plusieurs perspectives.</h1><p className="chat-welcome-copy">Pose ta question. PrismAI choisira automatiquement une solution configurée et adaptée à la demande.</p>
             <div className="chat-suggestions">{SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendText(suggestion)} disabled={!hasModels}>{suggestion}<span aria-hidden="true">↗</span></button>)}</div>
-            {!hasModels && <div className="chat-provider-empty"><strong>Aucun modèle IA n’est configuré.</strong><span>Ajoute une clé fournisseur côté serveur (Groq, Gemini, OpenRouter ou Mistral) pour activer l’envoi. Aucun modèle fictif n’est affiché.</span></div>}
-          </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong>{message.role === 'assistant' && message.provider_used && <span>{message.provider_used}{message.model ? ` · ${message.model}` : ''}</span>}</div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
+            {!hasModels && <div className="chat-provider-empty"><strong>PrismAI est en cours de configuration.</strong><span>Le Chat sera disponible dès que son catalogue de capacités aura été validé.</span></div>}
+          </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong></div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
               {message.role === 'assistant' && message.content && <div className="chat-message-actions"><button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copier la réponse">Copier</button>{index === messages.length - 1 && <button type="button" onClick={() => regenerate(index)} disabled={busy || !hasModels}>Régénérer</button>}</div>}
             </div></article>)}</div>}
-          {error && <div className="chat-alert" role="alert">{error}{!hasModels && error.includes('Aucun fournisseur') ? null : <button type="button" onClick={() => setError('')}>Fermer</button>}</div>}
+          {error && <div className="chat-alert" role="alert">{error}<button type="button" onClick={() => setError('')}>Fermer</button></div>}
           {notice && <p className="chat-status" role="status">{notice}</p>}
           <div ref={bottomRef} />
         </section>
-        <form className="chat-composer" onSubmit={onSubmit}><textarea ref={textAreaRef} aria-label="Écrire un message" value={draft} onChange={(event) => { setDraft(event.target.value); event.currentTarget.style.height = 'auto'; event.currentTarget.style.height = `${Math.min(event.currentTarget.scrollHeight, 220)}px`; }} onKeyDown={onComposerKeyDown} placeholder={hasModels ? 'Écris ton message…' : 'Configure un provider IA pour commencer…'} rows={1} disabled={!hasModels || busy} /><div className="chat-composer-footer"><span>Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne · Les fichiers ne sont pas encore pris en charge</span>{busy ? <button type="button" className="chat-stop-button" onClick={stopGeneration}>■ Arrêter</button> : <button type="submit" className="chat-send-button" disabled={!draft.trim() || !hasModels} aria-label="Envoyer le message">Envoyer <span aria-hidden="true">↑</span></button>}</div></form>
+        <form className="chat-composer" onSubmit={onSubmit}><textarea ref={textAreaRef} aria-label="Écrire un message" value={draft} onChange={(event) => { setDraft(event.target.value); event.currentTarget.style.height = 'auto'; event.currentTarget.style.height = `${Math.min(event.currentTarget.scrollHeight, 220)}px`; }} onKeyDown={onComposerKeyDown} placeholder={hasModels ? 'Écris ton message…' : 'Le Chat PrismAI sera bientôt disponible…'} rows={1} disabled={!hasModels || busy} /><div className="chat-composer-footer"><span>Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne · Les fichiers ne sont pas encore pris en charge</span>{busy ? <button type="button" className="chat-stop-button" onClick={stopGeneration}>■ Arrêter</button> : <button type="submit" className="chat-send-button" disabled={!draft.trim() || !hasModels} aria-label="Envoyer le message">Envoyer <span aria-hidden="true">↑</span></button>}</div></form>
         <p className="chat-disclaimer">Les réponses peuvent contenir des erreurs. Vérifie les informations importantes.</p>
       </main>
       {mobileHistory && <button className="chat-backdrop" aria-label="Fermer l’historique" onClick={() => setMobileHistory(false)} />}

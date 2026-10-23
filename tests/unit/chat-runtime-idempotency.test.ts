@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   reserveCredits: vi.fn(), claimCreditOperation: vi.fn(), completeCredits: vi.fn(), refundCredits: vi.fn(), getSupabaseAdminClient: vi.fn(),
-  chatWithFallback: vi.fn(), getConfiguredModels: vi.fn(), getConfiguredModelById: vi.fn(), calculateCreditCost: vi.fn(), insufficientCredits: vi.fn(),
+  chatWithFallback: vi.fn(), getConfiguredModels: vi.fn(), calculateCreditCost: vi.fn(), insufficientCredits: vi.fn(),
 }));
 vi.mock('@prismai/db', () => ({ reserveCredits: mocks.reserveCredits, claimCreditOperation: mocks.claimCreditOperation, completeCredits: mocks.completeCredits, refundCredits: mocks.refundCredits, getSupabaseAdminClient: mocks.getSupabaseAdminClient }));
 vi.mock('@prismai/domain', () => ({ calculateCreditCost: mocks.calculateCreditCost, insufficientCredits: mocks.insufficientCredits }));
-vi.mock('@prismai/provider-router', () => ({ chatWithFallback: mocks.chatWithFallback, getConfiguredModels: mocks.getConfiguredModels, getConfiguredModelById: mocks.getConfiguredModelById, classifyCapability: () => ({ capability: 'TEXT' }) }));
+vi.mock('@prismai/provider-router', () => ({ chatWithFallback: mocks.chatWithFallback, getConfiguredModels: mocks.getConfiguredModels, classifyCapability: () => ({ capability: 'TEXT' }) }));
 import { runChatTurn } from '../../packages/chat-runtime/src/index';
 
 beforeEach(() => {

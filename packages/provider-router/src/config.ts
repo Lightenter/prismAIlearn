@@ -1,33 +1,70 @@
+import { z } from 'zod';
+import { capabilitySchema, type Capability } from '@prismai/contracts';
 import type { ProviderName } from './types';
 
-export type ProviderDefinition = {
-  provider: ProviderName;
-  label: string;
-  apiKeyEnv: string;
-  modelEnv: string;
-  defaultModel: string;
-};
-
+export type PlanTier = 'FREE' | 'PRO';
 export type ConfiguredModel = {
   id: string;
   provider: ProviderName;
-  providerLabel: string;
   model: string;
-  label: string;
+  capabilities: Capability[];
+  contextWindowTokens: number;
+  plans: PlanTier[];
+  qualityRank: number;
 };
 
-export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
-  { provider: 'groq', label: 'Groq', apiKeyEnv: 'GROQ_API_KEY', modelEnv: 'GROQ_MODEL', defaultModel: 'llama-3.3-70b-versatile' },
-  { provider: 'gemini', label: 'Google Gemini', apiKeyEnv: 'GEMINI_API_KEY', modelEnv: 'GEMINI_MODEL', defaultModel: 'gemini-1.5-flash' },
-  { provider: 'openrouter', label: 'OpenRouter', apiKeyEnv: 'OPENROUTER_API_KEY', modelEnv: 'OPENROUTER_MODEL', defaultModel: 'meta-llama/llama-3.3-70b-instruct:free' },
-  { provider: 'mistral', label: 'Mistral', apiKeyEnv: 'MISTRAL_API_KEY', modelEnv: 'MISTRAL_MODEL', defaultModel: 'mistral-small-latest' },
+export const PROVIDER_DEFINITIONS: { provider: ProviderName; apiKeyEnv: string }[] = [
+  { provider: 'groq', apiKeyEnv: 'GROQ_API_KEY' },
+  { provider: 'gemini', apiKeyEnv: 'GEMINI_API_KEY' },
+  { provider: 'openrouter', apiKeyEnv: 'OPENROUTER_API_KEY' },
+  { provider: 'mistral', apiKeyEnv: 'MISTRAL_API_KEY' },
 ];
 
+const routingEntrySchema = z.object({
+  provider: z.enum(['groq', 'gemini', 'openrouter', 'mistral']),
+  model: z.string().trim().min(1).max(200),
+  capabilities: z.array(capabilitySchema).min(1),
+  contextWindowTokens: z.number().int().positive(),
+  plans: z.array(z.enum(['FREE', 'PRO'])).min(1),
+  qualityRank: z.number().int().min(1).max(5),
+}).strict();
+const routingCatalogSchema = z.array(routingEntrySchema).max(32).superRefine((entries, context) => {
+  const ids = new Set<string>();
+  entries.forEach((entry, index) => {
+    const id = `${entry.provider}:${entry.model}`;
+    if (ids.has(id)) context.addIssue({ code: z.ZodIssueCode.custom, path: [index, 'model'], message: 'duplicate model entry' });
+    ids.add(id);
+  });
+});
+
+/**
+ * Le catalogue ne contient que les modèles dont le nom et les métadonnées ont été
+ * renseignés explicitement par l’exploitant. Une clé API seule n’active aucun modèle.
+ */
 export function getConfiguredModels(): ConfiguredModel[] {
-  return PROVIDER_DEFINITIONS.flatMap((definition) => {
-    if (!process.env[definition.apiKeyEnv]?.trim()) return [];
-    const model = process.env[definition.modelEnv]?.trim() || definition.defaultModel;
-    return [{ id: `${definition.provider}:${model}`, provider: definition.provider, providerLabel: definition.label, model, label: `${definition.label} · ${model}` }];
+  const raw = process.env.PRISMAI_ROUTING_CATALOG?.trim();
+  if (!raw) return [];
+
+  let value: unknown;
+  try { value = JSON.parse(raw); }
+  catch {
+    console.error(JSON.stringify({ event: 'prismai.routing.config_error', code: 'INVALID_JSON' }));
+    return [];
+  }
+  const parsed = routingCatalogSchema.safeParse(value);
+  if (!parsed.success) {
+    console.error(JSON.stringify({
+      event: 'prismai.routing.config_error',
+      code: 'INVALID_CATALOG',
+      issues: parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), code: issue.code })),
+    }));
+    return [];
+  }
+
+  return parsed.data.flatMap((entry) => {
+    const definition = PROVIDER_DEFINITIONS.find((item) => item.provider === entry.provider);
+    if (!definition || !process.env[definition.apiKeyEnv]?.trim()) return [];
+    return [{ ...entry, id: `${entry.provider}:${entry.model}` }];
   });
 }
 

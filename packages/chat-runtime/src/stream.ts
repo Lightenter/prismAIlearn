@@ -3,12 +3,12 @@ import { runEventSchema, type Capability, type ChatMessage, type RunEvent } from
 import { classifyCapability } from '@prismai/provider-router';
 
 export function createRunId(): string { return randomUUID(); }
-export function createRunEvents(runId: string, messages: ChatMessage[], content: string, provider: string, credits: number, model?: string): RunEvent[] {
+export function createRunEvents(runId: string, messages: ChatMessage[], content: string, fallbackUsed: boolean, credits: number): RunEvent[] {
   const decision = classifyCapability(messages);
   const events: RunEvent[] = [
     { type: 'run.started', runId, sequence: 0, state: 'CREATED', capability: decision.capability },
     { type: 'message.delta', runId, sequence: 1, text: content },
-    { type: 'run.completed', runId, sequence: 2, state: 'COMPLETED', provider, ...(model ? { model } : {}), credits },
+    { type: 'run.completed', runId, sequence: 2, state: 'COMPLETED', fallbackUsed, credits },
   ];
   return events.map((event) => runEventSchema.parse(event));
 }

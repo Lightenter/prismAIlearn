@@ -138,6 +138,12 @@ importers:
       '@prismai/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@prismai/domain':
+        specifier: workspace:*
+        version: link:../domain
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
 
   packages/tools-runtime: {}
 
