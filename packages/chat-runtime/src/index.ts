@@ -49,7 +49,7 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
       try { await refundCredits(operationId, 'provider_or_runtime_failure'); } catch { /* La base reste l’autorité si le remboursement échoue. */ }
     }
     // Conserve l’erreur métier pour que la route applique son contrat HTTP stable.
-    if (error instanceof Error && error.message === 'INSUFFICIENT_CREDITS') throw insufficientCredits();
+    if (error instanceof Error && ['INSUFFICIENT_CREDITS', 'INSUFFICIENT_CREDITS_FINAL'].includes(error.message)) throw insufficientCredits();
     throw error;
   }
 }

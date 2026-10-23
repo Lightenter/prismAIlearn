@@ -66,4 +66,12 @@
 - [x] Protéger `/dashboard` côté serveur et lire le profil, le solde et l’activité depuis les tables Supabase RLS ; afficher un état vide explicite pour les projets non disponibles au lieu de simuler des données.
 - [x] Ajouter les endpoints backend de récupération du mot de passe, renvoi du lien de vérification et Google OAuth ; les sessions et cookies PKCE restent httpOnly, Secure et SameSite=None en HTTPS.
 - [x] Mettre à jour les README des dépôts `prismAIlearn` et `prismai-architecture` avec le fonctionnement et les prérequis Supabase, y compris `APP_BASE_URL` et les callbacks autorisés.
-- [ ] Effectuer un test positif complet d’inscription, confirmation par e-mail puis connexion avec une boîte contrôlée et l’URL de callback de staging autorisée. Le serveur est démarré ; l’accès Auth, l’inscription activée et le retour d’erreur login ont été vérifiés, sans créer de compte de test ni toucher à la production.
+- [ ] Effectuer un test positif d’inscription puis de connexion sans confirmation e-mail sur `prismai-staging`, puis vérifier le profil et les 300 crédits initiaux. Aucun compte de test n’a encore été créé dans ce projet.
+
+## Comptes et crédits — staging
+
+- [x] Choisir les règles métier : 300 crédits permanents à l’inscription, puis 100 crédits quotidiens non cumulables à partir du lendemain, remis à zéro à 00:00 heure de Douala.
+- [x] Appliquer les migrations 001 → 002 → 003 sur le staging ; la migration 003 remplace l’ancien bonus historique de 10 000 par 300 et crée le compartiment de quota journalier.
+- [x] Activer et vérifier pg_cron, programmer la création des quotas à minuit Douala et conserver le mécanisme de création à la demande en cas de job manqué.
+- [x] Réactiver les inscriptions du staging après validation du schéma, avec confirmation e-mail désactivée. Le endpoint Auth public confirme `signup_enabled=true` et `email_autoconfirm=true`.
+- [ ] Tester que les 100 crédits du jour suivant expirent sans cumul à minuit et que les crédits quotidiens sont débités avant le portefeuille permanent.

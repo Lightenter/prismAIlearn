@@ -51,7 +51,7 @@ L’application web écoute sur `http://localhost:3000` et l’API interne sur `
 
 ## Supabase
 
-Appliquer `supabase/migrations/001_init.sql` sur un projet de staging avant production. La migration couvre profils, organisations, conversations, messages/parts, runs, comptes crédits, opérations, paiements, pièces jointes et Evidence, avec RLS et RPC atomiques. Les fonctions de crédits utilisent les états `CREATED`, `RESERVED`, `PROCESSING`, `COMPLETED` et `FAILED`.
+Les migrations `001_init.sql`, `002_security_hardening.sql`, `003_daily_credit_quota.sql`, `004_enable_pg_cron.sql` et `005_schedule_daily_credit_quota.sql` sont appliquées au projet de staging. `001_init.sql` est historique et attribue encore 10 000 crédits dans son trigger ; `003_daily_credit_quota.sql` le remplace par la règle actuelle : bonus d’inscription permanent de 300 crédits et quota non cumulable de 100 crédits par jour, à partir du lendemain, en heure `Africa/Douala`. Les crédits quotidiens expirent à minuit local et ne se convertissent pas en crédits permanents. Toujours appliquer `003` avant de rouvrir les inscriptions. Le job Cron actif tourne à `23:00 GMT`, soit `00:00 Africa/Douala`. La migration initiale couvre profils, organisations, conversations, messages/parts, runs, comptes crédits, opérations, paiements, pièces jointes et Evidence, avec RLS et RPC atomiques.
 
 ## Tests et build
 
@@ -68,7 +68,7 @@ Les tests locaux ne déclarent pas avoir validé un service externe : ils couvre
 
 - Le streaming local utilise un protocole SSE typé et un fallback borné ; la reprise multi-instance durable nécessite Redis et une file de jobs activés en staging.
 - Les studios image, vidéo et document exposent explicitement leur disponibilité/configuration ; ils ne simulent pas une génération réelle sans provider configuré.
-- La réservation de crédits est prête côté domaine/SQL ; les règles commerciales Free/Pro/Créateur et CinetPay/Stripe restent configurables mais non activées.
+- Le profil conserve le nom et le code de parrainage facultatif; les mots de passe restent gérés et hachés par Supabase Auth. Le quota journalier est consommé avant le portefeuille permanent. Les promotions de codes promo ne sont pas encore validées ni créditées.
 - LiteLLM est documenté comme gateway optionnelle derrière le routeur PrismAI, jamais comme source d’autorité tenant/billing.
 
 ## Licences et réutilisation
@@ -100,7 +100,7 @@ Les routes `/login` et `/signup` sont deux pages distinctes qui partagent la mê
 
 Pour configurer l’application Web en développement, copier `apps/web/.env.example` vers `apps/web/.env.local` et définir `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` et `APP_BASE_URL` avec un projet Supabase de développement/staging. `APP_BASE_URL` doit être l’origine visible par le navigateur (`http://localhost:3000` en local direct, ou l’origine HTTPS publique pour un tunnel) ; les liens de confirmation et OAuth en dépendent. Ces valeurs sont lues par les routes serveur Next.js ; le code navigateur n’instancie pas de client Supabase. **Ne jamais mettre `SUPABASE_SERVICE_ROLE_KEY` dans une variable `NEXT_PUBLIC_*` ou dans l’application Web.** Les variables locales sont ignorées par Git.
 
-Dans Supabase Auth, configurer l’URL du site et autoriser précisément `${APP_BASE_URL}/auth/callback` dans la liste des URL de redirection ; le callback rejette les chemins de retour externes. Pour Google, activer le fournisseur dans Supabase Auth et autoriser le même callback. Sur le projet de staging utilisé pendant cette tâche, le endpoint Auth a répondu, l’inscription est activée, Google est activé et la confirmation e-mail est requise. Le chemin de login avec identifiants invalides a renvoyé une erreur contrôlée ; aucun compte n’a été créé et une inscription/login réussie reste à tester avec une boîte e-mail contrôlée. Employer un staging isolé, jamais une base de production.
+Dans Supabase Auth, configurer l’URL du site et autoriser précisément `${APP_BASE_URL}/auth/callback` dans la liste des URL de redirection ; le callback rejette les chemins de retour externes. Le staging `prismai-staging` est distinct de Production, les inscriptions e-mail y sont réactivées et `Confirm email` est désactivé (`mailer_autoconfirm=true`) afin que l’inscription ne dépende pas d’un e-mail de validation. Le fichier local `apps/web/.env.local` pointe sur ce staging et reste ignoré par Git. La connexion, l’inscription positive et l’attribution de 300 crédits restent à tester avec un nouveau compte staging. Employer un staging isolé, jamais une base de production.
 
 Le serveur web peut être lancé depuis la racine avec `pnpm --filter @prismai/web dev`; il écoute par défaut sur `http://localhost:3000`.
 
