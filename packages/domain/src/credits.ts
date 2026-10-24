@@ -8,13 +8,14 @@ export const CREDIT_RATES: Record<CreditModel, number> = {
   image: 50,
 };
 
+/**
+ * Seules les classes de crédits internes explicites sont acceptées.
+ * Un provider inconnu ne doit jamais être facturé silencieusement au tarif Groq.
+ */
 export function normalizeModel(model: string): CreditModel {
-  const value = model.toLowerCase();
-  if (value.includes('gemini')) return 'gemini';
-  if (value.includes('openrouter')) return 'openrouter';
-  if (value.includes('mistral')) return 'mistral';
-  if (value.includes('image')) return 'image';
-  return 'groq';
+  const value = model.trim().toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(CREDIT_RATES, value)) return value as CreditModel;
+  throw Object.assign(new Error('UNSUPPORTED_CREDIT_MODEL'), { code: 'UNSUPPORTED_CREDIT_MODEL' });
 }
 
 export function calculateCreditCost(model: string, tokens: number): number {

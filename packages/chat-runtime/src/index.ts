@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ChatMessage } from '@prismai/contracts';
 import { calculateCreditCost, insufficientCredits } from '@prismai/domain';
 import { reserveCredits, claimCreditOperation, completeCredits, refundCredits, getSupabaseAdminClient } from '@prismai/db';
-import { chatWithFallback, classifyCapability, estimateInputTokens, getConfiguredModels, selectRoutedModels, type FallbackOptions, type PlanTier } from '@prismai/provider-router';
+import { chatWithFallback, classifyCapability, estimateInputTokens, getConfiguredModelCreditClass, getConfiguredModels, selectRoutedModels, type FallbackOptions, type PlanTier } from '@prismai/provider-router';
 export * from './stream';
 
 export type ChatRuntimeOptions = {
@@ -23,7 +23,14 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
   const routedCandidates = selectRoutedModels(classifyCapability(messages), estimatedTokens, models, planTier);
   const maxFallbacks = Math.min(1, Math.max(0, options.fallback?.maxFallbacks ?? 1));
   const reservableCandidates = routedCandidates.slice(0, maxFallbacks + 1);
-  const estimatedCost = Math.max(...reservableCandidates.map((model) => calculateCreditCost(model.provider, estimatedTokens)));
+  const creditClassByProvider = new Map<string, string>();
+  const estimatedCosts = reservableCandidates.map((model) => {
+    const creditClass = getConfiguredModelCreditClass(model);
+    if (!creditClass) throw Object.assign(new Error('CREDIT_CLASS_UNCONFIGURED'), { code: 'CREDIT_CLASS_UNCONFIGURED' });
+    creditClassByProvider.set(model.provider, creditClass);
+    return calculateCreditCost(creditClass, estimatedTokens);
+  });
+  const estimatedCost = Math.max(...estimatedCosts);
   const operationId = await reserveCredits(userId, idempotencyKey, estimatedCost, options.runId);
   let finalized = false;
   try {
@@ -39,7 +46,9 @@ export async function runChatTurn(userId: string, messages: ChatMessage[], optio
       maxFallbacks,
       signal: options.signal ?? options.fallback?.signal,
     });
-    const finalCost = calculateCreditCost(response.provider_used, response.tokens || estimatedTokens);
+    const creditClass = creditClassByProvider.get(response.provider_used);
+    if (!creditClass) throw Object.assign(new Error('CREDIT_CLASS_UNCONFIGURED'), { code: 'CREDIT_CLASS_UNCONFIGURED' });
+    const finalCost = calculateCreditCost(creditClass, response.tokens || estimatedTokens);
     const completed = await completeCredits(operationId, finalCost);
     finalized = true;
 
