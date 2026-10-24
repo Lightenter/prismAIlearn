@@ -38,10 +38,11 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
   { provider: 'cloudflare', apiKeyEnv: 'CLOUDFLARE_API_TOKEN', requiredEnvVars: ['CLOUDFLARE_ACCOUNT_ID'] },
   { provider: 'huggingface', apiKeyEnv: 'HF_TOKEN' },
   { provider: 'sambanova', apiKeyEnv: 'SAMBANOVA_API_KEY' },
+  { provider: 'zai', apiKeyEnv: 'ZAI_API_KEY' },
 ];
 
 const routingEntrySchema = z.object({
-  provider: z.enum(['groq', 'gemini', 'openrouter', 'mistral', 'cloudflare', 'huggingface', 'sambanova']),
+  provider: z.enum(['groq', 'gemini', 'openrouter', 'mistral', 'cloudflare', 'huggingface', 'sambanova', 'zai']),
   model: z.string().trim().min(1).max(200),
   creditClass: z.enum(['groq', 'gemini', 'openrouter', 'mistral']).optional(),
   capabilities: z.array(capabilitySchema).min(1),

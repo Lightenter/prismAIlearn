@@ -14,6 +14,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | Hugging Face Inference Providers | `HF_TOKEN` avec permission `inference.serverless.write` | `https://router.huggingface.co/v1/chat/completions` | pas de crédit d’inférence en plan Free; modèle possiblement `is_free` temporaire; `creditClass` obligatoire |
 | SambaNova Cloud | `SAMBANOVA_API_KEY` | `https://api.sambanova.ai/v1/chat/completions` | quotas Free par modèle à confirmer dans le compte; `creditClass` obligatoire |
 | Cohere | `COHERE_API_KEY` | `https://api.cohere.ai/compatibility/v1/chat/completions` | clé Trial exclue de l’usage commercial et de production; non intégré au routeur gratuit PrismAI |
+| Z.AI / GLM | `ZAI_API_KEY` (clé API Standard; pas Coding Plan) | `https://api.z.ai/api/paas/v4/chat/completions` | prix affiché nul pour certains modèles, sans quota/SLA garanti; `creditClass` obligatoire |
 
 ## Procédure
 
@@ -62,6 +63,10 @@ SambaNova utilise un endpoint compatible OpenAI, mais les quotas Free et les con
 ## Cohere : exclu du routage gratuit de production
 
 La clé Trial Cohere est réservée à l’évaluation et exclue de la production et de l’utilisation commerciale selon les conditions relevées dans l’audit. PrismAI étant un SaaS Free/Pro, cette clé n’est ni configurée dans le routeur ni ajoutée à `.env.example`; aucun test PrismAI ne doit être exécuté avec la clé Trial. Une clé Production relève d’un accès distinct et potentiellement payant, hors du lot des providers gratuits. Réévaluer les conditions et obtenir l’accord sur le coût avant toute demande d’intégration Production.
+
+## Test réel Z.AI / GLM
+
+Utiliser `ZAI_API_KEY` issue de l’API Standard, jamais une clé Coding Plan sans accord contractuel adapté. Cataloguer le modèle réel et une `creditClass` PrismAI; cette classe ne reproduit pas le coût du fournisseur. Le prix nul de certains modèles Flash n’établit ni quota gratuit, ni allocation, ni SLA. Vérifier la région, le prix effectif et l’absence de débit payant dans le compte avant de définir `ZAI_TEST_FREE_CONFIRMED=true`, puis lancer `pnpm test:integration:zai`. Le script effectue au plus un appel minimal sans retry ni journalisation de clé/modèle/contenu; à défaut de confirmation il retourne `SKIPPED`.
 
 ## Test réel Hugging Face Inference Providers
 

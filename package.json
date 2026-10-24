@@ -20,6 +20,7 @@
     "test:integration:cloudflare": "node scripts/integration/test_provider_cloudflare.mjs",
     "test:integration:huggingface": "node scripts/integration/test_provider_huggingface.mjs",
     "test:integration:sambanova": "node scripts/integration/test_provider_sambanova.mjs",
+    "test:integration:zai": "node scripts/integration/test_provider_zai.mjs",
     "format:check": "prettier --check .",
     "supabase:reset": "supabase db reset"
   },
