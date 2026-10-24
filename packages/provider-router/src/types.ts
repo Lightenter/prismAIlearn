@@ -1,7 +1,7 @@
 import type { ChatMessage, ProviderResponse } from '@prismai/contracts';
 import type { ConfiguredModel, PlanTier } from './config';
 
-export type ProviderName = 'groq' | 'gemini' | 'openrouter' | 'mistral' | 'cloudflare' | 'huggingface' | 'sambanova';
+export type ProviderName = 'groq' | 'gemini' | 'openrouter' | 'mistral' | 'cloudflare' | 'huggingface' | 'sambanova' | 'zai';
 export type ProviderClient = (messages: ChatMessage[], signal: AbortSignal) => Promise<ProviderResponse>;
 export type FallbackOptions = {
   providers?: Partial<Record<ProviderName, ProviderClient>>;

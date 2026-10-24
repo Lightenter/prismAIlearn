@@ -61,6 +61,7 @@ function createProviderClient(configured: ConfiguredModel, timeoutMs: number): P
   }
   if (configured.provider === 'huggingface') return openAiClient('huggingface', apiKey, 'https://router.huggingface.co/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'sambanova') return openAiClient('sambanova', apiKey, 'https://api.sambanova.ai/v1/chat/completions', configured.model, timeoutMs);
+  if (configured.provider === 'zai') return openAiClient('zai', apiKey, 'https://api.z.ai/api/paas/v4/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'groq') return openAiClient('groq', apiKey, 'https://api.groq.com/openai/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'openrouter') return openAiClient('openrouter', apiKey, 'https://openrouter.ai/api/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'mistral') return openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', configured.model, timeoutMs);
