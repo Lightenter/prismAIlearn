@@ -139,6 +139,8 @@ Cohere n’est pas raccordé comme provider gratuit de PrismAI : ses clés Trial
 
 Z.AI/GLM utilise `ZAI_API_KEY` et un modèle explicitement catalogué avec `creditClass` interne, qui ne reflète pas le prix Z.AI. Certains modèles Flash affichent un prix nul, mais cela ne garantit ni quota gratuit ni SLA; vérifier région, modèle et compte avant `ZAI_TEST_FREE_CONFIRMED=true`. `pnpm test:integration:zai` effectue alors un appel minimal unique sans retry. Ne pas utiliser une clé Coding Plan sauf autorisation contractuelle explicite pour PrismAI.
 
+NVIDIA NIM n’est pas intégré au routage gratuit de production : les accès/credits d’essai examinés sont destinés au prototypage et les Trial Terms excluent la production sans abonnement. Ne configure pas une clé NVIDIA d’essai dans PrismAI SaaS. Réévaluer uniquement avec un accès Production/abonnement dont les conditions, coûts et capacités sont adaptés.
+
 ### Quotas et périmètre restant
 
 Le système existant `003_daily_credit_quota.sql` attribue 100 crédits quotidiens non cumulables à tous les comptes, en plus des règles de portefeuille déjà en place; cette livraison n’invente pas un quota Pro supérieur. Le rôle `premium` côté serveur autorise les modèles dont `plans` contient `PRO`, mais ne crée pas à lui seul un plafond commercial distinct. Aucun quota « un PDF par jour » n’est appliqué pour l’instant : le dépôt ne comporte pas de route de traitement PDF intégrée au Chat, ni de flux de consommation auquel raccorder un compteur atomique. Avant d’activer les documents, ajouter ce pipeline et une RPC de quota Free atomique (idempotence, simultanéité, règles de consommation après échec), puis ses tests de concurrence. Ne pas faire passer un PDF par le Chat texte en attendant.
