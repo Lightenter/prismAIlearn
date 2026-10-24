@@ -15,6 +15,7 @@
     "test:integration:r2": "node scripts/integration/test_r2_connection.mjs",
     "test:integration:gemini": "node scripts/integration/test_provider_gemini.mjs",
     "test:integration:groq": "node scripts/integration/test_provider_groq.mjs",
+    "test:integration:openrouter": "node scripts/integration/test_provider_openrouter.mjs",
     "format:check": "prettier --check .",
     "supabase:reset": "supabase db reset"
   },

@@ -73,6 +73,27 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(new Headers(init?.headers).get('authorization')).toBe('Bearer groq-unit-test-key');
   });
 
+  it('appelle OpenRouter avec un Bearer serveur et le modèle exact explicitement configuré', async () => {
+    process.env.OPENROUTER_API_KEY = 'openrouter-unit-test-key';
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      id: 'test-request',
+      model: 'unit-test-model',
+      choices: [{ message: { content: 'OpenRouter OK' } }],
+      usage: { total_tokens: 4 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    const configured: ConfiguredModel = { ...models[0], id: 'openrouter:unit-test-model', provider: 'openrouter', model: 'unit-test-model' };
+
+    const response = await chatWithFallback(messages, 'user', { models: [configured], maxFallbacks: 0, timeoutMs: 1_000 });
+
+    expect(response).toMatchObject({ content: 'OpenRouter OK', provider_used: 'openrouter', model: 'unit-test-model', tokens: 4 });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toBe('https://openrouter.ai/api/v1/chat/completions');
+    expect(String(url)).not.toContain('openrouter-unit-test-key');
+    expect(new Headers(init?.headers).get('authorization')).toBe('Bearer openrouter-unit-test-key');
+    expect(JSON.parse(String(init?.body)).model).toBe('unit-test-model');
+  });
+
   it('classe la dernière demande et non tout l’historique, puis tient compte de l’intention et des contraintes', () => {
     const history: ChatMessage[] = [
       { role: 'user', content: 'Crée une vidéo de démonstration' },
