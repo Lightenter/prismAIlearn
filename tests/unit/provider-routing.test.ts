@@ -3,7 +3,7 @@ import { chatWithFallback, getConfiguredModels, resetCircuitBreakers, selectRout
 import type { ChatMessage, ProviderResponse } from '@prismai/contracts';
 import type { ConfiguredModel } from '@prismai/provider-router';
 
-const envKeys = ['GROQ_API_KEY', 'GEMINI_API_KEY', 'OPENROUTER_API_KEY', 'MISTRAL_API_KEY', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'HF_TOKEN', 'PRISMAI_ROUTING_CATALOG'] as const;
+const envKeys = ['GROQ_API_KEY', 'GEMINI_API_KEY', 'OPENROUTER_API_KEY', 'MISTRAL_API_KEY', 'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'HF_TOKEN', 'SAMBANOVA_API_KEY', 'PRISMAI_ROUTING_CATALOG'] as const;
 const originalEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
 const messages: ChatMessage[] = [{ role: 'user', content: 'Bonjour' }];
 const answer: ProviderResponse = { content: 'Salut', provider_used: 'gemini', model: 'gemini-test', tokens: 4 };
@@ -61,6 +61,19 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(getConfiguredModels()).toMatchObject([{ provider: 'huggingface', model: 'provider/model:free', creditClass: 'mistral' }]);
 
     delete process.env.HF_TOKEN;
+    expect(getConfiguredModels()).toEqual([]);
+  });
+
+  it('ignore SambaNova sans classe de crédits explicite ou sans clé serveur', () => {
+    const entry = { provider: 'sambanova', model: 'unit-test-model', capabilities: ['TEXT'], contextWindowTokens: 8_000, plans: ['FREE'], qualityRank: 1 };
+    process.env.SAMBANOVA_API_KEY = 'sambanova-unit-test-key';
+    process.env.PRISMAI_ROUTING_CATALOG = JSON.stringify([entry]);
+    expect(getConfiguredModels()).toEqual([]);
+
+    process.env.PRISMAI_ROUTING_CATALOG = JSON.stringify([{ ...entry, creditClass: 'gemini' }]);
+    expect(getConfiguredModels()).toMatchObject([{ provider: 'sambanova', model: 'unit-test-model', creditClass: 'gemini' }]);
+
+    delete process.env.SAMBANOVA_API_KEY;
     expect(getConfiguredModels()).toEqual([]);
   });
 
@@ -182,6 +195,27 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(String(url)).not.toContain('hf-unit-test-token');
     expect(new Headers(init?.headers).get('authorization')).toBe('Bearer hf-unit-test-token');
     expect(JSON.parse(String(init?.body)).model).toBe('provider/model:free');
+  });
+
+  it('appelle SambaNova à l’endpoint compatible avec Bearer serveur et modèle exact', async () => {
+    process.env.SAMBANOVA_API_KEY = 'sambanova-unit-test-key';
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      id: 'test-request',
+      model: 'unit-test-model',
+      choices: [{ message: { content: 'SambaNova OK' } }],
+      usage: { total_tokens: 5 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    const configured: ConfiguredModel = { ...models[0], id: 'sambanova:unit-test-model', provider: 'sambanova', model: 'unit-test-model', creditClass: 'mistral' };
+
+    const response = await chatWithFallback(messages, 'user', { models: [configured], maxFallbacks: 0, timeoutMs: 1_000 });
+
+    expect(response).toMatchObject({ content: 'SambaNova OK', provider_used: 'sambanova', model: 'unit-test-model', tokens: 5 });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toBe('https://api.sambanova.ai/v1/chat/completions');
+    expect(String(url)).not.toContain('sambanova-unit-test-key');
+    expect(new Headers(init?.headers).get('authorization')).toBe('Bearer sambanova-unit-test-key');
+    expect(JSON.parse(String(init?.body)).model).toBe('unit-test-model');
   });
 
   it('classe la dernière demande et non tout l’historique, puis tient compte de l’intention et des contraintes', () => {

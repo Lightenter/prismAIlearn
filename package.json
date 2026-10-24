@@ -19,6 +19,7 @@
     "test:integration:mistral": "node scripts/integration/test_provider_mistral.mjs",
     "test:integration:cloudflare": "node scripts/integration/test_provider_cloudflare.mjs",
     "test:integration:huggingface": "node scripts/integration/test_provider_huggingface.mjs",
+    "test:integration:sambanova": "node scripts/integration/test_provider_sambanova.mjs",
     "format:check": "prettier --check .",
     "supabase:reset": "supabase db reset"
   },
