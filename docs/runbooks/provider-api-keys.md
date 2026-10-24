@@ -10,6 +10,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | Gemini | `GEMINI_API_KEY` | API Gemini `generateContent` | texte/vision selon le modèle et le compte réellement activés |
 | OpenRouter | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1/chat/completions` | capacités du modèle sélectionné, jamais supposées |
 | Mistral | `MISTRAL_API_KEY` | `https://api.mistral.ai/v1/chat/completions` | capacités et allocation du Workspace à confirmer |
+| Cloudflare Workers AI | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions` | modèle exact et quota account à vérifier; `creditClass` existante obligatoire |
 
 ## Procédure
 
@@ -29,6 +30,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 - Le timeout est borné et le circuit breaker empêche une boucle de retries.
 - Le prix/coût est versionné et attribué par tentative, y compris les fallbacks.
 - Les capacités non testées sont marquées indisponibles, pas présentées comme garanties.
+- Les nouveaux providers n’ont pas de barème implicite : définir une classe de crédits interne déjà existante ou laisser leur modèle désactivé. Cela n’ajoute ni ne modifie aucun taux.
 
 ## Test réel Gemini
 
@@ -45,3 +47,7 @@ OpenRouter n’est activé qu’avec `OPENROUTER_API_KEY` et une entrée de mod�
 ## Test réel Mistral
 
 L’offre Mistral Free est une allocation mensuelle partagée du Workspace, pas une gratuité illimitée. Avant `pnpm test:integration:mistral`, vérifier dans Mistral Admin le modèle précis, le solde restant et les limites d’usage, puis définir `MISTRAL_TEST_FREE_CONFIRMED=true` seulement si l’appel reste dans cette allocation gratuite. Le test exige également `MISTRAL_API_KEY` et un modèle explicitement catalogué; il fait une requête courte, sans retry ni sortie de secret. Sans confirmation, il retourne `SKIPPED`.
+
+## Test réel Cloudflare Workers AI
+
+Cloudflare requiert `CLOUDFLARE_ACCOUNT_ID` et un API Token serveur limité aux droits Workers AI nécessaires. Le modèle doit être explicite dans `PRISMAI_ROUTING_CATALOG` et inclure `creditClass` parmi les classes PrismAI déjà tarifées (`groq`, `gemini`, `openrouter`, `mistral`); à défaut, il est ignoré et aucun appel ne démarre. Cette classe régit uniquement les crédits PrismAI et ne prétend pas reproduire le prix Cloudflare. Le quota documenté est de 10 000 neurons par compte et par jour, avec exceptions possibles selon le modèle et le plan. Confirmer dans le dashboard que le modèle précis reste dans le quota gratuit et qu’aucune facturation Workers Paid/crédit prépayé ne sera déclenchée, puis définir `CLOUDFLARE_TEST_FREE_CONFIRMED=true` et lancer `pnpm test:integration:cloudflare`. Le script effectue au plus une requête minimale sans retry ni journalisation du token, du compte ou du modèle.

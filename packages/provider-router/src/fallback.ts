@@ -53,9 +53,16 @@ function createProviderClient(configured: ConfiguredModel, timeoutMs: number): P
   const apiKey = definition ? process.env[definition.apiKeyEnv]?.trim() : '';
   if (!apiKey) return undefined;
   if (configured.provider === 'gemini') return geminiClient(apiKey, configured.model, timeoutMs);
+  if (configured.provider === 'cloudflare') {
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
+    if (!accountId) return undefined;
+    const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/v1/chat/completions`;
+    return openAiClient('cloudflare', apiKey, endpoint, configured.model, timeoutMs);
+  }
   if (configured.provider === 'groq') return openAiClient('groq', apiKey, 'https://api.groq.com/openai/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'openrouter') return openAiClient('openrouter', apiKey, 'https://openrouter.ai/api/v1/chat/completions', configured.model, timeoutMs);
-  return openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', configured.model, timeoutMs);
+  if (configured.provider === 'mistral') return openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', configured.model, timeoutMs);
+  return undefined;
 }
 
 export function resetCircuitBreakers() { circuits.clear(); }

@@ -1,6 +1,6 @@
 import type { Capability, ChatMessage, Complexity } from '@prismai/contracts';
 import { calculateCreditCost } from '@prismai/domain';
-import type { ConfiguredModel, PlanTier } from './config';
+import { getConfiguredModelCreditClass, type ConfiguredModel, type PlanTier } from './config';
 
 export type CapabilityDecision = { capability: Capability; complexity: Complexity; reason: string };
 export const CHAT_API_CAPABILITIES: Capability[] = ['TEXT', 'CODE', 'REASONING', 'CREATIVE'];
@@ -64,28 +64,28 @@ export function selectRoutedModels(
   if (!isSupportedChatCapability(decision.capability)) {
     throw Object.assign(new Error('CAPABILITY_UNAVAILABLE'), { code: 'CAPABILITY_UNAVAILABLE' });
   }
-  const compatible = available.filter((model) =>
-    model.capabilities.includes(decision.capability)
-    && model.plans.includes(plan)
-    && model.contextWindowTokens >= estimatedInputTokens,
-  );
+  const compatible = available.flatMap((model) => {
+    const creditClass = getConfiguredModelCreditClass(model);
+    if (!creditClass || !model.capabilities.includes(decision.capability) || !model.plans.includes(plan) || model.contextWindowTokens < estimatedInputTokens) return [];
+    return [{ model, creditClass }];
+  });
   if (!compatible.length) {
     throw Object.assign(new Error('NO_MODEL_FOR_CAPABILITY'), { code: 'NO_MODEL_FOR_CAPABILITY' });
   }
 
   const preferQuality = plan === 'PRO' && decision.complexity === 'HIGH';
   const sorted = compatible.sort((left, right) => {
-    const leftCredits = calculateCreditCost(left.provider, estimatedInputTokens);
-    const rightCredits = calculateCreditCost(right.provider, estimatedInputTokens);
+    const leftCredits = calculateCreditCost(left.creditClass, estimatedInputTokens);
+    const rightCredits = calculateCreditCost(right.creditClass, estimatedInputTokens);
     const rankDifference = preferQuality
-      ? (right.qualityRank - left.qualityRank) || (leftCredits - rightCredits)
-      : (leftCredits - rightCredits) || (right.qualityRank - left.qualityRank);
-    return rankDifference || left.provider.localeCompare(right.provider) || left.model.localeCompare(right.model);
+      ? (right.model.qualityRank - left.model.qualityRank) || (leftCredits - rightCredits)
+      : (leftCredits - rightCredits) || (right.model.qualityRank - left.model.qualityRank);
+    return rankDifference || left.model.provider.localeCompare(right.model.provider) || left.model.model.localeCompare(right.model.model);
   });
   const seenProviders = new Set<string>();
   return sorted.filter((model) => {
-    if (seenProviders.has(model.provider)) return false;
-    seenProviders.add(model.provider);
+    if (seenProviders.has(model.model.provider)) return false;
+    seenProviders.add(model.model.provider);
     return true;
-  });
+  }).map(({ model }) => model);
 }
