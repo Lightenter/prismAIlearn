@@ -54,6 +54,25 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(new Headers(init?.headers).get('x-goog-api-key')).toBe('gemini-unit-test-key');
   });
 
+  it('appelle Groq avec une authentification Bearer serveur et sans secret dans l’URL', async () => {
+    process.env.GROQ_API_KEY = 'groq-unit-test-key';
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      id: 'test-request',
+      model: 'fast',
+      choices: [{ message: { content: 'Groq OK' } }],
+      usage: { total_tokens: 3 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await chatWithFallback(messages, 'user', { models: [models[0]], maxFallbacks: 0, timeoutMs: 1_000 });
+
+    expect(response).toMatchObject({ content: 'Groq OK', provider_used: 'groq', tokens: 3 });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toBe('https://api.groq.com/openai/v1/chat/completions');
+    expect(String(url)).not.toContain('groq-unit-test-key');
+    expect(new Headers(init?.headers).get('authorization')).toBe('Bearer groq-unit-test-key');
+  });
+
   it('classe la dernière demande et non tout l’historique, puis tient compte de l’intention et des contraintes', () => {
     const history: ChatMessage[] = [
       { role: 'user', content: 'Crée une vidéo de démonstration' },

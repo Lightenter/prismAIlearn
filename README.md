@@ -118,9 +118,11 @@ Pour activer une génération réelle, configurer côté serveur `PRISMAI_ROUTIN
 
 Le routeur essaie au plus un modèle de remplacement. Il ne bascule que sur les statuts temporaires explicitement autorisés (429/503); il ne contourne pas une erreur 401/403 et ne répète pas un appel dont l’exécution est incertaine après un timeout réseau. Le runtime réserve avant l’appel le coût maximal des candidats principal et fallback réellement éligibles, puis finalise au coût calculé de la réponse ou libère la réservation en cas d’échec. Le calcul des crédits reste celui déjà défini par fournisseur dans `packages/domain`; il ne constitue pas une grille tarifaire par modèle.
 
-### Test réel Gemini (optionnel)
+### Tests réels des providers (optionnels)
 
 L’authentification IA n’est pas requise pour démarrer Next.js; les clés et le catalogue sont des paramètres serveur facultatifs et un provider sans clé est ignoré. L’authentification Supabase réelle reste, elle, dépendante de ses variables propres fournies par l’environnement local ou l’hébergeur. `pnpm test:integration:gemini` effectue un seul appel minimal au modèle Gemini explicitement présent dans `PRISMAI_ROUTING_CATALOG`; il se termine par `SKIPPED` si clé ou modèle manquent. Pour éviter toute consommation payante accidentelle, le script exige aussi `GEMINI_TEST_FREE_CONFIRMED=true` après vérification du modèle et du quota Free dans AI Studio. Il n’affiche ni clé, ni modèle, ni réponse, ne retente pas la requête et n’est pas inclus dans `pnpm test:integration`.
+
+`pnpm test:integration:groq` suit le même principe pour un modèle Groq explicitement catalogué. Il exige `GROQ_TEST_FREE_CONFIRMED=true` après vérification dans GroqCloud des modèles et limites Free du compte; il effectue au plus un appel minimal, n’affiche aucun secret ou modèle et ne retente pas. Les deux tests se marquent `SKIPPED` sans configuration complète et ne sont pas inclus dans le test d’intégration général.
 
 ### Quotas et périmètre restant
 
