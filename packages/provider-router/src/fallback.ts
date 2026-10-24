@@ -41,7 +41,7 @@ function geminiClient(apiKey: string, model: string, timeoutMs: number): Provide
   return async (messages, signal) => {
     const system = messages.filter((message) => message.role === 'system').map((message) => message.content).join('\n');
     const contents = messages.filter((message) => message.role !== 'system').map((message) => ({ role: message.role === 'assistant' ? 'model' : 'user', parts: [{ text: message.content }] }));
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents, ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}), generationConfig: { temperature: 0.3 } }), signal: AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) });
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey }, body: JSON.stringify({ contents, ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}), generationConfig: { temperature: 0.3 } }), signal: AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) });
     if (!response.ok) { const error = new Error(`Provider HTTP ${response.status}`) as Error & { status: number }; error.status = response.status; throw error; }
     const json = await response.json() as any;
     const content = String(json.candidates?.[0]?.content?.parts?.[0]?.text ?? '');
