@@ -41,3 +41,7 @@ Le provider Groq est désactivé sans `GROQ_API_KEY` et modèle explicitement co
 ## Test réel OpenRouter
 
 OpenRouter n’est activé qu’avec `OPENROUTER_API_KEY` et une entrée de modèle explicite. Avant `pnpm test:integration:openrouter`, vérifier que le modèle catalogué porte bien une offre gratuite active pour ce compte et que l’appel ne peut pas consommer de crédits payants ou d’essai. Définir ensuite `OPENROUTER_TEST_FREE_CONFIRMED=true`. Les modèles gratuits et leurs limites sont susceptibles d’évoluer; le test effectue une seule petite requête, sans retry ni journalisation de clé, modèle ou réponse. Sans clé, modèle ou confirmation, il se marque `SKIPPED`.
+
+## Test réel Mistral
+
+L’offre Mistral Free est une allocation mensuelle partagée du Workspace, pas une gratuité illimitée. Avant `pnpm test:integration:mistral`, vérifier dans Mistral Admin le modèle précis, le solde restant et les limites d’usage, puis définir `MISTRAL_TEST_FREE_CONFIRMED=true` seulement si l’appel reste dans cette allocation gratuite. Le test exige également `MISTRAL_API_KEY` et un modèle explicitement catalogué; il fait une requête courte, sans retry ni sortie de secret. Sans confirmation, il retourne `SKIPPED`.

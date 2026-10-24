@@ -94,6 +94,26 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(JSON.parse(String(init?.body)).model).toBe('unit-test-model');
   });
 
+  it('appelle Mistral avec un Bearer serveur et le modèle exact configuré', async () => {
+    process.env.MISTRAL_API_KEY = 'mistral-unit-test-key';
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      id: 'test-request',
+      model: 'unit-test-model',
+      choices: [{ message: { content: 'Mistral OK' } }],
+      usage: { total_tokens: 4 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    const configured: ConfiguredModel = { ...models[0], id: 'mistral:unit-test-model', provider: 'mistral', model: 'unit-test-model' };
+
+    const response = await chatWithFallback(messages, 'user', { models: [configured], maxFallbacks: 0, timeoutMs: 1_000 });
+
+    expect(response).toMatchObject({ content: 'Mistral OK', provider_used: 'mistral', model: 'unit-test-model', tokens: 4 });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toBe('https://api.mistral.ai/v1/chat/completions');
+    expect(String(url)).not.toContain('mistral-unit-test-key');
+    expect(new Headers(init?.headers).get('authorization')).toBe('Bearer mistral-unit-test-key');
+  });
+
   it('classe la dernière demande et non tout l’historique, puis tient compte de l’intention et des contraintes', () => {
     const history: ChatMessage[] = [
       { role: 'user', content: 'Crée une vidéo de démonstration' },
