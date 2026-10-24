@@ -13,6 +13,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | Cloudflare Workers AI | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions` | modèle exact et quota account à vérifier; `creditClass` existante obligatoire |
 | Hugging Face Inference Providers | `HF_TOKEN` avec permission `inference.serverless.write` | `https://router.huggingface.co/v1/chat/completions` | pas de crédit d’inférence en plan Free; modèle possiblement `is_free` temporaire; `creditClass` obligatoire |
 | SambaNova Cloud | `SAMBANOVA_API_KEY` | `https://api.sambanova.ai/v1/chat/completions` | quotas Free par modèle à confirmer dans le compte; `creditClass` obligatoire |
+| Cohere | `COHERE_API_KEY` | `https://api.cohere.ai/compatibility/v1/chat/completions` | clé Trial exclue de l’usage commercial et de production; non intégré au routeur gratuit PrismAI |
 
 ## Procédure
 
@@ -57,6 +58,10 @@ Cloudflare requiert `CLOUDFLARE_ACCOUNT_ID` et un API Token serveur limité aux 
 ## Test réel SambaNova Cloud
 
 SambaNova utilise un endpoint compatible OpenAI, mais les quotas Free et les conditions de plan varient selon le modèle et ne sont pas formulés de manière entièrement cohérente dans les pages consultées. Définir `SAMBANOVA_API_KEY` et cataloguer explicitement le modèle avec une `creditClass` PrismAI; cette classe interne ne reproduit pas les coûts SambaNova. Vérifier directement dans le compte le modèle, la disponibilité du Free Tier et le quota restant avant de définir `SAMBANOVA_TEST_FREE_CONFIRMED=true`. Le test `pnpm test:integration:sambanova` envoie alors une seule requête minimale, sans retry ni journalisation de la clé, du modèle ou de la réponse. Sinon, il retourne `SKIPPED`.
+
+## Cohere : exclu du routage gratuit de production
+
+La clé Trial Cohere est réservée à l’évaluation et exclue de la production et de l’utilisation commerciale selon les conditions relevées dans l’audit. PrismAI étant un SaaS Free/Pro, cette clé n’est ni configurée dans le routeur ni ajoutée à `.env.example`; aucun test PrismAI ne doit être exécuté avec la clé Trial. Une clé Production relève d’un accès distinct et potentiellement payant, hors du lot des providers gratuits. Réévaluer les conditions et obtenir l’accord sur le coût avant toute demande d’intégration Production.
 
 ## Test réel Hugging Face Inference Providers
 
