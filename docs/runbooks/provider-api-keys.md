@@ -11,6 +11,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | OpenRouter | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1/chat/completions` | capacités du modèle sélectionné, jamais supposées |
 | Mistral | `MISTRAL_API_KEY` | `https://api.mistral.ai/v1/chat/completions` | capacités et allocation du Workspace à confirmer |
 | Cloudflare Workers AI | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions` | modèle exact et quota account à vérifier; `creditClass` existante obligatoire |
+| Hugging Face Inference Providers | `HF_TOKEN` avec permission `inference.serverless.write` | `https://router.huggingface.co/v1/chat/completions` | pas de crédit d’inférence en plan Free; modèle possiblement `is_free` temporaire; `creditClass` obligatoire |
 
 ## Procédure
 
@@ -51,3 +52,7 @@ L’offre Mistral Free est une allocation mensuelle partagée du Workspace, pas 
 ## Test réel Cloudflare Workers AI
 
 Cloudflare requiert `CLOUDFLARE_ACCOUNT_ID` et un API Token serveur limité aux droits Workers AI nécessaires. Le modèle doit être explicite dans `PRISMAI_ROUTING_CATALOG` et inclure `creditClass` parmi les classes PrismAI déjà tarifées (`groq`, `gemini`, `openrouter`, `mistral`); à défaut, il est ignoré et aucun appel ne démarre. Cette classe régit uniquement les crédits PrismAI et ne prétend pas reproduire le prix Cloudflare. Le quota documenté est de 10 000 neurons par compte et par jour, avec exceptions possibles selon le modèle et le plan. Confirmer dans le dashboard que le modèle précis reste dans le quota gratuit et qu’aucune facturation Workers Paid/crédit prépayé ne sera déclenchée, puis définir `CLOUDFLARE_TEST_FREE_CONFIRMED=true` et lancer `pnpm test:integration:cloudflare`. Le script effectue au plus une requête minimale sans retry ni journalisation du token, du compte ou du modèle.
+
+## Test réel Hugging Face Inference Providers
+
+Le plan Free Hugging Face n’inclut aucun crédit d’inférence; certains modèles peuvent néanmoins être marqués temporairement `is_free`. Créer un token finement limité avec permission `inference.serverless.write`, puis cataloguer le modèle exact et une `creditClass` PrismAI déjà tarifée. Cette classe sert uniquement au calcul interne de crédits et ne reproduit pas le prix Hugging Face. Avant le test, vérifier dans l’interface Hugging Face que le modèle reste gratuit et que l’appel n’utilisera ni crédit payant ni crédit d’essai. Définir `HF_TEST_FREE_CONFIRMED=true` uniquement après cette vérification, puis exécuter `pnpm test:integration:huggingface`. Une seule petite requête est envoyée, sans retry ni journalisation du token, du modèle ou de la réponse. Sans clé, modèle ou confirmation, le script retourne `SKIPPED`; ce n’est pas une validation réelle tant que le test n’a pas passé sur le compte visé.

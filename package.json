@@ -18,6 +18,7 @@
     "test:integration:openrouter": "node scripts/integration/test_provider_openrouter.mjs",
     "test:integration:mistral": "node scripts/integration/test_provider_mistral.mjs",
     "test:integration:cloudflare": "node scripts/integration/test_provider_cloudflare.mjs",
+    "test:integration:huggingface": "node scripts/integration/test_provider_huggingface.mjs",
     "format:check": "prettier --check .",
     "supabase:reset": "supabase db reset"
   },
