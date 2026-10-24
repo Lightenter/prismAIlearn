@@ -7,6 +7,7 @@ Ce dépôt contient l’implémentation progressive de PrismAI à partir du cadr
 ## Références conservées
 
 - [`docs/prismai-architecture-report.md`](docs/prismai-architecture-report.md) — matrice des références, risques, décisions et architecture cible.
+- [`docs/provider-audit-2026-10-24.md`](docs/provider-audit-2026-10-24.md) — audit comparatif, limites d’accès et état des tests des providers IA.
 - [`docs/source-requirements.txt`](docs/source-requirements.txt) — cahier des charges et méthode par étapes.
 - [`docs/frontend-reference.md`](docs/frontend-reference.md) et [`docs/assets/prismai-frontend-reference.png`](docs/assets/prismai-frontend-reference.png) — référence visuelle dark neon, utilisée comme direction et non comme copie pixel par pixel.
 - [`plan.md`](plan.md) — périmètre de l’unité livrée.
@@ -39,7 +40,7 @@ infra/                    R2, LiteLLM, Redis et CI
 ```bash
 corepack enable
 pnpm install
-cp .env.example .env.local
+# Facultatif : cp .env.example .env.local, puis renseigner les variables nécessaires aux intégrations.
 pnpm dev
 ```
 
@@ -77,7 +78,7 @@ Le code PrismAI reste original et n’embarque pas de copie de LibreChat, Open W
 
 ## Validation des intégrations
 
-Les scripts non destructifs `scripts/integration/test_supabase_connection.mjs` et `scripts/integration/test_r2_connection.mjs` valident respectivement les endpoints Supabase et le cycle temporaire Put/Head/Get/Delete R2. Ils retournent `SKIPPED` si les variables requises sont absentes et ne journalisent jamais les secrets. Utiliser `pnpm test:integration`, `pnpm test:integration:supabase` ou `pnpm test:integration:r2`. Le guide des clés Groq, Gemini et OpenRouter est dans [`docs/runbooks/provider-api-keys.md`](docs/runbooks/provider-api-keys.md).
+Les scripts non destructifs `scripts/integration/test_supabase_connection.mjs` et `scripts/integration/test_r2_connection.mjs` valident respectivement les endpoints Supabase et le cycle temporaire Put/Head/Get/Delete R2. Ils retournent `SKIPPED` si les variables requises sont absentes et ne journalisent jamais les secrets. Utiliser `pnpm test:integration`, `pnpm test:integration:supabase` ou `pnpm test:integration:r2`. Le guide des clés et tests des providers est dans [`docs/runbooks/provider-api-keys.md`](docs/runbooks/provider-api-keys.md).
 
 ## Authentification du chat
 
@@ -129,6 +130,8 @@ L’authentification IA n’est pas requise pour démarrer Next.js; les clés et
 `pnpm test:integration:mistral` ne s’exécute réellement qu’avec `MISTRAL_API_KEY`, un modèle du catalogue et `MISTRAL_TEST_FREE_CONFIRMED=true`. Mistral Free repose sur une allocation mensuelle partagée et limitée, non sur une gratuité illimitée; vérifier le solde et les limites du Workspace dans Admin avant de confirmer. Le test envoie une requête minimale unique et ignore toute allocation qui ne serait pas confirmée.
 
 Cloudflare Workers AI requiert `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` et un modèle réel explicitement catalogué. Les nouveaux providers doivent en plus indiquer `creditClass` en choisissant un des barèmes PrismAI déjà définis (`groq`, `gemini`, `openrouter`, `mistral`); sans classe, le modèle est ignoré. Ces classes ne prétendent pas représenter le prix fournisseur et les taux existants restent inchangés. Le quota publié est de 10 000 neurons par compte et par jour, mais certains modèles peuvent exiger Workers Paid ou des crédits; vérifier le compte et le modèle exacts avant `CLOUDFLARE_TEST_FREE_CONFIRMED=true`. `pnpm test:integration:cloudflare` effectue alors un seul appel minimal, sans retry ni affichage des identifiants ou du modèle.
+
+Hugging Face Inference Providers utilise `HF_TOKEN` et un modèle précis déjà déclaré au catalogue, avec une `creditClass` PrismAI explicite. Cette classe ne sert qu’au calcul des crédits PrismAI et ne représente pas le coût facturé par Hugging Face. Le plan Free n’inclut pas de crédit d’inférence; certains modèles peuvent être annoncés temporairement `is_free`. Vérifier la gratuité du modèle et le solde du compte juste avant tout test. `pnpm test:integration:huggingface` reste `SKIPPED` sans `HF_TEST_FREE_CONFIRMED=true` et ne fait ensuite qu’un appel minimal sans retry. Ce statut conditionnel ne constitue pas une garantie de gratuité permanente.
 
 ### Quotas et périmètre restant
 

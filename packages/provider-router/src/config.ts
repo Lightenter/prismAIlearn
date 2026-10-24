@@ -36,10 +36,11 @@ export const PROVIDER_DEFINITIONS: ProviderDefinition[] = [
   { provider: 'openrouter', apiKeyEnv: 'OPENROUTER_API_KEY' },
   { provider: 'mistral', apiKeyEnv: 'MISTRAL_API_KEY' },
   { provider: 'cloudflare', apiKeyEnv: 'CLOUDFLARE_API_TOKEN', requiredEnvVars: ['CLOUDFLARE_ACCOUNT_ID'] },
+  { provider: 'huggingface', apiKeyEnv: 'HF_TOKEN' },
 ];
 
 const routingEntrySchema = z.object({
-  provider: z.enum(['groq', 'gemini', 'openrouter', 'mistral', 'cloudflare']),
+  provider: z.enum(['groq', 'gemini', 'openrouter', 'mistral', 'cloudflare', 'huggingface']),
   model: z.string().trim().min(1).max(200),
   creditClass: z.enum(['groq', 'gemini', 'openrouter', 'mistral']).optional(),
   capabilities: z.array(capabilitySchema).min(1),

@@ -59,6 +59,7 @@ function createProviderClient(configured: ConfiguredModel, timeoutMs: number): P
     const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/v1/chat/completions`;
     return openAiClient('cloudflare', apiKey, endpoint, configured.model, timeoutMs);
   }
+  if (configured.provider === 'huggingface') return openAiClient('huggingface', apiKey, 'https://router.huggingface.co/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'groq') return openAiClient('groq', apiKey, 'https://api.groq.com/openai/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'openrouter') return openAiClient('openrouter', apiKey, 'https://openrouter.ai/api/v1/chat/completions', configured.model, timeoutMs);
   if (configured.provider === 'mistral') return openAiClient('mistral', apiKey, 'https://api.mistral.ai/v1/chat/completions', configured.model, timeoutMs);

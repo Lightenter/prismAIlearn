@@ -1,0 +1,73 @@
+# Audit PrismAI et matrice des providers IA
+
+**État documentaire : 24 octobre 2026.** Tous les éléments gratuits ci-dessous sont soumis aux conditions et limites du compte, du modèle, du Workspace ou du fournisseur amont. La présence d’un modèle dans une documentation ou un catalogue public ne prouve pas son accès dans le compte PrismAI. Aucun provider n’a encore été validé par un appel réel de cette application.
+
+## État initial des deux projets
+
+Les dépôts `Lightenter/prismai-architecture` et `Lightenter/prismAIlearn` sont sur `main`, propres et leurs surfaces de routage, runtime, crédits, contrats, tests associés et migrations de quotas sont identiques.
+
+Le routeur TypeScript sait appeler Gemini, Groq, OpenRouter et Mistral au moyen d’adaptateurs HTTP existants. Il ne découvre pas les modèles : il lit le catalogue explicite `PRISMAI_ROUTING_CATALOG`, vérifie la clé serveur associée et ignore l’entrée si cette clé manque. Les six autres services n’ont pas d’adaptateur. Le fichier `.env.local` n’est pas nécessaire au lancement de Next.js; en revanche, l’authentification Supabase exige les variables Supabase adéquates fournies par l’environnement local ou l’hébergeur. Sans modèle configuré, les routes de chat renvoient `NO_PROVIDER_CONFIGURED` au lieu de faire semblant de générer une réponse.
+
+L’authentification chat repose sur `supabase.auth.getUser()`. La réservation de crédits, le claim idempotent avant l’appel, la finalisation ou le remboursement et le rate limit SQL existent déjà. La migration de quota accorde actuellement 100 crédits quotidiens à tous les comptes et conserve le bonus d’inscription permanent distinct de 300 crédits. Ce travail ne doit ni changer ces règles ni exposer les fournisseurs ou modèles au frontend. Le fallback est limité à un provider supplémentaire sur HTTP 429/503; les erreurs d’authentification et timeouts ambigus ne déclenchent pas de deuxième appel.
+
+**Point financier à traiter avant d’activer un nouveau provider :** le barème interne actuel associe les crédits à quatre noms (`groq`, `gemini`, `openrouter`, `mistral`). Un nom inconnu est normalisé par défaut en `groq`. Ajouter d’autres providers sans classe de crédits explicite pourrait donc les facturer au mauvais barème. Il faut garder les taux existants inchangés et exiger une classe de crédits interne explicite avant d’autoriser l’appel d’un modèle nouvellement ajouté; aucune valeur de crédit ne sera inventée.
+
+Référence de tests initiale : architecture, **35/35 tests**; learning, **36/36**. Le typecheck et le lint passent dans les deux dépôts. Les tests d’intégration existants vérifient Supabase et R2; il n’existe pas encore de test réseau provider intégré à PrismAI. Les fichiers `.env.local` ne contiennent, au mieux, qu’un `GROQ_API_KEY` vide; aucune clé ou catalogue provider non vide n’est disponible dans cet audit. Par conséquent, les tests réseau réels restent à faire.
+
+## Matrice des providers
+
+| Provider | Clé/identifiants requis | Accès gratuit documenté | Limites et conditions principales | Endpoint / compatibilité | État de test PrismAI |
+|---|---|---|---|---|---|
+| **Google Gemini API** | Clé AI Studio de projet Cloud (`GEMINI_API_KEY`). | Free Tier récurrent pour certains modèles, avec quotas variables. Le crédit d’essai Google Cloud de 300 USD/90 jours ne paie pas l’usage Gemini API d’AI Studio. [1] [2] | RPM/TPM/RPD par projet, modèle et tier; régions et modèles admissibles. En Free Tier, prompts/réponses peuvent servir à l’amélioration et être examinés; politique de surveillance de 55 jours. [2] [3] [4] | Chat Completions OpenAI-compatible : `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`; Interactions API native aussi disponible. [1] | **Non testé en réel.** L’adaptateur existe, mais aucune clé/configuration active n’a été validée. |
+| **Groq** | Clé GroqCloud (`GROQ_API_KEY`). | Free plan et plafonds par modèle documentés; aucune allocation universelle de crédits d’essai garantie. [5] [6] | Les limites varient par modèle et organisation; modèles Preview ou marqués Enterprise à ne pas présumer accessibles gratuitement. Compatibilité OpenAI partielle. Les logs d’abus/fiabilité peuvent durer jusqu’à 30 jours selon réglages. [6] [7] [8] | `https://api.groq.com/openai/v1/chat/completions`; streaming SSE disponible. [7] | **Non testé en réel.** L’adaptateur existe; la variable locale est vide. |
+| **OpenRouter** | Clé OpenRouter (`OPENROUTER_API_KEY`). | Plan Free et variantes `:free`; les modèles gratuits et leurs tarifs changent. Une petite allocation de bienvenue est évoquée sans montant ni échéance garantis. [9] [10] | 50 requêtes/jour sous le seuil d’au moins 10 USD de crédits achetés; 1 000/jour au-dessus de ce seuil; 20/minute. Les politiques de rétention/training varient aussi selon le fournisseur de modèle amont. [9] [10] [11] | `https://openrouter.ai/api/v1/chat/completions`; `/api/v1/models` expose le catalogue. [11] | **Non testé en réel.** L’adaptateur existe, sans clé ou modèle activé. |
+| **Mistral AI** | Clé Studio liée à un Workspace (`MISTRAL_API_KEY`). | Free mode avec allocation mensuelle partagée entre Studio, API et Vibe; la valeur dépend du compte et ne constitue pas une gratuité illimitée. [12] | Les limites se consultent dans Admin; l’usage au-delà peut nécessiter pay-as-you-go/crédits. Modèles Preview à éviter pour une disponibilité stable. Des endpoints régionaux sont proposés avec un surcoût documenté. Rétention API jusqu’à 30 jours sauf configuration ZDR admissible. [12] [13] [14] | `https://api.mistral.ai/v1/chat/completions`; payload proche d’OpenAI, streaming SSE. [14] | **Non testé en réel.** Adaptateur existant, sans credential validé. |
+| **Cloudflare Workers AI** | Account ID et API Token (`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`). | 10 000 Neurons par compte et par jour sont publiés comme quota récurrent; ce n’est pas un crédit d’essai. Certains modèles exigent Workers Paid ou des crédits prépayés. [15] | Reset quotidien à 00:00 UTC; Workers Paid requis après le quota. Limites, prix et disponibilité varient selon modèle/tâche. La rétention nulle standard a des exceptions pour les fonctionnalités avec état, logs ou stockage activés. [15] [16] [17] | `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions`; compatibilité OpenAI documentée pour de nombreux modèles texte. [16] | Adaptateur, tests unitaires et script d’intégration ajoutés dans les deux dépôts; **test réel non effectué**, identifiants absents. |
+| **Hugging Face Inference Providers** | Token HF fine-grained avec permission `inference.serverless.write` (`HF_TOKEN`). | Pas de crédit inclus en plan Free. Les plans payants PRO/Team/Enterprise incluent un crédit mensuel; certains modèles peuvent être temporairement annoncés `is_free`. [18] [19] | Modèle, prix, capacité et fournisseur amont peuvent changer; les limites Hub ne sont pas des quotas d’inférence. Les règles de données du fournisseur amont s’appliquent; HF dit ne pas conserver les corps des requêtes/réponses routées. [19] [20] | `https://router.huggingface.co/v1/chat/completions`; `/v1/models` pour l’inventaire dynamique. [18] | Adaptateur, tests unitaires et script d’intégration ajoutés dans les deux dépôts; **test réel non effectué**, aucun crédit Free garanti et token absent. |
+| **SambaNova Cloud** | Compte SambaCloud et clé API (`SAMBANOVA_API_KEY`). | Des limites Free Tier par modèle sont publiées, mais les pages de plan/facturation ne concordent pas totalement sur les prérequis pratiques. Aucun crédit d’essai universel chiffré n’est établi. [21] [22] | Les tables indiquent notamment 20 RPM, 20 RPD et 200 000 tokens/jour pour le Free Tier; vérifier le plan et le solde du compte avant appel. DPA : prompts/outputs transitoires conservés jusqu’à 30 jours pour sécurité; la page marketing formule la confidentialité différemment. [21] [23] | `https://api.sambanova.ai/v1/chat/completions`; compatibilité OpenAI avec différences de paramètres. [22] | **Non testé en réel.** Aucun adaptateur dans PrismAI. |
+| **Cohere** | Clé Trial ou Production (`COHERE_API_KEY`). | Clé Trial gratuite pour évaluation, plafonnée à 1 000 appels/mois; elle est explicitement exclue de la production et de l’usage commercial. Pas de gratuité commerciale permanente documentée. [24] [25] | Rate limits par modèle et endpoint; l’accès à une clé Production est payant et certains modèles peuvent nécessiter une approbation. La politique de confidentialité détaillée n’a pas pu être vérifiée dans les sources extraites ici. [25] [26] | API native `https://api.cohere.com/v2/chat`, ou compatibilité OpenAI `https://api.cohere.ai/compatibility/v1/chat/completions`. [26] | **Non testé en réel.** Aucun adaptateur dans PrismAI. |
+| **Z.AI / GLM** | Clé API Standard (`ZAI_API_KEY`); ne pas confondre avec la clé Coding Plan. | Les prix officiels affichent certains modèles Flash à tarif nul; cela ne fixe pas un volume gratuit, un quota ni un SLA. Aucun crédit d’essai universel automatique n’est établi. [27] [28] | Quotas exacts par compte non publiés dans les pages consultées. Le Coding Plan est payant et ses conditions limitent son usage à des outils compatibles; ne pas l’utiliser pour PrismAI sans autorisation contractuelle distincte. [29] | `https://api.z.ai/api/paas/v4/chat/completions`; compatibilité OpenAI avec différences. Le DPA API décrit un traitement usuel à Singapour. [28] [30] | **Non testé en réel.** Aucun adaptateur dans PrismAI. |
+| **NVIDIA NIM** | Compte NVIDIA/Developer et clé de la fiche de modèle (`NVIDIA_API_KEY`). | Inférence gratuite de prototypage annoncée pour certains modèles; des crédits d’essai peuvent être accordés, sans valeur ni durée universelle. Aucune gratuité permanente garantie. [31] [32] | La FAQ parle d’« jusqu’à 40 RPM pour la plupart » — limite de compte à vérifier, non promesse générale. Les Trial Terms excluent la production sans abonnement; éviter les données sensibles. [32] [33] | `https://integrate.api.nvidia.com/v1/chat/completions`; interface Chat Completions OpenAI-compatible, avec options propres à certains modèles. [31] [34] | **Non testé en réel.** Aucun adaptateur dans PrismAI. |
+
+## Règle de progression proposée
+
+Conserver l’ordre demandé : Gemini → Groq → OpenRouter → Mistral → Cloudflare Workers AI → Hugging Face → SambaNova → Cohere → Z.AI/GLM → NVIDIA NIM. Pour chaque provider : adapter côté serveur, ajouter d’abord des tests unitaires sans appels externes, puis un test d’intégration qui s’ignore proprement lorsque ses secrets manquent; exécuter les validations avant de passer au suivant. Un provider reste **non opérationnel** tant qu’un vrai appel authentifié depuis PrismAI n’a pas réussi avec le modèle et le quota visibles pour le compte. Aucun de ces appels réels n’est actuellement possible avec la configuration inspectée.
+
+Pour la première intégration Gemini, utiliser un modèle exact accessible au compte, la clé serveur uniquement, et ne pas déclarer de capacité Vision/outil/recherche si elle n’a pas été testée dans le payload réel. Ajouter des variables provider dans `.env.example` comme documentation facultative et dans l’environnement de déploiement; le lancement de Next.js ne doit pas imposer la création d’un fichier `.env.local`. Les variables Supabase restent distinctes et nécessaires à l’authentification réelle.
+
+## Sources officielles
+
+[1]: https://ai.google.dev/gemini-api/docs/openai "Gemini OpenAI compatibility"
+[2]: https://ai.google.dev/gemini-api/docs/rate-limits "Gemini API rate limits"
+[3]: https://ai.google.dev/gemini-api/docs/pricing "Gemini API pricing"
+[4]: https://ai.google.dev/gemini-api/terms "Gemini API Additional Terms of Service"
+[5]: https://console.groq.com/docs/models "Groq supported models"
+[6]: https://console.groq.com/docs/rate-limits "Groq rate limits"
+[7]: https://console.groq.com/docs/openai "Groq OpenAI compatibility"
+[8]: https://console.groq.com/docs/your-data "Groq data handling"
+[9]: https://openrouter.ai/pricing "OpenRouter pricing"
+[10]: https://openrouter.ai/docs/limits "OpenRouter limits"
+[11]: https://openrouter.ai/docs/quickstart "OpenRouter quickstart and API"
+[12]: https://docs.mistral.ai/admin/billing-usage/subscriptions "Mistral subscriptions"
+[13]: https://docs.mistral.ai/admin/billing-usage/usage-limits "Mistral usage and limits"
+[14]: https://docs.mistral.ai/api/endpoint/chat "Mistral Chat API"
+[15]: https://developers.cloudflare.com/workers-ai/platform/pricing/ "Cloudflare Workers AI pricing"
+[16]: https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/ "Cloudflare OpenAI-compatible endpoints"
+[17]: https://developers.cloudflare.com/workers-ai/platform/data-usage/ "Cloudflare Workers AI data usage"
+[18]: https://huggingface.co/docs/inference-providers/index "Hugging Face Inference Providers"
+[19]: https://huggingface.co/docs/inference-providers/pricing "Hugging Face Inference Providers pricing"
+[20]: https://huggingface.co/docs/inference-providers/security "Hugging Face Inference Providers security"
+[21]: https://docs.sambanova.ai/docs/en/models/rate-limits "SambaNova model rate limits"
+[22]: https://docs.sambanova.ai/docs/en/features/openai-compatibility "SambaNova OpenAI compatibility"
+[23]: https://sambanova.ai/data-processing-agreement-sambanova "SambaNova Data Processing Agreement"
+[24]: https://cohere.com/pricing "Cohere pricing and trial restrictions"
+[25]: https://docs.cohere.com/docs/rate-limits "Cohere rate limits"
+[26]: https://docs.cohere.com/docs/compatibility-api "Cohere OpenAI compatibility API"
+[27]: https://docs.z.ai/guides/overview/pricing "Z.AI API pricing"
+[28]: https://docs.z.ai/guides/develop/openai/python "Z.AI OpenAI SDK compatibility"
+[29]: https://docs.z.ai/legal-agreement/subscription-terms "Z.AI subscription and Coding Plan terms"
+[30]: https://docs.z.ai/legal-agreement/privacy-policy "Z.AI API Data Processing Addendum"
+[31]: https://docs.api.nvidia.com/nim/docs/api-quickstart "NVIDIA API Catalog quickstart"
+[32]: https://build.nvidia.com/terms "NVIDIA API Catalog FAQ and limits"
+[33]: https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf "NVIDIA API Trial Terms"
+[34]: https://docs.api.nvidia.com/nim/reference/nvidia-nemotron-3-5-lightning-30b-a3b-infer "NVIDIA Nemotron inference API"
