@@ -1,6 +1,6 @@
 # Clés API des fournisseurs IA
 
-Utiliser ce guide uniquement pour un environnement local ou un staging isolé. Ne jamais placer une clé dans `apps/web`, une variable `NEXT_PUBLIC_*`, une capture d’écran, un commit, un log ou un message de chat.
+Utiliser ce guide uniquement pour un environnement local ou un staging isolé. Ne jamais placer une clé dans le code client, une variable `NEXT_PUBLIC_*`, une capture d’écran, un commit, un log ou un message de chat. En local, un fichier `.env.local` ignoré par Git est une option; un gestionnaire de secrets ou les variables d’environnement de l’hébergeur conviennent aussi.
 
 ## Variables attendues
 
@@ -33,3 +33,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 ## Test réel Gemini
 
 Le provider Gemini est désactivé sans `GEMINI_API_KEY` et modèle explicite Gemini dans `PRISMAI_ROUTING_CATALOG`. Le runtime transmet la clé via l’en-tête `x-goog-api-key`, jamais dans l’URL. Pour autoriser un test réseau ponctuel, confirmer d’abord dans AI Studio que le modèle configuré et le quota du compte sont bien gratuits, puis définir `GEMINI_TEST_FREE_CONFIRMED=true` dans l’environnement d’exécution et lancer `pnpm test:integration:gemini`. Le script fait une seule requête non sensible, ne réessaie pas et ne journalise ni la clé, ni le modèle, ni le texte généré. En l’absence de clé, de modèle ou de confirmation, il retourne `SKIPPED`. Cette validation réelle reste à effectuer avant de déclarer Gemini opérationnel dans PrismAI.
+
+## Test réel Groq
+
+Le provider Groq est désactivé sans `GROQ_API_KEY` et modèle explicitement configuré. La clé est transmise par Bearer dans l’en-tête HTTPS, jamais dans l’URL. Avant `pnpm test:integration:groq`, vérifier dans GroqCloud que le modèle exact est accessible et que le compte dispose du quota Free, puis définir `GROQ_TEST_FREE_CONFIRMED=true`. Le test envoie une requête courte unique, sans retry et sans données sensibles; il n’affiche ni clé, ni modèle, ni réponse. Sans configuration ou confirmation, il retourne `SKIPPED`. Une valeur de clé déjà exposée dans un message doit être révoquée et remplacée avant tout essai.
