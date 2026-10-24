@@ -15,6 +15,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | SambaNova Cloud | `SAMBANOVA_API_KEY` | `https://api.sambanova.ai/v1/chat/completions` | quotas Free par modèle à confirmer dans le compte; `creditClass` obligatoire |
 | Cohere | `COHERE_API_KEY` | `https://api.cohere.ai/compatibility/v1/chat/completions` | clé Trial exclue de l’usage commercial et de production; non intégré au routeur gratuit PrismAI |
 | Z.AI / GLM | `ZAI_API_KEY` (clé API Standard; pas Coding Plan) | `https://api.z.ai/api/paas/v4/chat/completions` | prix affiché nul pour certains modèles, sans quota/SLA garanti; `creditClass` obligatoire |
+| NVIDIA NIM | `NVIDIA_API_KEY` (clé liée à une fiche de modèle) | `https://integrate.api.nvidia.com/v1/chat/completions` | accès d’essai destiné au prototypage, exclu de la production sans abonnement; non intégré au routage gratuit |
 
 ## Procédure
 
@@ -67,6 +68,10 @@ La clé Trial Cohere est réservée à l’évaluation et exclue de la productio
 ## Test réel Z.AI / GLM
 
 Utiliser `ZAI_API_KEY` issue de l’API Standard, jamais une clé Coding Plan sans accord contractuel adapté. Cataloguer le modèle réel et une `creditClass` PrismAI; cette classe ne reproduit pas le coût du fournisseur. Le prix nul de certains modèles Flash n’établit ni quota gratuit, ni allocation, ni SLA. Vérifier la région, le prix effectif et l’absence de débit payant dans le compte avant de définir `ZAI_TEST_FREE_CONFIRMED=true`, puis lancer `pnpm test:integration:zai`. Le script effectue au plus un appel minimal sans retry ni journalisation de clé/modèle/contenu; à défaut de confirmation il retourne `SKIPPED`.
+
+## NVIDIA NIM : différé hors du lot gratuit de production
+
+Les accès NVIDIA API Catalog relevés comme gratuits sont des crédits de prototypage/essai, sans garantie d’allocation permanente; les Trial Terms excluent l’usage en production sans abonnement. PrismAI étant un SaaS Free/Pro, aucune clé d’essai n’est acceptée par son routeur et aucun adaptateur n’est déclaré. Réexaminer uniquement après confirmation d’un accès Production adapté, de son coût, des limites de compte et de l’autorisation d’usage commercial; toute future intégration devra alors recevoir son propre test unitaire et d’intégration.
 
 ## Test réel Hugging Face Inference Providers
 
