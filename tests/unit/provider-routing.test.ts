@@ -23,6 +23,7 @@ beforeEach(() => {
 afterEach(() => {
   for (const key of envKeys) { const value = originalEnv[key]; if (value === undefined) delete process.env[key]; else process.env[key] = value; }
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('catalogue et politique de routage PrismAI', () => {
@@ -34,6 +35,23 @@ describe('catalogue et politique de routage PrismAI', () => {
     expect(JSON.stringify(getConfiguredModels())).not.toContain('secret-test-key');
     delete process.env.PRISMAI_ROUTING_CATALOG;
     expect(getConfiguredModels()).toEqual([]);
+  });
+
+  it('appelle Gemini avec la clé dans un en-tête serveur et jamais dans l’URL', async () => {
+    process.env.GEMINI_API_KEY = 'gemini-unit-test-key';
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: 'Gemini OK' }] } }],
+      usageMetadata: { totalTokenCount: 5 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await chatWithFallback(messages, 'user', { models: [fallbackModels[1]], maxFallbacks: 0, timeoutMs: 1_000 });
+
+    expect(response).toMatchObject({ content: 'Gemini OK', provider_used: 'gemini', tokens: 5 });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toBe('https://generativelanguage.googleapis.com/v1beta/models/quality:generateContent');
+    expect(String(url)).not.toContain('key=');
+    expect(new Headers(init?.headers).get('x-goog-api-key')).toBe('gemini-unit-test-key');
   });
 
   it('classe la dernière demande et non tout l’historique, puis tient compte de l’intention et des contraintes', () => {

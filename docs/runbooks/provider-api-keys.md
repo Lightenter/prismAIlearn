@@ -9,6 +9,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | Groq | `GROQ_API_KEY` | `https://api.groq.com/openai/v1/chat/completions` | texte/code selon le modèle réellement activé |
 | Gemini | `GEMINI_API_KEY` | API Gemini `generateContent` | texte/vision selon le modèle et le compte réellement activés |
 | OpenRouter | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1/chat/completions` | capacités du modèle sélectionné, jamais supposées |
+| Mistral | `MISTRAL_API_KEY` | `https://api.mistral.ai/v1/chat/completions` | capacités et allocation du Workspace à confirmer |
 
 ## Procédure
 
@@ -28,3 +29,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 - Le timeout est borné et le circuit breaker empêche une boucle de retries.
 - Le prix/coût est versionné et attribué par tentative, y compris les fallbacks.
 - Les capacités non testées sont marquées indisponibles, pas présentées comme garanties.
+
+## Test réel Gemini
+
+Le provider Gemini est désactivé sans `GEMINI_API_KEY` et modèle explicite Gemini dans `PRISMAI_ROUTING_CATALOG`. Le runtime transmet la clé via l’en-tête `x-goog-api-key`, jamais dans l’URL. Pour autoriser un test réseau ponctuel, confirmer d’abord dans AI Studio que le modèle configuré et le quota du compte sont bien gratuits, puis définir `GEMINI_TEST_FREE_CONFIRMED=true` dans l’environnement d’exécution et lancer `pnpm test:integration:gemini`. Le script fait une seule requête non sensible, ne réessaie pas et ne journalise ni la clé, ni le modèle, ni le texte généré. En l’absence de clé, de modèle ou de confirmation, il retourne `SKIPPED`. Cette validation réelle reste à effectuer avant de déclarer Gemini opérationnel dans PrismAI.
