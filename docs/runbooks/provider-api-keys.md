@@ -12,6 +12,7 @@ Utiliser ce guide uniquement pour un environnement local ou un staging isolé. N
 | Mistral | `MISTRAL_API_KEY` | `https://api.mistral.ai/v1/chat/completions` | capacités et allocation du Workspace à confirmer |
 | Cloudflare Workers AI | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | `https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions` | modèle exact et quota account à vérifier; `creditClass` existante obligatoire |
 | Hugging Face Inference Providers | `HF_TOKEN` avec permission `inference.serverless.write` | `https://router.huggingface.co/v1/chat/completions` | pas de crédit d’inférence en plan Free; modèle possiblement `is_free` temporaire; `creditClass` obligatoire |
+| SambaNova Cloud | `SAMBANOVA_API_KEY` | `https://api.sambanova.ai/v1/chat/completions` | quotas Free par modèle à confirmer dans le compte; `creditClass` obligatoire |
 
 ## Procédure
 
@@ -52,6 +53,10 @@ L’offre Mistral Free est une allocation mensuelle partagée du Workspace, pas 
 ## Test réel Cloudflare Workers AI
 
 Cloudflare requiert `CLOUDFLARE_ACCOUNT_ID` et un API Token serveur limité aux droits Workers AI nécessaires. Le modèle doit être explicite dans `PRISMAI_ROUTING_CATALOG` et inclure `creditClass` parmi les classes PrismAI déjà tarifées (`groq`, `gemini`, `openrouter`, `mistral`); à défaut, il est ignoré et aucun appel ne démarre. Cette classe régit uniquement les crédits PrismAI et ne prétend pas reproduire le prix Cloudflare. Le quota documenté est de 10 000 neurons par compte et par jour, avec exceptions possibles selon le modèle et le plan. Confirmer dans le dashboard que le modèle précis reste dans le quota gratuit et qu’aucune facturation Workers Paid/crédit prépayé ne sera déclenchée, puis définir `CLOUDFLARE_TEST_FREE_CONFIRMED=true` et lancer `pnpm test:integration:cloudflare`. Le script effectue au plus une requête minimale sans retry ni journalisation du token, du compte ou du modèle.
+
+## Test réel SambaNova Cloud
+
+SambaNova utilise un endpoint compatible OpenAI, mais les quotas Free et les conditions de plan varient selon le modèle et ne sont pas formulés de manière entièrement cohérente dans les pages consultées. Définir `SAMBANOVA_API_KEY` et cataloguer explicitement le modèle avec une `creditClass` PrismAI; cette classe interne ne reproduit pas les coûts SambaNova. Vérifier directement dans le compte le modèle, la disponibilité du Free Tier et le quota restant avant de définir `SAMBANOVA_TEST_FREE_CONFIRMED=true`. Le test `pnpm test:integration:sambanova` envoie alors une seule requête minimale, sans retry ni journalisation de la clé, du modèle ou de la réponse. Sinon, il retourne `SKIPPED`.
 
 ## Test réel Hugging Face Inference Providers
 
