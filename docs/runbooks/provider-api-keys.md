@@ -37,3 +37,7 @@ Le provider Gemini est désactivé sans `GEMINI_API_KEY` et modèle explicite Ge
 ## Test réel Groq
 
 Le provider Groq est désactivé sans `GROQ_API_KEY` et modèle explicitement configuré. La clé est transmise par Bearer dans l’en-tête HTTPS, jamais dans l’URL. Avant `pnpm test:integration:groq`, vérifier dans GroqCloud que le modèle exact est accessible et que le compte dispose du quota Free, puis définir `GROQ_TEST_FREE_CONFIRMED=true`. Le test envoie une requête courte unique, sans retry et sans données sensibles; il n’affiche ni clé, ni modèle, ni réponse. Sans configuration ou confirmation, il retourne `SKIPPED`. Une valeur de clé déjà exposée dans un message doit être révoquée et remplacée avant tout essai.
+
+## Test réel OpenRouter
+
+OpenRouter n’est activé qu’avec `OPENROUTER_API_KEY` et une entrée de modèle explicite. Avant `pnpm test:integration:openrouter`, vérifier que le modèle catalogué porte bien une offre gratuite active pour ce compte et que l’appel ne peut pas consommer de crédits payants ou d’essai. Définir ensuite `OPENROUTER_TEST_FREE_CONFIRMED=true`. Les modèles gratuits et leurs limites sont susceptibles d’évoluer; le test effectue une seule petite requête, sans retry ni journalisation de clé, modèle ou réponse. Sans clé, modèle ou confirmation, il se marque `SKIPPED`.
