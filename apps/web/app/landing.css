@@ -1,0 +1,82 @@
+/* Styles de la landing PrismAI (Tailwind, sombre, motif prisme). */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Reset local (preflight désactivé) : neutralise les styles globaux hérités sur la landing. */
+  :where(.landing), :where(.landing) *, :where(.landing) ::before, :where(.landing) ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: currentColor; }
+  :where(.landing) h1, :where(.landing) h2, :where(.landing) h3, :where(.landing) p, :where(.landing) figure, :where(.landing) dl, :where(.landing) dd, :where(.landing) pre, :where(.landing) fieldset, :where(.landing) legend { margin: 0; padding: 0; color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; max-width: none; background: none; }
+  :where(.landing) h1 span, :where(.landing) h2 span { background: none; color: inherit; -webkit-text-fill-color: currentColor; }
+  :where(.landing) ol, :where(.landing) ul { margin: 0; padding: 0; list-style: none; }
+  :where(.landing) a { color: inherit; text-decoration: none; }
+  :where(.landing) button, :where(.landing) input { font: inherit; color: inherit; margin: 0; }
+  :where(.landing) button { background: transparent; cursor: pointer; padding: 0; }
+  :where(.landing) img { display: block; max-width: 100%; height: auto; }
+  :where(.landing) table { border-collapse: collapse; }
+  :where(.landing) { font-feature-settings: 'cv11', 'ss01'; line-height: 1.5; }
+  :where(.landing) ::selection { background: #8F3CFF; color: #fff; }
+  :where(.landing) :focus-visible { outline: 2px solid #5EF2FF; outline-offset: 3px; border-radius: 4px; }
+}
+
+@layer components {
+  /* Bouton unique de la page : aplat accent, rayon 8px, retour au toucher. */
+  .lp-btn { @apply inline-flex items-center justify-center rounded-lg bg-accent font-medium text-white transition-[background-color,transform] duration-200 hover:bg-accent-hover active:scale-[0.98] active:bg-accent-press; }
+  .link-arrow { @apply inline-flex items-center gap-2 font-medium text-ink transition-colors hover:text-cyan; }
+  .link-arrow span { @apply transition-transform duration-200; }
+  .link-arrow:hover span { transform: translateX(4px); }
+
+  /* Le pentagone du logo, motif unique de la page. */
+  .prism-stage { clip-path: polygon(50% 0, 100% 27%, 82% 100%, 18% 100%, 0 27%); animation: prism-drift 18s ease-in-out infinite alternate; }
+  @keyframes prism-drift { from { rotate: -4deg; scale: 1; } to { rotate: 3deg; scale: 1.04; } }
+
+  .tab { @apply h-9 rounded-md text-[14px] font-medium text-soft transition-colors duration-200 hover:text-ink; }
+  .tab[aria-selected='true'] { @apply bg-raise text-ink; }
+  .router-body > * { transition: opacity .22s ease, transform .22s ease; }
+  .router-body.is-switching > * { opacity: 0; transform: translateY(6px); }
+
+  .feature { @apply min-w-0 rounded-lg bg-surface p-6 transition-colors duration-300 hover:bg-[#17171D] md:p-7; }
+  .feature-ui { @apply lg:min-h-[188px] rounded-lg bg-raise p-4 transition-transform duration-300; }
+  .feature:hover .feature-ui { transform: translateY(-4px); }
+  .facet { @apply flex items-center gap-2.5; }
+  .facet::before { content: ''; @apply block h-2.5 w-2.5 shrink-0 bg-accent; clip-path: polygon(50% 0, 100% 27%, 82% 100%, 18% 100%, 0 27%); }
+
+  .metric { clip-path: polygon(0 0, calc(100% - 48px) 0, 100% 48px, 100% 100%, 0 100%); }
+  .metric-figure { @apply text-[clamp(64px,7vw,112px)] font-semibold leading-[0.9] tracking-[-0.05em] tabular-nums; }
+
+  .step { @apply flex flex-col justify-between gap-10 px-5 py-10 md:px-8 md:py-14 lg:min-h-[78svh]; }
+  .step-card { @apply w-full lg:max-w-[300px] rounded-lg bg-ground p-4 transition-transform duration-150; }
+  .step:hover .step-card { transform: translateY(-6px); }
+  .step-clause { @apply text-[22px] font-medium leading-[1.2] tracking-[-0.02em]; }
+
+  .faq { @apply rounded-lg bg-surface transition-colors duration-300; }
+  .faq summary { @apply flex min-h-[72px] cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-[17px] font-medium; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq p { @apply max-w-[58ch] px-6 pb-6 text-[17px] leading-[1.6]; }
+  .faq[open] { @apply bg-accent text-white; }
+  .faq-sign { @apply relative block h-4 w-4 shrink-0; }
+  .faq-sign::before, .faq-sign::after { content: ''; @apply absolute left-0 top-[6.5px] h-[3px] w-4 rounded-sm bg-current transition-transform duration-300; }
+  .faq-sign::after { transform: rotate(90deg); }
+  .faq[open] .faq-sign::after { transform: rotate(0deg); }
+  .faq:not([open]):hover { @apply bg-raise; }
+
+  .seg { @apply relative cursor-pointer; }
+  .seg span { @apply flex h-10 items-center justify-center rounded-md text-[15px] font-medium text-soft transition-colors; }
+  .seg input:checked + span { @apply bg-raise text-ink; }
+  .seg input:focus-visible + span { outline: 2px solid #5EF2FF; outline-offset: 2px; }
+
+  .photo { @apply relative m-0 overflow-hidden; }
+  .photo img { clip-path: polygon(0 0, calc(100% - 48px) 0, 100% 48px, 100% 100%, 0 100%); transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .photo:hover img { transform: scale(1.03); }
+  .photo figcaption { @apply mt-3 text-[13px] text-soft; }
+  .footer-link { @apply text-ink transition-colors hover:text-cyan; }
+
+  /* Entrées : le contenu reste visible sans script. */
+  .js-reveal .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+  .js-reveal .reveal.is-in { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prism-stage { animation: none; }
+  .router-body > *, .feature-ui, .step-card { transition: none; }
+}

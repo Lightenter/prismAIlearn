@@ -3,7 +3,7 @@
 // Importe Link pour les liens légaux et le retour vers la connexion.
 import Link from 'next/link';
 // Importe les primitives React nécessaires au formulaire contrôlé.
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 // Importe le routeur client pour rediriger uniquement après session vérifiée.
 import { useRouter } from 'next/navigation';
 // Importe le shell Auth partagé sans navigation complète.
@@ -21,6 +21,14 @@ export default function SignupPage() {
   const [pending, setPending] = useState(false);
   // Prépare la navigation contrôlée vers le Dashboard.
   const router = useRouter();
+
+  // Reprend l’e-mail saisi sur la landing (sessionStorage, jamais dans l’URL), puis l’efface.
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem('prismai:signup-email');
+      if (saved) { setForm((current) => ({ ...current, email: current.email || saved })); window.sessionStorage.removeItem('prismai:signup-email'); }
+    } catch { /* stockage indisponible : rien à pré-remplir. */ }
+  }, []);
 
   // Met à jour un champ sans exposer les données saisies dans une URL.
   function updateField(field: keyof typeof form, value: string | boolean) {
