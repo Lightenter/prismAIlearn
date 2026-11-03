@@ -45,7 +45,7 @@ export default function SignupPage() {
       const response = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email, password: form.password, fullName: form.fullName, referralCode: form.referralCode }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setError(result.error === 'ACCOUNT_ALREADY_EXISTS' ? 'Un compte existe déjà avec cette adresse e-mail.' : 'Impossible de créer le compte. Vérifie les informations saisies.');
+        setError(result.error === 'AUTH_NOT_CONFIGURED' ? 'Le service d’authentification n’est pas configuré sur ce serveur.' : result.error === 'ACCOUNT_ALREADY_EXISTS' ? 'Un compte existe déjà avec cette adresse e-mail.' : result.error === 'INVALID_EMAIL' ? 'Saisis une adresse e-mail valide.' : result.error === 'PASSWORD_TOO_SHORT' ? 'Le mot de passe doit contenir au moins 8 caractères.' : result.error === 'SIGNUP_DISABLED' ? 'Les inscriptions sont temporairement désactivées.' : result.error === 'AUTH_RATE_LIMITED' ? 'Trop de tentatives. Réessaie dans quelques minutes.' : result.error === 'CAPTCHA_REQUIRED' ? 'Une vérification anti-robot est requise.' : 'Impossible de créer le compte. Le serveur d’authentification a refusé la demande.');
         return;
       }
       if (result.sessionEstablished === true) {
