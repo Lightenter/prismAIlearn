@@ -19,7 +19,8 @@ export async function POST(request: Request) {
   const user = authResult.data.user;
   if (!user) return unauthorizedResponse();
   try {
-    if (!(await consumeRateLimit(`chat-stream:${user.id}`, 60, 30))) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
+    // Partage le compteur avec /api/chat : 30 requêtes cumulées par utilisateur et fenêtre de 60 secondes.
+    if (!(await consumeRateLimit(`chat:${user.id}`, 60, 30))) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
   } catch { return unexpectedChatErrorResponse('CHAT_STREAM_FAILED'); }
 
   try {
