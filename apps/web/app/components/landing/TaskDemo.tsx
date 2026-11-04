@@ -78,7 +78,7 @@ export function TaskDemo() {
           </button>
         ))}
       </div>
-      <div className={`router-body mt-5${switching ? ' is-switching' : ''}`} aria-live="polite">
+      <div className={`demo-body mt-5${switching ? ' is-switching' : ''}`} aria-live="polite">
         <div className="rounded-lg bg-raise p-4">
           <p className="text-[13px] text-soft">Ta question</p>
           <p className="mt-1.5 text-[17px] leading-[1.5]">{task.prompt}</p>
