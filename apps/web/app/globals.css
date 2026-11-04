@@ -220,7 +220,7 @@ p { color: var(--muted); line-height: 1.65; }
 /* Repousse les contrôles de session à droite. */
 .dashboard-header-actions { display: flex; align-items: center; gap: 18px; margin-left: auto; }
 /* Affiche une cloche légère sans dépendance externe. */
-.dashboard-bell { color: var(--soft); font-size: 1.8rem; transform: rotate(-25deg); }
+.dashboard-bell { display: inline-grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 10px; color: var(--soft); background: var(--fill); }
 /* Encadre le solde aperçu dans l’en-tête. */
 .dashboard-top-credit { padding: 11px 17px; border: 1px solid var(--line-strong); border-radius: 8px; color: var(--ink); font-size: .82rem; }
 /* Affiche le nom réel ou le profil neutre. */
@@ -232,13 +232,13 @@ p { color: var(--muted); line-height: 1.65; }
 /* Style le rail de navigation gauche. */
 .dashboard-sidebar { padding: 18px 16px 24px; border-right: 1px solid var(--line); background: var(--surface); }
 /* Aligne tous les liens du rail. */
-.dashboard-sidebar nav, .dashboard-sidebar > a { display: flex; flex-direction: column; gap: 3px; }
+.dashboard-sidebar nav { display: flex; flex-direction: column; gap: 3px; }
 /* Style chaque lien du rail sans masquer sa destination. */
-.dashboard-sidebar nav a, .dashboard-sidebar > a { display: flex; align-items: center; gap: 14px; min-height: 42px; padding: 0 15px; border-radius: 8px; color: var(--soft); font-size: .84rem; transition: color .2s ease, background .2s ease; }
+.dashboard-sidebar nav a { display: flex; align-items: center; gap: 14px; min-height: 42px; padding: 0 15px; border-radius: 8px; color: var(--soft); font-size: .84rem; transition: color .2s ease, background .2s ease; }
 /* Illumine le lien actif comme sur la maquette. */
 .dashboard-sidebar nav a.dashboard-nav-active { color: #fff; background: var(--accent); box-shadow: 0 7px 22px var(--glow); }
 /* Colore les liens du rail au survol. */
-.dashboard-sidebar nav a:hover, .dashboard-sidebar > a:hover { color: var(--ink); background: var(--fill-accent); }
+.dashboard-sidebar nav a:hover { color: var(--ink); background: var(--fill-accent); }
 /* Sépare les groupes de navigation. */
 .dashboard-sidebar-divider { height: 1px; margin: 17px 15px; background: var(--fill-accent); }
 /* Style le libellé du groupe secondaire. */
@@ -296,7 +296,7 @@ p { color: var(--muted); line-height: 1.65; }
 /* Pose les six accès studios en rangée responsive. */
 .dashboard-studio-grid { display: grid; grid-template-columns: repeat(6, minmax(105px, 1fr)); gap: 13px; }
 /* Style chaque carte studio avec sa couleur de capacité. */
-.dashboard-studio-card { position: relative; display: flex; flex-direction: column; min-height: 163px; padding: 15px; overflow: hidden; border: 1px solid rgba(109, 126, 216, .35); border-radius: 9px; color: #fff; transition: transform .2s ease, border-color .2s ease; }
+.dashboard-studio-card { position: relative; display: flex; flex-direction: column; min-height: 163px; padding: 15px 15px 46px; overflow: hidden; border: 1px solid rgba(109, 126, 216, .35); border-radius: 9px; color: #fff; transition: transform .2s ease, border-color .2s ease; }
 /* Donne un retour visuel aux cartes studio. */
 .dashboard-studio-card:hover { border-color: rgba(188, 167, 255, .75); transform: translateY(-3px); }
 /* Colore l’icône de chaque studio. */
@@ -351,7 +351,7 @@ p { color: var(--muted); line-height: 1.65; }
 /* Réorganise le Dashboard sur les écrans intermédiaires. */
 @media (max-width: 1180px) { .dashboard-layout { grid-template-columns: 220px minmax(0, 1fr); } .dashboard-right { grid-column: 2; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 28px 30px; border-top: 1px solid var(--line); border-left: 0; } .dashboard-right .dashboard-info-card { margin: 0; } .dashboard-studio-grid { grid-template-columns: repeat(3, 1fr); } }
 /* Rend le rail et les colonnes lisibles sur mobile. */
-@media (max-width: 720px) { .dashboard-header { flex-wrap: wrap; gap: 8px 13px; padding: 13px 16px; } .dashboard-header > p { display: none; } .dashboard-header-actions { width: 100%; justify-content: space-between; margin-left: 0; } .dashboard-layout { display: block; } .dashboard-sidebar { display: none; } .dashboard-content { padding: 24px 15px 36px; } .dashboard-hero { min-height: 390px; padding: 27px 20px; } .dashboard-hero-prism { position: absolute; right: -40px; bottom: -35px; opacity: .65; } .dashboard-hero-actions { flex-direction: column; align-items: stretch; } .dashboard-hero-actions .btn { justify-content: center; } .dashboard-studio-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-right { display: block; padding: 0 15px 25px; } .dashboard-right .dashboard-info-card { margin-bottom: 13px; } }
+@media (max-width: 720px) { .dashboard-header { flex-wrap: wrap; gap: 8px 13px; padding: 13px 16px; } .dashboard-header > p { display: none; } .dashboard-header-actions { width: 100%; justify-content: space-between; margin-left: 0; } .dashboard-layout { display: block; } .dashboard-sidebar { display: flex; gap: 6px; overflow-x: auto; padding: 10px 15px; border-right: 0; border-bottom: 1px solid var(--line); scrollbar-width: none; } .dashboard-sidebar::-webkit-scrollbar { display: none; } .dashboard-sidebar nav { flex-direction: row; flex: none; gap: 6px; } .dashboard-sidebar nav a { flex: none; min-height: 36px; padding: 0 12px; gap: 8px; white-space: nowrap; } .dashboard-sidebar-divider, .dashboard-sidebar-label, .dashboard-upgrade { display: none; } .dashboard-content { padding: 24px 15px 36px; } .dashboard-hero { min-height: 390px; padding: 27px 20px; } .dashboard-hero-prism { position: absolute; right: -40px; bottom: -35px; opacity: .65; } .dashboard-hero-actions { flex-direction: column; align-items: stretch; } .dashboard-hero-actions .btn { justify-content: center; } .dashboard-studio-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-right { display: block; padding: 0 15px 25px; } .dashboard-right .dashboard-info-card { margin-bottom: 13px; } }
 
 
 /* Workspace Chat PrismAI : sidebar historique et canevas de conversation. */
