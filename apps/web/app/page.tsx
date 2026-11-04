@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Inter } from 'next/font/google';
 import { CtaForm } from './components/landing/CtaForm';
 import { LandingEffects } from './components/landing/LandingEffects';
-import { RouterDemo } from './components/landing/RouterDemo';
+import { TaskDemo } from './components/landing/TaskDemo';
 import './landing.css';
 
 // Charge Inter (police de la marque) avec les trois graisses utilisées.
@@ -11,11 +11,11 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variabl
 
 // Métadonnées publiques de la landing.
 export const metadata = {
-  title: 'PrismAI — Plusieurs IA. Un seul espace.',
-  description: 'PrismAI réunit plusieurs modèles d’IA dans un seul espace. PRISM ROUTER choisit le modèle adapté à chaque question. 300 crédits offerts à l’inscription.',
+  title: 'PrismAI — Une IA pour tout ton travail.',
+  description: 'PrismAI t’aide à rédiger, coder, résumer et traduire dans un seul espace. 300 crédits offerts à l’inscription.',
 };
 
-// Rend la landing : hero et routeur, fonctionnalités, chiffres, fonctionnement, Cameroun, FAQ, appel final.
+// Rend la landing : hero et démonstration, fonctionnalités, chiffres, fonctionnement, Cameroun, FAQ, appel final.
 export default function HomePage() {
   return (
     <div className={`landing ${inter.variable} min-h-screen overflow-x-clip bg-ground font-sans text-ink antialiased`}>
@@ -42,23 +42,23 @@ export default function HomePage() {
       </header>
 
       <main id="contenu">
-        {/* Hero : promesse, action unique et démonstrateur PRISM ROUTER sur le prisme géant. */}
+        {/* Hero : promesse, action unique et démonstrateur sur le prisme géant. */}
         <section className="relative overflow-hidden" aria-labelledby="hero-title">
           <div className="mx-auto grid max-w-page items-center gap-14 px-5 pb-24 pt-14 md:px-8 lg:min-h-[calc(100svh-64px)] lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-10">
             <div className="relative z-10 lg:col-span-6">
-              <h1 id="hero-title" className="reveal text-[clamp(44px,5vw,72px)] font-semibold leading-[0.98] tracking-[-0.045em]">Plusieurs IA.<br />Un seul espace.</h1>
-              <p className="reveal mt-8 max-w-[40ch] text-[17px] leading-[1.55] text-ink/90 [transition-delay:80ms]">Rédige, code et résume avec PrismAI. PRISM ROUTER choisit pour chaque question le modèle adapté, et chaque réponse affiche son coût.</p>
+              <h1 id="hero-title" className="reveal text-[clamp(44px,5vw,72px)] font-semibold leading-[0.98] tracking-[-0.045em]">Une IA pour<br />tout ton travail.</h1>
+              <p className="reveal mt-8 max-w-[40ch] text-[17px] leading-[1.55] text-ink/90 [transition-delay:80ms]">Rédige, code, résume et traduis avec PrismAI. Chaque réponse s’adapte à ta demande et affiche son coût en crédits.</p>
               <div className="reveal mt-10 flex flex-wrap items-center gap-x-6 gap-y-4 [transition-delay:160ms]">
                 <Link className="lp-btn h-12 px-6 text-[17px]" href="/signup">Commencer gratuitement</Link>
-                <a className="link-arrow text-[17px]" href="#routeur">Essayer le routeur <span aria-hidden="true">→</span></a>
+                <a className="link-arrow text-[17px]" href="#demo">Voir une démo <span aria-hidden="true">→</span></a>
               </div>
               <p className="reveal mt-8 text-[15px] text-soft [transition-delay:220ms]">300 crédits offerts à l’inscription. Aucune carte bancaire demandée.</p>
             </div>
 
             {/* Scène : le pentagone du logo, agrandi et rogné, porte l'interface. */}
-            <div className="relative lg:col-span-6" id="routeur">
+            <div className="relative lg:col-span-6" id="demo">
               <div className="prism-stage pointer-events-none absolute -right-[38%] top-[6%] aspect-square w-[118%] bg-accent sm:-right-[22%] lg:-right-[30%] lg:top-auto lg:-translate-y-[22%] lg:w-[128%]" aria-hidden="true"></div>
-              <RouterDemo />
+              <TaskDemo />
             </div>
           </div>
         </section>
@@ -103,8 +103,8 @@ export default function HomePage() {
                   <tbody>
                     <tr><td className="py-1.5 text-ink/90">Bonus d’inscription</td><td className="py-1.5 text-right text-cyan">+300</td></tr>
                     <tr><td className="py-1.5 text-ink/90">Quota du jour</td><td className="py-1.5 text-right text-cyan">+100</td></tr>
-                    <tr><td className="py-1.5 text-ink/90">Réponse · Mistral</td><td className="py-1.5 text-right text-soft">−3</td></tr>
-                    <tr><td className="py-1.5 text-ink/90">Réponse · OpenRouter</td><td className="py-1.5 text-right text-soft">−6</td></tr>
+                    <tr><td className="py-1.5 text-ink/90">Réponse · Rédaction</td><td className="py-1.5 text-right text-soft">−3</td></tr>
+                    <tr><td className="py-1.5 text-ink/90">Réponse · Code</td><td className="py-1.5 text-right text-soft">−6</td></tr>
                     <tr><td className="pt-3 font-semibold">Solde disponible</td><td className="pt-3 text-right font-semibold">391</td></tr>
                   </tbody>
                 </table>
@@ -134,11 +134,11 @@ export default function HomePage() {
                   <p className="text-[17px] leading-[1.45]">crédits ajoutés chaque jour, dès le lendemain de l’inscription.</p>
                 </div>
                 <div className="metric reveal mt-8 flex min-h-[230px] flex-col justify-between bg-raise p-5 md:p-6 [transition-delay:160ms] md:col-span-3 md:mt-[14vh] md:min-h-[300px]">
-                  <p className="metric-figure" data-count="8">8</p>
-                  <p className="text-[17px] leading-[1.45]">fournisseurs d’IA pris en charge par PRISM ROUTER.</p>
+                  <p className="metric-figure" data-count="2">2</p>
+                  <p className="text-[17px] leading-[1.45]">langues de travail : français et anglais.</p>
                 </div>
               </div>
-              <p className="reveal mt-8 text-[15px] leading-[1.55] text-soft md:col-span-6">Groq, Gemini, OpenRouter, Mistral, Cloudflare, Hugging Face, SambaNova et Z.AI. Sur Groq et Gemini, 1 000 tokens coûtent 1 crédit.</p>
+              <p className="reveal mt-8 text-[15px] leading-[1.55] text-soft md:col-span-6">Le coût de chaque réponse s’affiche avec la réponse, de 1 à 2 crédits par tranche de 1 000 tokens selon la tâche.</p>
             </div>
           </div>
         </section>
@@ -157,11 +157,11 @@ export default function HomePage() {
             <li className="step bg-raise">
               <span className="hidden text-[clamp(28px,2.6vw,36px)] lg:block" aria-hidden="true"> </span>
               <div className="step-card reveal [transition-delay:80ms]" data-ui aria-hidden="true">
-                <p className="text-[13px] text-soft">Requête · routée</p>
+                <p className="text-[13px] text-soft">Requête · en cours</p>
                 <p className="mt-2 text-[15px] leading-[1.5]">Pourquoi ma requête fetch renvoie une erreur CORS ?</p>
-                <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]"><div><dt className="text-soft">Capacité</dt><dd className="text-ink">Code</dd></div><div><dt className="text-soft">Fournisseur</dt><dd className="text-ink">OpenRouter</dd></div></dl>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]"><div><dt className="text-soft">Tâche</dt><dd className="text-ink">Code</dd></div><div><dt className="text-soft">Statut</dt><dd className="text-ink">Rédaction de la réponse</dd></div></dl>
               </div>
-              <p className="step-clause reveal">Puis PRISM ROUTER<br /> choisit le modèle.</p>
+              <p className="step-clause reveal">Puis PrismAI<br /> prépare la réponse.</p>
             </li>
             <li className="step bg-[#26262F]">
               <span className="hidden text-[clamp(28px,2.6vw,36px)] lg:block" aria-hidden="true"> </span>
@@ -211,7 +211,7 @@ export default function HomePage() {
           <div className="space-y-2 lg:col-span-8">
             <details className="faq reveal" {...{ name: 'faq' }} open>
               <summary>Qu’est-ce que PrismAI ?<span className="faq-sign" aria-hidden="true"></span></summary>
-              <p>Un espace de conversation qui réunit plusieurs modèles d’IA. Tu écris ta demande ; PRISM ROUTER détecte la capacité nécessaire et l’envoie au fournisseur adapté.</p>
+              <p>Un assistant IA pour rédiger, coder, résumer et traduire, dans un seul espace de conversation. Tu écris ta demande ; PrismAI adapte sa réponse à la tâche.</p>
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
               <summary>L’inscription est-elle gratuite ?<span className="faq-sign" aria-hidden="true"></span></summary>
@@ -223,11 +223,11 @@ export default function HomePage() {
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
               <summary>Combien coûte une réponse ?<span className="faq-sign" aria-hidden="true"></span></summary>
-              <p>Le coût dépend des tokens et du fournisseur : 1 crédit par tranche de 1 000 tokens sur Groq et Gemini, 1,5 sur Mistral, 2 sur OpenRouter. Le montant s’affiche avec chaque réponse.</p>
+              <p>Le coût dépend de la longueur de la réponse et du type de tâche : de 1 à 2 crédits par tranche de 1 000 tokens. Le montant s’affiche avec chaque réponse.</p>
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
-              <summary>Que se passe-t-il si un fournisseur est saturé ?<span className="faq-sign" aria-hidden="true"></span></summary>
-              <p>Si un fournisseur répond qu’il est limité ou indisponible, PRISM ROUTER peut basculer vers un autre modèle configuré. Un fournisseur qui échoue plusieurs fois est mis en pause quelques minutes.</p>
+              <summary>Dans quelles langues puis-je écrire ?<span className="faq-sign" aria-hidden="true"></span></summary>
+              <p>En français et en anglais. Tu peux aussi demander une traduction de l’un vers l’autre dans la même conversation.</p>
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
               <summary>Où PrismAI est-il disponible ?<span className="faq-sign" aria-hidden="true"></span></summary>
@@ -258,7 +258,7 @@ export default function HomePage() {
           <div className="md:col-span-2"><p className="text-soft">Produit</p><ul className="mt-3 space-y-2"><li><a className="footer-link" href="#fonctionnalites">Fonctionnalités</a></li><li><a className="footer-link" href="#chiffres">Chiffres</a></li><li><Link className="footer-link" href="/pricing">Tarifs</Link></li></ul></div>
           <div className="md:col-span-2"><p className="text-soft">Compte</p><ul className="mt-3 space-y-2"><li><Link className="footer-link" href="/signup">Créer un compte</Link></li><li><Link className="footer-link" href="/login">Se connecter</Link></li></ul></div>
           <div className="md:col-span-2"><p className="text-soft">Aide</p><ul className="mt-3 space-y-2"><li><a className="footer-link" href="#fonctionnement">Fonctionnement</a></li><li><a className="footer-link" href="#cameroun">Cameroun</a></li><li><a className="footer-link" href="#faq">Questions fréquentes</a></li></ul></div>
-          <div className="col-span-2 md:col-span-4 md:col-start-9"><p className="text-soft">PrismAI</p><p className="mt-3 leading-[1.55]">Plusieurs IA, un seul espace.<br />Lancé au Cameroun.</p></div>
+          <div className="col-span-2 md:col-span-4 md:col-start-9"><p className="text-soft">PrismAI</p><p className="mt-3 leading-[1.55]">Une IA pour tout ton travail.<br />Lancé au Cameroun.</p></div>
         </div>
         <div className="mt-16 flex flex-col items-start justify-between gap-4 text-[13px] leading-[1.5] text-soft sm:flex-row sm:items-center">
           <p>© 2026 PrismAI · Photos via Wikimedia Commons : « Douala traffic » par Bmnda (CC0), « Vegetable market in Douala » par Adesolive (CC0), « Douala Bonamoussadi » par MimbaF7023 (<a className="underline underline-offset-2 hover:text-ink" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>).</p>
