@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 
 type Conversation = { id: string; title: string; created_at: string; updated_at: string };
@@ -228,7 +229,7 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
       {railCollapsed && <button type="button" className="chat-icon-button chat-open-rail" aria-label="Afficher la barre latérale" onClick={() => setRailCollapsed(false)}>☰</button>}
 
       <main className="chat-main-pane">
-        <header className="chat-toolbar"><button type="button" className="chat-icon-button chat-mobile-history" aria-label="Ouvrir l’historique" onClick={() => setMobileHistory(true)}>☰</button><div className="chat-conversation-heading"><strong>{activeTitle}</strong><span>Conversation privée</span></div><div className="chat-toolbar-actions"><span className="chat-credit-chip" title="Crédits disponibles">◆ {balance === null ? '—' : balance.toLocaleString('fr-FR')}</span><Link className="chat-avatar chat-toolbar-avatar" href="/dashboard" aria-label="Profil et paramètres">P</Link></div></header>
+        <header className="chat-toolbar"><button type="button" className="chat-icon-button chat-mobile-history" aria-label="Ouvrir l’historique" onClick={() => setMobileHistory(true)}>☰</button><div className="chat-conversation-heading"><strong>{activeTitle}</strong><span>Conversation privée</span></div><div className="chat-toolbar-actions"><ThemeToggle /><span className="chat-credit-chip" title="Crédits disponibles">◆ {balance === null ? '—' : balance.toLocaleString('fr-FR')}</span><Link className="chat-avatar chat-toolbar-avatar" href="/dashboard" aria-label="Profil et paramètres">P</Link></div></header>
         <section className="chat-thread" aria-label="Messages de la conversation" aria-live="polite">
           {messages.length === 0 ? <div className="chat-welcome"><div className="chat-welcome-prism"><span className="prism" aria-hidden="true" /></div><p className="chat-eyebrow">CHAT PRISMAI</p><h1>Une idée, plusieurs perspectives.</h1><p className="chat-welcome-copy">Pose ta question. PrismAI choisira automatiquement une solution configurée et adaptée à la demande.</p>
             <div className="chat-suggestions">{SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendText(suggestion)} disabled={!hasModels}>{suggestion}<span aria-hidden="true">↗</span></button>)}</div>

@@ -1,5 +1,6 @@
 // Landing publique PrismAI : sombre, sobre, inspirée de Linear, construite en Tailwind.
 import Link from 'next/link';
+import { ThemeToggle } from './components/ThemeToggle';
 import { Inter } from 'next/font/google';
 import { CtaForm } from './components/landing/CtaForm';
 import { LandingEffects } from './components/landing/LandingEffects';
@@ -28,16 +29,24 @@ export default function HomePage() {
             <span className="block h-[18px] w-[18px] bg-accent transition-transform duration-300 group-hover:rotate-[72deg] [clip-path:polygon(50%_0,100%_27%,82%_100%,18%_100%,0_27%)]" aria-hidden="true"></span>
             PrismAI
           </a>
-          <div className="hidden items-center gap-8 text-[15px] text-soft lg:flex">
-            <a className="transition-colors hover:text-ink" href="#fonctionnalites">Fonctionnalités</a>
-            <a className="transition-colors hover:text-ink" href="#chiffres">Chiffres</a>
-            <a className="transition-colors hover:text-ink" href="#fonctionnement">Fonctionnement</a>
-            <a className="transition-colors hover:text-ink" href="#faq">FAQ</a>
+          <div className="hidden items-center gap-8 text-[15px] text-soft md:flex">
+            <a className="nav-link text-ink" href="#contenu" aria-current="page">Accueil</a>
+            <a className="nav-link" href="#fonctionnalites">Fonctionnalités</a>
+            <Link className="nav-link" href="/pricing">Tarifs</Link>
+            <a className="nav-link" href="#fonctionnement">Comment ça marche</a>
           </div>
-          <div className="flex items-center gap-5">
-            <Link className="hidden text-[15px] text-soft transition-colors hover:text-ink sm:inline" href="/login">Se connecter</Link>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link className="hidden text-[15px] text-soft transition-colors hover:text-ink lg:inline" href="/login">Se connecter</Link>
+            <ThemeToggle />
             <Link className="lp-btn h-10 px-4 text-[15px]" href="/signup">Commencer</Link>
           </div>
+        </nav>
+        {/* Sur mobile, les quatre liens passent sur une seconde ligne défilante. */}
+        <nav className="flex justify-between gap-4 overflow-x-auto border-t border-ink/10 px-5 py-3 text-[13px] text-soft md:hidden" aria-label="Navigation principale mobile">
+          <a className="nav-link text-ink" href="#contenu">Accueil</a>
+          <a className="nav-link" href="#fonctionnalites">Fonctionnalités</a>
+          <Link className="nav-link" href="/pricing">Tarifs</Link>
+          <a className="nav-link" href="#fonctionnement">Comment ça marche</a>
         </nav>
       </header>
 
@@ -163,7 +172,7 @@ export default function HomePage() {
               </div>
               <p className="step-clause reveal">Puis PrismAI<br /> prépare la réponse.</p>
             </li>
-            <li className="step bg-[#26262F]">
+            <li className="step bg-edge">
               <span className="hidden text-[clamp(28px,2.6vw,36px)] lg:block" aria-hidden="true"> </span>
               <div className="step-card reveal [transition-delay:160ms]" data-ui aria-hidden="true">
                 <p className="text-[13px] text-soft">Requête · terminée</p>
@@ -262,7 +271,7 @@ export default function HomePage() {
         </div>
         <div className="mt-16 flex flex-col items-start justify-between gap-4 text-[13px] leading-[1.5] text-soft sm:flex-row sm:items-center">
           <p>© 2026 PrismAI · Photos via Wikimedia Commons : « Douala traffic » par Bmnda (CC0), « Vegetable market in Douala » par Adesolive (CC0), « Douala Bonamoussadi » par MimbaF7023 (<a className="underline underline-offset-2 hover:text-ink" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>).</p>
-          <a href="#" className="shrink-0 rounded-lg bg-raise px-3 py-2 text-ink transition-colors hover:bg-[#26262F]">Revenir en haut</a>
+          <a href="#" className="shrink-0 rounded-lg bg-raise px-3 py-2 text-ink transition-colors hover:bg-edge">Revenir en haut</a>
         </div>
       </footer>
     </div>

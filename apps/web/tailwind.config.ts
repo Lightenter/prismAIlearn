@@ -8,13 +8,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ground: '#0A0A0D',
-        surface: '#131318',
-        raise: '#1C1C23',
-        ink: '#F5F5F7',
-        soft: '#B4B4BD',
-        accent: { DEFAULT: '#8F3CFF', hover: '#9D52FF', press: '#7A2AE6' },
-        cyan: '#5EF2FF',
+        // Couleurs pilotées par des variables CSS (landing.css) pour basculer sombre / clair.
+        ground: 'rgb(var(--lp-ground) / <alpha-value>)',
+        surface: { DEFAULT: 'rgb(var(--lp-surface) / <alpha-value>)', hover: 'rgb(var(--lp-surface-hover) / <alpha-value>)' },
+        raise: 'rgb(var(--lp-raise) / <alpha-value>)',
+        edge: 'rgb(var(--lp-edge) / <alpha-value>)',
+        ink: 'rgb(var(--lp-ink) / <alpha-value>)',
+        soft: 'rgb(var(--lp-soft) / <alpha-value>)',
+        accent: { DEFAULT: 'rgb(var(--lp-accent) / <alpha-value>)', hover: 'rgb(var(--lp-accent-hover) / <alpha-value>)', press: 'rgb(var(--lp-accent-press) / <alpha-value>)' },
+        cyan: 'rgb(var(--lp-cyan) / <alpha-value>)',
       },
       fontFamily: { sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'] },
       maxWidth: { page: '1240px' },
