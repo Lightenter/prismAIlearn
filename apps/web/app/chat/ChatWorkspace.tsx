@@ -57,15 +57,15 @@ function MarkdownMessage({ content }: { content: string }) {
 
 function errorLabel(code: string) {
   const labels: Record<string, string> = {
-    NO_PROVIDER_CONFIGURED: 'Le Chat PrismAI n’est pas encore disponible. Réessaie un peu plus tard.',
+    CHAT_UNAVAILABLE: 'Le Chat PrismAI n’est pas encore disponible. Réessaie un peu plus tard.',
     CAPABILITY_UNAVAILABLE: 'Cette capacité n’est pas active dans le Chat. Tu peux coller le texte à traiter directement dans la conversation.',
-    NO_MODEL_FOR_CAPABILITY: 'Aucun modèle PrismAI configuré ne peut traiter cette demande pour le moment.',
-    PROVIDER_UNAVAILABLE: 'PrismAI n’a pas pu traiter la demande. Aucun crédit non utilisé ne sera débité.',
+    TASK_UNAVAILABLE: 'PrismAI ne peut pas encore traiter ce type de demande. Réessaie un peu plus tard.',
+    SERVICE_UNAVAILABLE: 'PrismAI n’a pas pu traiter la demande. Aucun crédit non utilisé ne sera débité.',
     INSUFFICIENT_CREDITS: 'Crédits insuffisants pour démarrer cette génération.',
     RATE_LIMITED: 'Trop de requêtes rapprochées. Patiente un instant avant de réessayer.',
     REQUEST_ALREADY_PROCESSED: 'Cette requête a déjà été revendiquée ou traitée. PrismAI ne relance pas un appel potentiellement facturable ; envoie une nouvelle requête seulement après avoir vérifié l’historique.',
     UNAUTHORIZED: 'Ta session a expiré. Reconnecte-toi pour continuer.',
-    CHAT_STREAM_FAILED: 'La génération a échoué. Vérifie la configuration puis réessaie.',
+    CHAT_STREAM_FAILED: 'La génération a échoué. Réessaie dans un instant.',
     CONVERSATION_NOT_FOUND: 'Cette conversation est introuvable ou n’est pas accessible.',
   };
   return labels[code] ?? 'La requête n’a pas abouti. Réessaie dans un instant.';
@@ -169,7 +169,7 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
       if (Number.isFinite(returnedBalance)) setBalance(returnedBalance);
       const reader = response.body?.getReader();
       if (!reader) throw new Error('CHAT_STREAM_FAILED');
-      const decoder = new TextDecoder(); let buffer = ''; let answer = ''; let fallbackUsed = false;
+      const decoder = new TextDecoder(); let buffer = ''; let answer = '';
       const handleEvent = (frame: string) => {
         const dataLine = frame.split('\n').find((line) => line.startsWith('data:'));
         if (!dataLine) return;
@@ -178,7 +178,6 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
           answer += event.text;
           setMessages([...next, { ...assistantMessage, content: answer }]);
         } else if (event.type === 'run.completed') {
-          fallbackUsed = event.fallbackUsed === true;
           setMessages([...next, { ...assistantMessage, content: answer }]);
         }
       };
@@ -191,7 +190,6 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
       }
       buffer += decoder.decode(); if (buffer.trim()) handleEvent(buffer);
       if (!answer) setMessages(next);
-      if (fallbackUsed) setNotice('PrismAI a utilisé une solution de repli pour terminer la demande.');
       await refreshConversations();
     } catch (caught) {
       if (caught instanceof Error && caught.name === 'AbortError') { setMessages((current) => current.filter((message) => message.id !== assistantMessage.id)); setNotice('Génération arrêtée.'); }
@@ -234,7 +232,7 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
         <section className="chat-thread" aria-label="Messages de la conversation" aria-live="polite">
           {messages.length === 0 ? <div className="chat-welcome"><div className="chat-welcome-prism"><span className="prism" aria-hidden="true" /></div><p className="chat-eyebrow">CHAT PRISMAI</p><h1>Une idée, plusieurs perspectives.</h1><p className="chat-welcome-copy">Pose ta question. PrismAI choisira automatiquement une solution configurée et adaptée à la demande.</p>
             <div className="chat-suggestions">{SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendText(suggestion)} disabled={!hasModels}>{suggestion}<span aria-hidden="true">↗</span></button>)}</div>
-            {!hasModels && <div className="chat-provider-empty"><strong>PrismAI est en cours de configuration.</strong><span>Le Chat sera disponible dès que son catalogue de capacités aura été validé.</span></div>}
+            {!hasModels && <div className="chat-unavailable"><strong>PrismAI est en cours de configuration.</strong><span>Le Chat sera disponible très bientôt.</span></div>}
           </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong></div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
               {message.role === 'assistant' && message.content && <div className="chat-message-actions"><button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copier la réponse">Copier</button>{index === messages.length - 1 && <button type="button" onClick={() => regenerate(index)} disabled={busy || !hasModels}>Régénérer</button>}</div>}
             </div></article>)}</div>}

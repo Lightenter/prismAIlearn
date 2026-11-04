@@ -398,8 +398,8 @@ p { color: var(--muted); line-height: 1.65; }
 .chat-suggestions button:hover:not(:disabled) { border-color: rgba(96,231,255,.45); background: rgba(39,58,122,.65); }
 .chat-suggestions button:disabled { cursor: not-allowed; opacity: .55; }
 .chat-suggestions button span { color: #79e4f7; }
-.chat-provider-empty { display: grid; gap: 5px; max-width: 790px; margin-top: 18px; padding: 13px 15px; border: 1px solid rgba(115,146,255,.21); border-radius: 12px; color: #c4cbed; background: rgba(77,91,178,.09); font-size: .78rem; line-height: 1.5; }
-.chat-provider-empty strong { color: #f0eeff; }
+.chat-unavailable { display: grid; gap: 5px; max-width: 790px; margin-top: 18px; padding: 13px 15px; border: 1px solid rgba(115,146,255,.21); border-radius: 12px; color: #c4cbed; background: rgba(77,91,178,.09); font-size: .78rem; line-height: 1.5; }
+.chat-unavailable strong { color: #f0eeff; }
 .chat-message-list { display: flex; flex-direction: column; gap: 28px; padding-bottom: 18px; }
 .chat-message { display: flex; align-items: flex-start; gap: 13px; }
 .chat-message-avatar { display: grid; flex: 0 0 31px; place-items: center; width: 31px; height: 31px; border: 1px solid rgba(145,162,255,.22); border-radius: 10px; color: #fff; background: rgba(47,57,125,.65); font-size: .75rem; font-weight: 800; }

@@ -10,7 +10,7 @@ type ProfileRow = { display_name: string | null; email: string | null; role: str
 // Décrit les montants renvoyés par la RPC limitée à l’utilisateur authentifié.
 type CreditSummaryRow = { wallet_available: number | string; daily_available: number | string; total_available: number | string; quota_date: string };
 // Décrit les champs réellement lus dans l’historique de crédits.
-type TransactionRow = { id: string; amount: number | string; type: string; model_used: string | null; created_at: string };
+type TransactionRow = { id: string; amount: number | string; type: string; created_at: string };
 
 // Traduit le rôle Supabase en libellé visible sans inventer de forfait.
 function planLabel(role: string | null | undefined) {
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
   const [profileResult, creditSummaryResult, transactionResult] = await Promise.all([
     supabase.from('profiles').select('display_name,email,role').eq('id', user.id).maybeSingle<ProfileRow>(),
     supabase.rpc('get_my_credit_summary'),
-    supabase.from('credit_transactions').select('id,amount,type,model_used,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+    supabase.from('credit_transactions').select('id,amount,type,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
   ]);
   // Utilise le profil réel lorsqu’il existe, sinon les métadonnées Auth connues côté serveur.
   const profile = profileResult.data;
