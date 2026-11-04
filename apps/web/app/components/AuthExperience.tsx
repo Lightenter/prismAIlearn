@@ -71,7 +71,7 @@ export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
     const params = new URLSearchParams(window.location.search);
     if (params.get('confirmed') === '1') setNotice({ tone: 'success', text: 'Adresse e-mail confirmée. Tu peux maintenant te connecter.' });
     if (params.get('error') === 'verification') setNotice({ tone: 'error', text: 'Le lien de vérification est invalide ou a expiré. Demande un nouvel e-mail.' });
-    if (params.get('error') === 'oauth') setNotice({ tone: 'error', text: 'Connexion Google indisponible. Vérifie que le fournisseur est activé et configuré dans Supabase Auth.' });
+    if (params.get('error') === 'oauth') setNotice({ tone: 'error', text: 'Connexion Google indisponible pour le moment. Utilise ton e-mail ou réessaie plus tard.' });
   }, []);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {

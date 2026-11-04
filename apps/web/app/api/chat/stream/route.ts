@@ -5,7 +5,7 @@ import { getConfiguredModels } from '@prismai/provider-router';
 import { createRunEvents, encodeSse, createRunId, runChatTurn } from '@prismai/chat-runtime';
 import { consumeRateLimit } from '@prismai/db';
 import { createSupabaseServerClient } from '../../../../lib/supabaseServer';
-import { isInvalidSessionError, runtimeChatErrorResponse, unauthorizedResponse, unexpectedChatErrorResponse } from '../../../../lib/chatErrors';
+import { isInvalidSessionError, runtimeChatErrorResponse, unauthorizedResponse, unexpectedChatErrorResponse, PUBLIC_CHAT_CODES } from '../../../../lib/chatErrors';
 import { getChatPlanTier } from '../../../../lib/chatPlan';
 
 export async function POST(request: Request) {
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   try {
     const input = chatRequestSchema.parse(await request.json());
     const models = getConfiguredModels();
-    if (!models.length) return NextResponse.json({ error: 'NO_PROVIDER_CONFIGURED' }, { status: 503 });
+    if (!models.length) return NextResponse.json({ error: PUBLIC_CHAT_CODES.NO_PROVIDER_CONFIGURED }, { status: 503 });
     if (input.conversationId) {
       const { data, error } = await supabase.from('conversations').select('id').eq('id', input.conversationId).eq('user_id', user.id).maybeSingle();
       if (error) return unexpectedChatErrorResponse('CHAT_STREAM_FAILED');

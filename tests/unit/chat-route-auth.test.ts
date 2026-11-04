@@ -61,7 +61,7 @@ describe('POST /api/chat authentification et erreurs', () => {
     mocks.getConfiguredModels.mockReturnValue([]);
     const response = await POST(request());
     expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({ error: 'NO_PROVIDER_CONFIGURED' });
+    expect(await response.json()).toEqual({ error: 'CHAT_UNAVAILABLE' });
     expect(mocks.runChatTurn).not.toHaveBeenCalled();
   });
   it('transmet l’identité vérifiée, ignore userId falsifié et masque les métadonnées provider', async () => {
