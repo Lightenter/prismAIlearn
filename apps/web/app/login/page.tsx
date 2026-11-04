@@ -42,7 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell eyebrow="PrismAI · Un seul Prisme" title="Retrouve ton espace PrismAI" description="Connecte-toi pour explorer et travailler avec l’IA.">
+    <AuthShell eyebrow="PrismAI · Connexion" title="Retrouve ton espace PrismAI" description="Connecte-toi pour explorer et travailler avec l’IA.">
       {/* Formulaire principal connecté à Supabase via le handler serveur. */}
       <form className="auth-form" onSubmit={submit}>
         <label htmlFor="login-email">Adresse e-mail</label>
