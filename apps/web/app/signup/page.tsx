@@ -70,7 +70,7 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthShell eyebrow="PrismAI · Un seul Prisme" title="Crée ton compte PrismAI" description="Rejoins ton espace pour explorer et travailler avec l’IA.">
+    <AuthShell variant="signup" eyebrow="PrismAI · Inscription" title="Crée ton compte PrismAI" description="Rejoins ton espace pour explorer et travailler avec l’IA.">
       {/* Formulaire d’inscription connecté à Supabase via le handler serveur. */}
       <form className="auth-form" onSubmit={submit}>
         <label htmlFor="signup-name">Nom complet</label>

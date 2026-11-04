@@ -159,7 +159,7 @@ export function AuthExperience({ initialMode }: { initialMode: AuthMode }) {
         ) : (
           <section className="auth-card auth-card-login" aria-labelledby="login-title">
             <Link className="wordmark auth-card-wordmark" href="/" aria-label="PrismAI, accueil"><span className="prism" aria-hidden="true"/>Prism<span>AI</span></Link>
-            <p className="auth-slogan">Toutes les IA. Un seul Prisme.</p>
+            <p className="auth-slogan">Une IA pour tout ton travail.</p>
             <PrismIllustration />
             <p className="auth-eyebrow auth-login-eyebrow">Ton espace IA, unifié</p>
             <h1 id="login-title" className="auth-card-title">Content de te revoir.</h1>

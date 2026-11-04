@@ -6,10 +6,16 @@ import type { ReactNode } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 
 // Décrit les propriétés du shell partagé des pages Auth.
-type AuthShellProps = { children: ReactNode; eyebrow: string; title: string; description: string };
+type AuthShellProps = { children: ReactNode; eyebrow: string; title: string; description: string; variant?: 'login' | 'signup' };
+
+// Message d’accueil du panneau de marque, adapté à la connexion ou à l’inscription.
+const welcome = {
+  login: { title: <>Content de te <span>revoir</span></>, copy: <>Connecte-toi pour retrouver<br />tes conversations et tes crédits.</> },
+  signup: { title: <>Bienvenue sur <span>PrismAI</span></>, copy: <>Crée ton compte en une minute.<br />300 crédits t’attendent pour commencer.</> },
+};
 
 // Rend la structure commune aux écrans de connexion et d’inscription.
-export function AuthShell({ children, eyebrow, title, description }: AuthShellProps) {
+export function AuthShell({ children, eyebrow, title, description, variant = 'login' }: AuthShellProps) {
   return (
     <div className="auth-page">
       {/* Retour discret vers la landing, sans barre de navigation marketing. */}
@@ -19,10 +25,10 @@ export function AuthShell({ children, eyebrow, title, description }: AuthShellPr
         {/* Bloc de marque et d’accueil inspiré de la maquette fournie. */}
         <section className="auth-visual" aria-label="Présentation PrismAI">
           <Link className="auth-brand" href="/"><span className="prism" aria-hidden="true" />PrismAI</Link>
-          <p className="auth-visual-slogan">Toutes les IA. Un seul Prisme.</p>
+          <p className="auth-visual-slogan">Une IA pour tout ton travail.</p>
           <div className="auth-prism-art" aria-hidden="true"><div className="auth-prism-glow" /><div className="auth-prism-shape" /><span className="auth-spark spark-one" /><span className="auth-spark spark-two" /><span className="auth-spark spark-three" /></div>
-          <h1>Bienvenue sur <span>PrismAI</span></h1>
-          <p className="auth-visual-copy">Content de te revoir.<br />Connecte-toi pour retrouver ton espace IA.</p>
+          <h1>{welcome[variant].title}</h1>
+          <p className="auth-visual-copy">{welcome[variant].copy}</p>
         </section>
         {/* Panneau de formulaire dont la largeur reste identique entre login et signup. */}
         <section className="auth-form-panel">
