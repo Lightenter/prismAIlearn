@@ -12,7 +12,7 @@ describe('contrats de l’architecture PrismAI', () => {
     const events = createRunEvents(crypto.randomUUID(), [{ role: 'user', content: 'Bonjour' }], 'Réponse', true, 1);
     expect(events.map((event) => event.sequence)).toEqual([0, 1, 2]);
     expect(encodeSse(events[0])).toContain('event: run.started');
-    expect(events[2]).toMatchObject({ type: 'run.completed', fallbackUsed: true });
+    expect(events[2]).toMatchObject({ type: 'run.completed', fallbackUsed: true, credits: 1 });
     expect(events[2]).not.toHaveProperty('provider');
     expect(events[2]).not.toHaveProperty('model');
   });

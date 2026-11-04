@@ -5,11 +5,12 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 
 type Conversation = { id: string; title: string; created_at: string; updated_at: string };
-type Message = { id: string; role: 'user' | 'assistant'; content: string };
+type Message = { id: string; role: 'user' | 'assistant'; content: string; creditsSpent?: number };
 type StoredMessage = { id: string; role: string; content: string };
 
 const SUGGESTIONS = ['Aide-moi à structurer une idée', 'Explique-moi un sujet simplement', 'Écris un plan clair pour mon projet'];
 const newId = () => typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+const formatCreditCost = (value: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(value)} crédit${value === 1 ? '' : 's'} utilisé${value === 1 ? '' : 's'}`;
 
 function dateGroup(dateValue: string) {
   const date = new Date(dateValue);
@@ -58,7 +59,7 @@ function MarkdownMessage({ content }: { content: string }) {
 
 function errorLabel(code: string) {
   const labels: Record<string, string> = {
-    CHAT_UNAVAILABLE: 'Le Chat PrismAI n’est pas encore disponible. Réessaie un peu plus tard.',
+    CHAT_UNAVAILABLE: 'Le Chat PrismAI n’est pas disponible pour le moment. Réessaie un peu plus tard.',
     CAPABILITY_UNAVAILABLE: 'Cette capacité n’est pas active dans le Chat. Tu peux coller le texte à traiter directement dans la conversation.',
     TASK_UNAVAILABLE: 'PrismAI ne peut pas encore traiter ce type de demande. Réessaie un peu plus tard.',
     SERVICE_UNAVAILABLE: 'PrismAI n’a pas pu traiter la demande. Aucun crédit non utilisé ne sera débité.',
@@ -170,7 +171,7 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
       if (Number.isFinite(returnedBalance)) setBalance(returnedBalance);
       const reader = response.body?.getReader();
       if (!reader) throw new Error('CHAT_STREAM_FAILED');
-      const decoder = new TextDecoder(); let buffer = ''; let answer = '';
+      const decoder = new TextDecoder(); let buffer = ''; let answer = ''; let completed = false;
       const handleEvent = (frame: string) => {
         const dataLine = frame.split('\n').find((line) => line.startsWith('data:'));
         if (!dataLine) return;
@@ -179,7 +180,9 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
           answer += event.text;
           setMessages([...next, { ...assistantMessage, content: answer }]);
         } else if (event.type === 'run.completed') {
-          setMessages([...next, { ...assistantMessage, content: answer }]);
+          completed = true;
+          const creditsSpent = Number(event.credits);
+          setMessages([...next, { ...assistantMessage, content: answer, ...(Number.isFinite(creditsSpent) && creditsSpent >= 0 ? { creditsSpent } : {}) }]);
         }
       };
       while (true) {
@@ -190,7 +193,7 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
         for (const frame of frames) handleEvent(frame);
       }
       buffer += decoder.decode(); if (buffer.trim()) handleEvent(buffer);
-      if (!answer) setMessages(next);
+      if (!answer && !completed) setMessages(next);
       await refreshConversations();
     } catch (caught) {
       if (caught instanceof Error && caught.name === 'AbortError') { setMessages((current) => current.filter((message) => message.id !== assistantMessage.id)); setNotice('Génération arrêtée.'); }
@@ -233,8 +236,8 @@ export function ChatWorkspace({ initialConversations, initialBalance, chatAvaila
         <section className="chat-thread" aria-label="Messages de la conversation" aria-live="polite">
           {messages.length === 0 ? <div className="chat-welcome"><div className="chat-welcome-prism"><span className="prism" aria-hidden="true" /></div><p className="chat-eyebrow">CHAT PRISMAI</p><h1>Une idée, plusieurs perspectives.</h1><p className="chat-welcome-copy">Pose ta question. PrismAI choisira automatiquement une solution configurée et adaptée à la demande.</p>
             <div className="chat-suggestions">{SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendText(suggestion)} disabled={!hasModels}>{suggestion}<span aria-hidden="true">↗</span></button>)}</div>
-            {!hasModels && <div className="chat-unavailable"><strong>PrismAI est en cours de configuration.</strong><span>Le Chat sera disponible très bientôt.</span></div>}
-          </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong></div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
+            {!hasModels && <div className="chat-unavailable"><strong>Le Chat n’est pas disponible pour le moment.</strong><span>Réessaie un peu plus tard.</span></div>}
+          </div> : <div className="chat-message-list">{messages.map((message, index) => <article className={`chat-message chat-message-${message.role}`} key={message.id}><div className="chat-message-avatar" aria-hidden="true">{message.role === 'assistant' ? <span className="prism" /> : 'M'}</div><div className="chat-message-body"><div className="chat-message-meta"><strong>{message.role === 'assistant' ? 'PrismAI' : 'Vous'}</strong>{message.role === 'assistant' && message.creditsSpent !== undefined && <span>{formatCreditCost(message.creditsSpent)}</span>}</div>{message.content ? <MarkdownMessage content={message.content} /> : busy && message.role === 'assistant' ? <span className="chat-thinking"><i /><i /><i /> Réflexion en cours…</span> : null}
               {message.role === 'assistant' && message.content && <div className="chat-message-actions"><button type="button" onClick={() => void copyMessage(message.content)} aria-label="Copier la réponse">Copier</button>{index === messages.length - 1 && <button type="button" onClick={() => regenerate(index)} disabled={busy || !hasModels}>Régénérer</button>}</div>}
             </div></article>)}</div>}
           {error && <div className="chat-alert" role="alert">{error}<button type="button" onClick={() => setError('')}>Fermer</button></div>}

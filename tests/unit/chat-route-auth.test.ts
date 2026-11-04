@@ -90,4 +90,20 @@ describe('POST /api/chat authentification et erreurs', () => {
     expect(response.status).toBe(402);
     expect(await response.json()).toEqual({ error: 'INSUFFICIENT_CREDITS' });
   });
+  it('masque le code interne quand le service de réponse échoue', async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: '33333333-3333-4333-8333-333333333333' } }, error: null });
+    mocks.runChatTurn.mockRejectedValue(Object.assign(new Error('provider/model secret detail'), { code: 'PROVIDER_UNAVAILABLE' }));
+    const response = await POST(request());
+    const body = await response.text();
+    expect(response.status).toBe(503);
+    expect(body).toBe('{"error":"SERVICE_UNAVAILABLE"}');
+    expect(body).not.toMatch(/provider|model/i);
+  });
+  it('masque le code interne quand aucune capacité ne convient', async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: '33333333-3333-4333-8333-333333333333' } }, error: null });
+    mocks.runChatTurn.mockRejectedValue(Object.assign(new Error('model secret detail'), { code: 'NO_MODEL_FOR_CAPABILITY' }));
+    const response = await POST(request());
+    expect(response.status).toBe(422);
+    expect(await response.text()).toBe('{"error":"TASK_UNAVAILABLE"}');
+  });
 });
