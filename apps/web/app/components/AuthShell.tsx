@@ -2,6 +2,8 @@
 import Link from 'next/link';
 // Importe le type ReactNode sans embarquer de code runtime inutile.
 import type { ReactNode } from 'react';
+// Importe la bascule clair/sombre.
+import { ThemeToggle } from './ThemeToggle';
 
 // Décrit les propriétés du shell partagé des pages Auth.
 type AuthShellProps = { children: ReactNode; eyebrow: string; title: string; description: string };
@@ -11,7 +13,7 @@ export function AuthShell({ children, eyebrow, title, description }: AuthShellPr
   return (
     <div className="auth-page">
       {/* Retour discret vers la landing, sans barre de navigation marketing. */}
-      <div className="auth-top container"><Link className="auth-back" href="/" aria-label="Retour à la landing">←</Link></div>
+      <div className="auth-top container"><Link className="auth-back" href="/" aria-label="Retour à la landing">←</Link><ThemeToggle /></div>
       {/* Carte principale en deux colonnes sur desktop et une colonne sur mobile. */}
       <main className="auth-main container">
         {/* Bloc de marque et d’accueil inspiré de la maquette fournie. */}

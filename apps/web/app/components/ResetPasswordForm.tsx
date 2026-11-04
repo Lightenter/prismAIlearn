@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ThemeToggle } from './ThemeToggle';
 import { useState, type FormEvent } from 'react';
 
 export function ResetPasswordForm() {
@@ -25,7 +26,7 @@ export function ResetPasswordForm() {
 
   return (
     <main className="auth-utility-page">
-      <Link className="wordmark auth-wordmark" href="/"><span className="prism" aria-hidden="true" />Prism<span>AI</span></Link>
+      <div className="auth-utility-top"><Link className="wordmark auth-wordmark" href="/"><span className="prism" aria-hidden="true" />PrismAI</Link><ThemeToggle /></div>
       <section className="auth-utility-card" aria-labelledby="reset-title">
         <p className="auth-eyebrow">Sécurité du compte</p>
         <h1 id="reset-title">Choisis un nouveau mot de passe</h1>

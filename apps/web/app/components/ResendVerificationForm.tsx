@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ThemeToggle } from './ThemeToggle';
 import { useState, type FormEvent } from 'react';
 
 export function ResendVerificationForm({ initialEmail = '' }: { initialEmail?: string }) {
@@ -22,7 +23,7 @@ export function ResendVerificationForm({ initialEmail = '' }: { initialEmail?: s
 
   return (
     <main className="auth-utility-page">
-      <Link className="wordmark auth-wordmark" href="/"><span className="prism" aria-hidden="true" />Prism<span>AI</span></Link>
+      <div className="auth-utility-top"><Link className="wordmark auth-wordmark" href="/"><span className="prism" aria-hidden="true" />PrismAI</Link><ThemeToggle /></div>
       <section className="auth-utility-card" aria-labelledby="verify-title">
         <div className="auth-utility-icon" aria-hidden="true">✉</div>
         <p className="auth-eyebrow">Étape de vérification</p>

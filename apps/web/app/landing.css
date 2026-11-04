@@ -4,6 +4,9 @@
 @tailwind utilities;
 
 @layer base {
+  /* Jetons de couleur : noir profond et violet néon en sombre, variante claire via [data-theme="light"]. */
+  .landing { --lp-ground: 10 10 13; --lp-surface: 19 19 24; --lp-surface-hover: 23 23 29; --lp-raise: 28 28 35; --lp-edge: 38 38 47; --lp-ink: 245 245 247; --lp-soft: 180 180 189; --lp-accent: 143 60 255; --lp-accent-hover: 157 82 255; --lp-accent-press: 122 42 230; --lp-cyan: 94 242 255; color-scheme: dark; }
+  :root[data-theme='light'] .landing { --lp-ground: 246 246 248; --lp-surface: 236 236 241; --lp-surface-hover: 230 230 236; --lp-raise: 255 255 255; --lp-edge: 223 223 230; --lp-ink: 13 13 18; --lp-soft: 78 78 90; --lp-accent: 122 42 230; --lp-accent-hover: 143 60 255; --lp-accent-press: 106 31 212; --lp-cyan: 14 116 144; color-scheme: light; }
   /* Reset local (preflight désactivé) : neutralise les styles globaux hérités sur la landing. */
   :where(.landing), :where(.landing) *, :where(.landing) ::before, :where(.landing) ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: currentColor; }
   :where(.landing) h1, :where(.landing) h2, :where(.landing) h3, :where(.landing) p, :where(.landing) figure, :where(.landing) dl, :where(.landing) dd, :where(.landing) pre, :where(.landing) fieldset, :where(.landing) legend { margin: 0; padding: 0; color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; max-width: none; background: none; }
@@ -15,13 +18,20 @@
   :where(.landing) img { display: block; max-width: 100%; height: auto; }
   :where(.landing) table { border-collapse: collapse; }
   :where(.landing) { font-feature-settings: 'cv11', 'ss01'; line-height: 1.5; }
-  :where(.landing) ::selection { background: #8F3CFF; color: #fff; }
-  :where(.landing) :focus-visible { outline: 2px solid #5EF2FF; outline-offset: 3px; border-radius: 4px; }
+  :where(.landing) ::selection { background: rgb(var(--lp-accent)); color: #fff; }
+  :where(.landing) :focus-visible { outline: 2px solid rgb(var(--lp-cyan)); outline-offset: 3px; border-radius: 4px; }
 }
 
 @layer components {
   /* Bouton unique de la page : aplat accent, rayon 8px, retour au toucher. */
   .lp-btn { @apply inline-flex items-center justify-center rounded-lg bg-accent font-medium text-white transition-[background-color,transform] duration-200 hover:bg-accent-hover active:scale-[0.98] active:bg-accent-press; }
+  /* Bascule clair / sombre de la landing. */
+  .landing .theme-toggle { @apply grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface text-ink transition-colors hover:bg-raise; }
+  .landing .theme-toggle svg { width: 18px; height: 18px; }
+  .landing .theme-toggle .icon-sun { display: none; }
+  :root[data-theme='light'] .landing .theme-toggle .icon-sun { display: block; }
+  :root[data-theme='light'] .landing .theme-toggle .icon-moon { display: none; }
+  .nav-link { @apply whitespace-nowrap transition-colors hover:text-ink; }
   .link-arrow { @apply inline-flex items-center gap-2 font-medium text-ink transition-colors hover:text-cyan; }
   .link-arrow span { @apply transition-transform duration-200; }
   .link-arrow:hover span { transform: translateX(4px); }
@@ -35,7 +45,7 @@
   .demo-body > * { transition: opacity .22s ease, transform .22s ease; }
   .demo-body.is-switching > * { opacity: 0; transform: translateY(6px); }
 
-  .feature { @apply min-w-0 rounded-lg bg-surface p-6 transition-colors duration-300 hover:bg-[#17171D] md:p-7; }
+  .feature { @apply min-w-0 rounded-lg bg-surface p-6 transition-colors duration-300 hover:bg-surface-hover md:p-7; }
   .feature-ui { @apply lg:min-h-[188px] rounded-lg bg-raise p-4 transition-transform duration-300; }
   .feature:hover .feature-ui { transform: translateY(-4px); }
   .facet { @apply flex items-center gap-2.5; }
@@ -63,7 +73,7 @@
   .seg { @apply relative cursor-pointer; }
   .seg span { @apply flex h-10 items-center justify-center rounded-md text-[15px] font-medium text-soft transition-colors; }
   .seg input:checked + span { @apply bg-raise text-ink; }
-  .seg input:focus-visible + span { outline: 2px solid #5EF2FF; outline-offset: 2px; }
+  .seg input:focus-visible + span { outline: 2px solid rgb(var(--lp-cyan)); outline-offset: 2px; }
 
   .photo { @apply relative m-0 overflow-hidden; }
   .photo img { clip-path: polygon(0 0, calc(100% - 48px) 0, 100% 48px, 100% 100%, 0 100%); transition: transform 1.2s cubic-bezier(.16,1,.3,1); }

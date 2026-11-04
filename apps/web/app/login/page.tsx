@@ -29,7 +29,7 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.sessionEstablished !== true) {
-        setError(result.error === 'AUTH_NOT_CONFIGURED' ? 'Le service d’authentification n’est pas configuré sur ce serveur.' : result.error === 'EMAIL_NOT_CONFIRMED' ? 'Confirme ton adresse e-mail avant de te connecter.' : result.error === 'AUTH_RATE_LIMITED' ? 'Trop de tentatives. Réessaie dans quelques minutes.' : 'Adresse e-mail ou mot de passe incorrect.');
+        setError(result.error === 'AUTH_NOT_CONFIGURED' ? 'La connexion est momentanément indisponible. Réessaie plus tard.' : result.error === 'EMAIL_NOT_CONFIRMED' ? 'Confirme ton adresse e-mail avant de te connecter.' : result.error === 'AUTH_RATE_LIMITED' ? 'Trop de tentatives. Réessaie dans quelques minutes.' : 'Adresse e-mail ou mot de passe incorrect.');
         return;
       }
       router.replace('/dashboard');

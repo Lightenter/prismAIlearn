@@ -1,5 +1,6 @@
 // Importe Link pour les accès internes sans rechargement complet.
 import Link from 'next/link';
+import { ThemeToggle } from '../components/ThemeToggle';
 // Importe redirect pour bloquer le rendu privé sans session vérifiée.
 import { redirect } from 'next/navigation';
 // Importe le client SSR qui applique les cookies et les politiques RLS.
@@ -67,7 +68,7 @@ export default async function DashboardPage() {
   return (
     <div className="dashboard-page">
       {/* Barre supérieure inspirée de la référence fournie. */}
-      <header className="dashboard-header"><Link className="dashboard-wordmark" href="/"><span className="prism" aria-hidden="true" />PrismAI</Link><p>Toutes les IA. Un seul Prisme.</p><div className="dashboard-header-actions"><span className="dashboard-bell" aria-label="Notifications">⌁</span><span className="dashboard-top-credit">{balance === null ? 'Crédits indisponibles' : `${balance.toLocaleString('fr-FR')} crédits`}</span><span className="dashboard-user-chip">{firstName}<small>{profile?.role ? planLabel(profile.role) : 'Profil'}</small></span></div></header>
+      <header className="dashboard-header"><Link className="dashboard-wordmark" href="/"><span className="prism" aria-hidden="true" />PrismAI</Link><p>Toutes les IA. Un seul Prisme.</p><div className="dashboard-header-actions"><ThemeToggle /><span className="dashboard-bell" aria-label="Notifications">⌁</span><span className="dashboard-top-credit">{balance === null ? 'Crédits indisponibles' : `${balance.toLocaleString('fr-FR')} crédits`}</span><span className="dashboard-user-chip">{firstName}<small>{profile?.role ? planLabel(profile.role) : 'Profil'}</small></span></div></header>
       {/* Structure principale avec rail latéral, contenu et colonne d’informations. */}
       <div className="dashboard-layout">
         {/* Rail latéral aligné sur les studios de PrismAI. */}
