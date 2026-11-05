@@ -13,7 +13,7 @@ function describeAuthError(code: string) {
   if (code === 'ACCOUNT_ALREADY_EXISTS') return 'Cette adresse e-mail possède déjà un compte. Connecte-toi plutôt.';
   if (code === 'PASSWORD_TOO_SHORT' || code === 'INVALID_REQUEST') return 'Vérifie les informations saisies et la longueur du mot de passe.';
   if (code === 'AUTH_NOT_CONFIGURED') return 'La connexion est momentanément indisponible. Réessaie plus tard.';
-  if (code === 'AUTH_UNAVAILABLE') return 'Le service d’authentification est temporairement indisponible. Réessaie plus tard.';
+  if (code === 'AUTH_UNAVAILABLE') return 'Impossible de joindre le serveur d’authentification depuis cet environnement. Vérifie la connexion réseau, puis réessaie.';
   return 'L’opération n’a pas abouti. Vérifie tes informations et réessaie.';
 }
 

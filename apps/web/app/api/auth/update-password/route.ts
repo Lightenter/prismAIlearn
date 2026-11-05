@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authConfigMissingResponse, authErrorResponse } from '../../../../lib/authErrors';
+import { authConfigMissingResponse, authFailureResponse } from '../../../../lib/authErrors';
 import { createSupabaseServerClient } from '../../../../lib/supabaseServer';
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError || !auth.user) return NextResponse.json({ error: 'SESSION_REQUIRED' }, { status: 401 });
     const { error } = await supabase.auth.updateUser({ password: body.password });
-    if (error) return authErrorResponse(error.message, 502);
+    if (error) return authFailureResponse(error);
     return NextResponse.json({ ok: true });
   } catch { return NextResponse.json({ error: 'AUTH_UNAVAILABLE' }, { status: 502 }); }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authConfigMissingResponse, authErrorResponse } from '../../../../lib/authErrors';
+import { authConfigMissingResponse, authFailureResponse } from '../../../../lib/authErrors';
 import { getAppOrigin } from '../../../../lib/requestOrigin';
 import { createSupabaseServerClient } from '../../../../lib/supabaseServer';
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   callback.searchParams.set('next', '/reset-password');
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(body.email.trim(), { redirectTo: callback.toString() });
-    if (error) return authErrorResponse(error.message, 502);
+    if (error) return authFailureResponse(error);
     return NextResponse.json({ ok: true });
   } catch { return NextResponse.json({ error: 'AUTH_UNAVAILABLE' }, { status: 502 }); }
 }

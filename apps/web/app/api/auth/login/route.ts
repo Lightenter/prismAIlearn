@@ -1,7 +1,7 @@
 // Importe la réponse JSON sécurisée de Next.js.
 import { NextResponse } from 'next/server';
 // Importe les réponses d’erreur normalisées du parcours Auth.
-import { authConfigMissingResponse, authErrorResponse } from '../../../../lib/authErrors';
+import { authConfigMissingResponse, authFailureResponse } from '../../../../lib/authErrors';
 // Importe le client Supabase SSR qui gère les cookies httpOnly.
 import { createSupabaseServerClient } from '../../../../lib/supabaseServer';
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Demande à Supabase de vérifier les identifiants et de poser le cookie de session.
     const { data, error } = await supabase.auth.signInWithPassword({ email: body.email.trim(), password: body.password });
     // Convertit l’erreur fournisseur en code stable côté navigateur.
-    if (error) return authErrorResponse(error.message, 502);
+    if (error) return authFailureResponse(error);
     // Refuse une réussite sans session exploitable pour le Dashboard.
     if (!data.session) return NextResponse.json({ error: 'SESSION_NOT_ESTABLISHED' }, { status: 401 });
     // Vérifie l’identité depuis le cookie SSR plutôt que depuis la réponse du navigateur.

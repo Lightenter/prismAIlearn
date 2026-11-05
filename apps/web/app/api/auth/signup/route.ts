@@ -1,7 +1,7 @@
 // Importe la réponse JSON sécurisée de Next.js.
 import { NextResponse } from 'next/server';
 // Importe les réponses d’erreur normalisées du parcours Auth.
-import { authConfigMissingResponse, authErrorResponse } from '../../../../lib/authErrors';
+import { authConfigMissingResponse, authFailureResponse } from '../../../../lib/authErrors';
 // Importe la construction d’URL publique pour le lien de confirmation.
 import { getAppOrigin } from '../../../../lib/requestOrigin';
 // Importe le client Supabase SSR qui écrit les cookies httpOnly.
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       options: { data: { full_name: body.fullName.trim(), display_name: body.fullName.trim(), ...(typeof body.referralCode === 'string' && body.referralCode.trim() ? { referral_code: body.referralCode.trim() } : {}) }, emailRedirectTo: callback.toString() },
     });
     // Convertit les erreurs Supabase en codes stables pour le frontend.
-    if (error) return authErrorResponse(error.message);
+    if (error) return authFailureResponse(error);
     // Attend la confirmation e-mail au lieu d’ouvrir un Dashboard sans session.
     if (!data.session) return NextResponse.json({ ok: true, sessionEstablished: false, emailConfirmationRequired: true }, { status: 201 });
     // Vérifie que le cookie de session posé par l’appel est réellement lisible côté serveur.
