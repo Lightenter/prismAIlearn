@@ -37,14 +37,42 @@ infra/                    R2, LiteLLM, Redis et CI
 
 ## Installation
 
+### Démarrage en une commande
+
+```bash
+git clone https://github.com/Lightenter/prismAIlearn.git
+cd prismAIlearn
+pnpm start:local
+```
+
+Le script `scripts/start-local.sh` vérifie Node.js 20+, active pnpm via Corepack, installe les dépendances, crée `apps/web/.env.local` s’il manque, compile les packages internes puis démarre le web et l’API. Il est idempotent : relancé, il ne réinstalle rien.
+
+Ouvrez ensuite **<http://localhost:3000>**. La page tarifs est sur **<http://localhost:3000/pricing>**.
+
+### Démarrage manuel
+
 ```bash
 corepack enable
 pnpm install
-# Facultatif : cp .env.example .env.local, puis renseigner les variables nécessaires aux intégrations.
+pnpm build --filter './packages/*'   # les packages exposent dist/ : sans build, le web ne démarre pas
 pnpm dev
 ```
 
-L’application web écoute sur `http://localhost:3000` et l’API interne sur `API_PORT` si elle est démarrée séparément. Les pages marketing et la référence UI sont visibles sans secret ; les actions privées exigent Supabase Auth et les clés serveur correspondantes.
+L’application web écoute sur `http://localhost:3000` et l’API interne sur `http://localhost:3001`. Les pages marketing et la référence UI sont visibles sans secret ; les actions privées exigent Supabase Auth et les clés serveur correspondantes.
+
+### Authentification en local
+
+L’inscription, la connexion et le dashboard nécessitent un projet Supabase accessible depuis votre machine. Après le premier lancement, renseignez `apps/web/.env.local` :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_COOKIE_SECURE=false   # true uniquement si vous servez le site en HTTPS
+```
+
+Attention : Next.js ne lit que `apps/web/.env.local`. Un `.env.local` placé à la racine du dépôt est ignoré par l’application web. Ne placez jamais `SUPABASE_SERVICE_ROLE_KEY` dans une variable `NEXT_PUBLIC_*`.
+
+Ajoutez aussi `http://localhost:3000/auth/callback` dans les URL de redirection autorisées de Supabase Auth (Authentication → URL Configuration).
 
 ## Variables et sécurité
 
