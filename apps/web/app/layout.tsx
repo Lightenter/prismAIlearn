@@ -1,5 +1,9 @@
 // Importe les styles globaux nécessaires à toutes les routes.
 import './globals.css';
+// Charge Inter depuis le paquet local : aucune requête vers Google Fonts au build ni au runtime.
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
 // Définit les métadonnées publiques de PrismAI.
 export const metadata = { title: 'PrismAI', description: 'Une IA pour tout ton travail.' };
 

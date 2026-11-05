@@ -2,14 +2,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ThemeToggle } from './components/ThemeToggle';
-import { Inter } from 'next/font/google';
 import { CtaForm } from './components/landing/CtaForm';
 import { LandingEffects } from './components/landing/LandingEffects';
 import { TaskDemo } from './components/landing/TaskDemo';
 import './landing.css';
-
-// Charge Inter (police de la marque) avec les trois graisses utilisées.
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter', display: 'swap' });
 
 // Métadonnées publiques de la landing.
 export const metadata = {
@@ -20,7 +16,7 @@ export const metadata = {
 // Rend la landing : hero et démonstration, fonctionnalités, chiffres, fonctionnement, Cameroun, FAQ, appel final.
 export default function HomePage() {
   return (
-    <div className={`landing ${inter.variable} min-h-screen overflow-x-clip bg-ground font-sans text-ink antialiased`}>
+    <div className="landing min-h-screen overflow-x-clip bg-ground font-sans text-ink antialiased">
       <LandingEffects />
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-ground">Aller au contenu</a>
       {/* Navigation : wordmark, quatre liens, une action. */}

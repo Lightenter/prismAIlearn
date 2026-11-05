@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
     "@prismai/chat-runtime": "workspace:*",
     "@prismai/contracts": "workspace:*",
     "@prismai/db": "workspace:*",

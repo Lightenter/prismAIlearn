@@ -18,7 +18,7 @@ const config: Config = {
         accent: { DEFAULT: 'rgb(var(--lp-accent) / <alpha-value>)', hover: 'rgb(var(--lp-accent-hover) / <alpha-value>)', press: 'rgb(var(--lp-accent-press) / <alpha-value>)' },
         cyan: 'rgb(var(--lp-cyan) / <alpha-value>)',
       },
-      fontFamily: { sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'] },
+      fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'] },
       maxWidth: { page: '1240px' },
       borderRadius: { lg: '8px' },
     },
