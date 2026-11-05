@@ -44,7 +44,7 @@ const plans: Plan[] = [
       'Idéal pour un usage quotidien',
     ],
     cta: 'Commencer gratuitement',
-    href: '/signup',
+    href: '/signup?from=/pricing',
   },
   {
     name: 'Starter',
@@ -60,7 +60,7 @@ const plans: Plan[] = [
       'Pour un usage régulier et soutenu',
     ],
     cta: 'Choisir Starter',
-    href: '/signup?plan=starter',
+    href: '/signup?plan=starter&from=/pricing',
     featured: true,
     badge: 'Le plus choisi',
   },
@@ -78,7 +78,7 @@ const plans: Plan[] = [
       'Pour les équipes et usages intensifs',
     ],
     cta: 'Choisir Business',
-    href: '/signup?plan=business',
+    href: '/signup?plan=business&from=/pricing',
   },
 ];
 
@@ -282,7 +282,7 @@ export default function PricingPage() {
                   <span>crédits</span>
                 </p>
                 <p className="booster-detail">{booster.detail}</p>
-                <Link className="btn plan-cta plan-cta-secondary" href="/signup?booster=1">
+                <Link className="btn plan-cta plan-cta-secondary" href="/signup?booster=1&from=/pricing">
                   {booster.cta}
                 </Link>
               </article>

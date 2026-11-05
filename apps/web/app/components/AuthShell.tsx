@@ -6,7 +6,17 @@ import type { ReactNode } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 
 // Décrit les propriétés du shell partagé des pages Auth.
-type AuthShellProps = { children: ReactNode; eyebrow: string; title: string; description: string; variant?: 'login' | 'signup' };
+type AuthShellProps = {
+  children: ReactNode;
+  eyebrow: string;
+  title: string;
+  description: string;
+  variant?: 'login' | 'signup';
+  // Page d’origine autorisée pour la flèche retour (ex. /pricing).
+  backHref?: string;
+  // Libellé accessible décrivant la destination réelle du retour.
+  backLabel?: string;
+};
 
 // Message d’accueil du panneau de marque, adapté à la connexion ou à l’inscription.
 const welcome = {
@@ -15,11 +25,11 @@ const welcome = {
 };
 
 // Rend la structure commune aux écrans de connexion et d’inscription.
-export function AuthShell({ children, eyebrow, title, description, variant = 'login' }: AuthShellProps) {
+export function AuthShell({ children, eyebrow, title, description, variant = 'login', backHref = '/', backLabel = 'Retour à la landing' }: AuthShellProps) {
   return (
     <div className="auth-page">
-      {/* Retour discret vers la landing, sans barre de navigation marketing. */}
-      <div className="auth-top container"><Link className="auth-back" href="/" aria-label="Retour à la landing">←</Link><ThemeToggle /></div>
+      {/* Retour discret vers la page d’origine (tarifs, landing…), sans barre de navigation marketing. */}
+      <div className="auth-top container"><Link className="auth-back" href={backHref} aria-label={backLabel}>←</Link><ThemeToggle /></div>
       {/* Carte principale en deux colonnes sur desktop et une colonne sur mobile. */}
       <main className="auth-main container">
         {/* Bloc de marque et d’accueil inspiré de la maquette fournie. */}
