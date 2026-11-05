@@ -1,0 +1,465 @@
+/* Page Tarifs : dark neon PrismAI, mobile-first, prix lisibles et crédits différenciés. */
+
+/* Le conteneur réutilise .container du thème ; ces classes restent locales à la page. */
+.pricing-hero {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  padding: 34px 0 8px;
+  text-align: center;
+}
+
+.pricing-hero .eyebrow {
+  color: var(--cyan-ink);
+  margin: 0;
+}
+
+.pricing-hero h1 {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(2.1rem, 8vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: -.055em;
+}
+
+.pricing-hero p {
+  margin: 0;
+  max-width: 54ch;
+  color: var(--soft);
+  font-size: .97rem;
+  line-height: 1.6;
+}
+
+/* Rappel de règle commerciale : jamais de nom de fournisseur ni de coût par action. */
+.pricing-hero-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--soft);
+  background: var(--fill);
+  font-size: .78rem;
+}
+
+/* ---------- 1. Plans principaux ---------- */
+
+.pricing-plans {
+  display: grid;
+  gap: 16px;
+  margin-top: 34px;
+}
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 24px 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  transition: border-color .2s ease, transform .2s ease;
+}
+
+.plan:hover { border-color: var(--line-strong); }
+
+/* Carte mise en avant : liseré néon en haut et halo discret. */
+.plan-featured {
+  border-color: rgba(143, 60, 255, .55);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(143, 60, 255, .16), transparent 62%),
+    var(--surface);
+  box-shadow: 0 18px 48px rgba(143, 60, 255, .16);
+}
+
+.plan-featured::before {
+  content: '';
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 2px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--cyan-ink), var(--accent), var(--cyan-ink));
+}
+
+.plan-badge {
+  position: absolute;
+  top: -11px;
+  right: 18px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--accent);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 20px var(--glow-strong);
+}
+
+.plan-name {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.plan-tagline {
+  margin: 4px 0 0;
+  color: var(--soft);
+  font-size: .84rem;
+  line-height: 1.45;
+  min-height: 2.4em;
+}
+
+/* Prix : élément le plus visible de la carte. */
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 16px 0 2px;
+}
+
+.plan-price strong {
+  font-size: clamp(2.15rem, 9vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.045em;
+  color: var(--ink);
+}
+
+.plan-price span {
+  color: var(--faint);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Étiquette de crédits : le type (jour / 30 jours / permanent) est explicite. */
+.credit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0 0;
+  padding: 6px 11px;
+  border-radius: 8px;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.credit-chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 9px currentColor;
+}
+
+.credit-daily { color: var(--soft); background: var(--fill); border: 1px solid var(--line); }
+.credit-temporary { color: var(--accent-ink); background: var(--fill-accent); border: 1px solid rgba(143, 60, 255, .35); }
+.credit-permanent { color: var(--cyan-ink); background: rgba(94, 242, 255, .09); border: 1px solid rgba(94, 242, 255, .3); }
+
+.plan-amount {
+  margin: 9px 0 0;
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* Liste de bénéfices : jamais de coût par action. */
+.plan-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-list li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 9px;
+  color: var(--soft);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.plan-list li::before {
+  content: '✓';
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: var(--cyan-ink);
+  background: rgba(94, 242, 255, .12);
+  font-size: .68rem;
+  font-weight: 900;
+}
+
+.plan-cta {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+}
+
+.plan-cta-secondary {
+  color: var(--ink);
+  background: var(--raise);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.plan-cta-secondary:hover {
+  background: var(--fill-accent);
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+/* ---------- 2. Ce que vous pouvez faire ---------- */
+
+.pricing-capabilities {
+  margin-top: 64px;
+}
+
+.section-head {
+  display: grid;
+  gap: 10px;
+  max-width: 62ch;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 5.2vw, 2.15rem);
+  line-height: 1.1;
+  letter-spacing: -.045em;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--soft);
+  font-size: .92rem;
+  line-height: 1.6;
+}
+
+.capability-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.capability {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.capability-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.capability-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  color: var(--accent-ink);
+  background: var(--fill-accent);
+  font-size: 1rem;
+}
+
+.capability h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -.02em;
+}
+
+.capability-benefit {
+  margin: 0 0 14px;
+  color: var(--faint);
+  font-size: .82rem;
+}
+
+.capability-levels {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.capability-levels li {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--raise);
+}
+
+.capability-levels strong {
+  display: block;
+  color: var(--ink);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.capability-levels span {
+  color: var(--soft);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+/* Rappel d'accès par plan, sans coût par action. */
+.capability-footnote {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 15px 17px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 13px;
+  background: var(--fill);
+  color: var(--soft);
+  font-size: .85rem;
+  line-height: 1.55;
+}
+
+.capability-footnote strong { color: var(--ink); }
+
+/* ---------- 3. Boosters ---------- */
+
+.pricing-boosters {
+  margin-top: 66px;
+  padding: 26px 20px 28px;
+  border: 1px solid rgba(94, 242, 255, .22);
+  border-radius: 22px;
+  background:
+    radial-gradient(110% 80% at 12% 0%, rgba(94, 242, 255, .1), transparent 58%),
+    var(--surface);
+}
+
+.pricing-boosters h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2.05rem);
+  line-height: 1.12;
+  letter-spacing: -.045em;
+}
+
+.pricing-boosters > p {
+  margin: 10px 0 0;
+  max-width: 60ch;
+  color: var(--soft);
+  font-size: .92rem;
+  line-height: 1.6;
+}
+
+.booster-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.booster {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 18px;
+  border: 1px solid rgba(94, 242, 255, .28);
+  border-radius: 15px;
+  background: rgba(10, 10, 13, .5);
+}
+
+.booster-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.booster-amount strong {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: var(--ink);
+}
+
+.booster-amount span {
+  color: var(--cyan-ink);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.booster-detail {
+  margin: 2px 0 14px;
+  color: var(--soft);
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.booster .plan-cta {
+  padding: 10px 16px;
+  font-size: .86rem;
+}
+
+/* Règles obligatoires : lisibles et jamais enfouies. */
+.booster-rules {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.booster-rules li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--soft);
+  font-size: .86rem;
+  line-height: 1.55;
+}
+
+.booster-rules li::before {
+  content: '◆';
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--cyan-ink);
+  font-size: .7rem;
+}
+
+.booster-rules strong { color: var(--ink); }
+
+.booster-fineprint {
+  margin: 16px 0 0;
+  color: var(--faint);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+/* ---------- Adaptation écran large ---------- */
+
+@media (min-width: 720px) {
+  .pricing-plans { grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+  .capability-grid { grid-template-columns: repeat(2, 1fr); }
+  .booster-grid { grid-template-columns: repeat(3, 1fr); }
+  .pricing-boosters { padding: 32px 28px 30px; }
+  .plan-tagline { min-height: 2.6em; }
+}
+
+@media (min-width: 1024px) {
+  .pricing-hero { padding-top: 46px; }
+  .capability-grid { grid-template-columns: repeat(4, 1fr); }
+}
