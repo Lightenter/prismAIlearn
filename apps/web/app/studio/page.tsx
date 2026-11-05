@@ -2,12 +2,38 @@ import Link from 'next/link';
 import { Footer } from '../components/Footer';
 import { SiteNav } from '../components/SiteNav';
 
+// Décrit le statut réel des studios sans promettre une capacité inactive.
 const studios = [
-  ['Texte Arena', 'Chat, rédaction et résumés, réponse affichée en direct.', '/chat', 'Disponible'],
-  ['Image Studio', 'Décris une idée, PrismAI la met en image.', '/studio/image', 'Bientôt disponible'],
-  ['Video Studio', 'Des vidéos courtes générées à partir de ta description.', '/studio/video', 'Bientôt disponible'],
-  ['Code Studio', 'Génération, explication et correction de code.', '/studio/code', 'Disponible'],
-  ['Document AI', 'Importe un document et pose tes questions dessus.', '/studio/document', 'Bientôt disponible'],
+  ['Texte Arena', 'Chat textuel privé après connexion, selon la disponibilité du service.', '/chat', 'Connexion requise'],
+  ['Image Studio', 'La génération d’images n’est pas activée dans cette version.', '/studio/image', 'Indisponible'],
+  ['Video Studio', 'La génération vidéo n’est pas activée dans cette version.', '/studio/video', 'Indisponible'],
+  ['Code Studio', 'Aucune interface Code dédiée n’est activée dans cette version.', '/studio/code', 'Indisponible'],
+  ['Document AI', 'L’import et l’analyse de documents ne sont pas activés dans cette version.', '/studio/document', 'Indisponible'],
 ];
 
-export default function StudioPage() { return <div className="page"><SiteNav /><main className="page-main container"><div className="eyebrow">Les cinq studios PrismAI</div><h1>Choisis ton <span>prisme</span>.</h1><div className="cards">{studios.map(([name, description, href, status]) => <article className="card" key={name}><div className="icon">✦</div><h3>{name}</h3><p>{description}</p><div className="signal"><span className="signal-status">{status}</span><Link className="btn btn-ghost" href={href}>Ouvrir →</Link></div></article>)}</div></main><Footer /></div>; }
+// Rend le catalogue des studios avec leurs états explicites.
+export default function StudioPage() {
+  return (
+    <div className="page">
+      <SiteNav />
+      <main className="page-main container">
+        <div className="eyebrow">Les espaces PrismAI</div>
+        <h1>Choisis ton <span>prisme</span>.</h1>
+        <div className="cards">
+          {studios.map(([name, description, href, status]) => (
+            <article className="card" key={name}>
+              <div className="icon" aria-hidden="true">✦</div>
+              <h2>{name}</h2>
+              <p>{description}</p>
+              <div className="signal">
+                <span className="signal-status">{status}</span>
+                <Link className="btn btn-ghost" href={href}>Ouvrir →</Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

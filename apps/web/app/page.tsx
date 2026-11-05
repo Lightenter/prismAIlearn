@@ -1,5 +1,6 @@
 // Landing publique PrismAI : sombre, sobre, inspirée de Linear, construite en Tailwind.
 import Link from 'next/link';
+import Image from 'next/image';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Inter } from 'next/font/google';
 import { CtaForm } from './components/landing/CtaForm';
@@ -112,9 +113,9 @@ export default function HomePage() {
                   <tbody>
                     <tr><td className="py-1.5 text-ink/90">Bonus d’inscription</td><td className="py-1.5 text-right text-cyan">+300</td></tr>
                     <tr><td className="py-1.5 text-ink/90">Quota du jour</td><td className="py-1.5 text-right text-cyan">+100</td></tr>
-                    <tr><td className="py-1.5 text-ink/90">Réponse · Rédaction</td><td className="py-1.5 text-right text-soft">−3</td></tr>
-                    <tr><td className="py-1.5 text-ink/90">Réponse · Code</td><td className="py-1.5 text-right text-soft">−6</td></tr>
-                    <tr><td className="pt-3 font-semibold">Solde disponible</td><td className="pt-3 text-right font-semibold">391</td></tr>
+                    <tr><td className="py-1.5 text-ink/90">Coût d’une réponse</td><td className="py-1.5 text-right text-soft">Calculé</td></tr>
+                    <tr><td className="py-1.5 text-ink/90">Solde après réponse</td><td className="py-1.5 text-right text-soft">Actualisé</td></tr>
+                    <tr><td className="pt-3 font-semibold">Calcul des crédits</td><td className="pt-3 text-right font-semibold">Côté serveur</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -147,7 +148,7 @@ export default function HomePage() {
                   <p className="text-[17px] leading-[1.45]">langues de travail : français et anglais.</p>
                 </div>
               </div>
-              <p className="reveal mt-8 text-[15px] leading-[1.55] text-soft md:col-span-6">Le coût de chaque réponse s’affiche avec la réponse, de 1 à 2 crédits par tranche de 1 000 tokens selon la tâche.</p>
+              <p className="reveal mt-8 text-[15px] leading-[1.55] text-soft md:col-span-6">Le coût de chaque réponse est calculé côté serveur selon l’usage et s’affiche avec la réponse.</p>
             </div>
           </div>
         </section>
@@ -177,7 +178,7 @@ export default function HomePage() {
               <div className="step-card reveal [transition-delay:160ms]" data-ui aria-hidden="true">
                 <p className="text-[13px] text-soft">Requête · terminée</p>
                 <p className="mt-2 text-[15px] leading-[1.5]">Pourquoi ma requête fetch renvoie une erreur CORS ?</p>
-                <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]"><div><dt className="text-soft">Coût</dt><dd className="text-cyan tabular-nums">6 crédits</dd></div><div><dt className="text-soft">Solde</dt><dd className="text-ink tabular-nums">294</dd></div></dl>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]"><div><dt className="text-soft">Coût</dt><dd className="text-cyan">Calculé</dd></div><div><dt className="text-soft">Solde</dt><dd className="text-ink">Actualisé</dd></div></dl>
               </div>
               <p className="step-clause reveal">Enfin, tu lis la réponse<br /> et son coût.</p>
             </li>
@@ -198,15 +199,15 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 gap-2 lg:col-span-7">
             <figure className="photo reveal col-span-2">
-              <img src="/landing/douala-circulation.webp" width="1600" height="1200" alt="Une avenue de Douala en saison sèche, voitures et motos sous le soleil" className="aspect-[16/10] w-full object-cover" loading="lazy" />
+              <Image src="/landing/douala-circulation.webp" width="1600" height="1200" alt="Une avenue de Douala en saison sèche, voitures et motos sous le soleil" className="aspect-[16/10] w-full object-cover" loading="lazy" />
               <figcaption>Une avenue de Douala, en saison sèche.</figcaption>
             </figure>
             <figure className="photo reveal [transition-delay:80ms]">
-              <img src="/landing/douala-marche.webp" width="1000" height="1333" alt="Étals de légumes dans un marché de Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
+              <Image src="/landing/douala-marche.webp" width="1000" height="1333" alt="Étals de légumes dans un marché de Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
               <figcaption>Un marché de légumes à Douala.</figcaption>
             </figure>
             <figure className="photo reveal [transition-delay:160ms]">
-              <img src="/landing/douala-bonamoussadi.webp" width="1000" height="1333" alt="Rue commerçante du quartier Bonamoussadi à Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
+              <Image src="/landing/douala-bonamoussadi.webp" width="1000" height="1333" alt="Rue commerçante du quartier Bonamoussadi à Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
               <figcaption>Le quartier Bonamoussadi.</figcaption>
             </figure>
           </div>
@@ -232,7 +233,7 @@ export default function HomePage() {
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
               <summary>Combien coûte une réponse ?<span className="faq-sign" aria-hidden="true"></span></summary>
-              <p>Le coût dépend de la longueur de la réponse et du type de tâche : de 1 à 2 crédits par tranche de 1 000 tokens. Le montant s’affiche avec chaque réponse.</p>
+              <p>Le coût varie selon la longueur de la réponse et le barème appliqué côté serveur. Le montant s’affiche avec chaque réponse.</p>
             </details>
             <details className="faq reveal" {...{ name: 'faq' }}>
               <summary>Dans quelles langues puis-je écrire ?<span className="faq-sign" aria-hidden="true"></span></summary>
@@ -250,7 +251,7 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-page gap-12 px-5 py-24 md:px-8 lg:min-h-[80svh] lg:grid-cols-12 lg:items-end lg:gap-8 lg:py-28">
             <div className="lg:col-span-7">
               <h2 id="cta-title" className="reveal text-[clamp(44px,5vw,72px)] font-semibold leading-[0.98] tracking-[-0.045em]">Pose ta première<br /> question.</h2>
-              <p className="reveal mt-8 max-w-[38ch] text-[17px] leading-[1.55] [transition-delay:80ms]">Ton compte est prêt en une minute. Les 300 crédits sont versés dès la confirmation de ton e-mail.</p>
+              <p className="reveal mt-8 max-w-[38ch] text-[17px] leading-[1.55] [transition-delay:80ms]">Ton compte se crée en une minute. Les 300 crédits sont ajoutés à la création du compte.</p>
             </div>
     <CtaForm />
           </div>

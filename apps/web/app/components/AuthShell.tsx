@@ -37,7 +37,7 @@ export function AuthShell({ children, eyebrow, title, description, variant = 'lo
         </section>
       </main>
       {/* Footer volontairement réduit aux mentions légales demandées. */}
-      <footer className="auth-footer"><Link href="/">PrismAI</Link><Link href="/">Mentions légales</Link><span>© 2026 PrismAI</span></footer>
+      <footer className="auth-footer"><Link href="/">PrismAI</Link><span>Mentions légales à publier</span><span>© 2026 PrismAI</span></footer>
     </div>
   );
 }
