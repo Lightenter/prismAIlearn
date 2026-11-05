@@ -51,10 +51,13 @@ fi
 
 # 6. Démarrage : web sur 3000 et API sur 3001
 port_busy() { (command -v ss >/dev/null && ss -ltn 2>/dev/null | grep -q ":$1 ") || (command -v lsof >/dev/null && lsof -i ":$1" -sTCP:LISTEN >/dev/null 2>&1); }
-if port_busy 3000; then
-  echo "Le port 3000 est déjà occupé. Libérez-le puis relancez ce script." >&2
-  exit 1
-fi
+# Le web et l'API occupent deux ports : les deux doivent être libres, sinon l'un des deux services échoue.
+for port in 3000 3001; do
+  if port_busy "$port"; then
+    echo "Le port $port est déjà occupé. Arrêtez le processus qui l'utilise, puis relancez ce script." >&2
+    exit 1
+  fi
+done
 
 say "Démarrage de PrismAI…"
 printf '\n   Site web      \033[36mhttp://localhost:3000\033[0m\n'
