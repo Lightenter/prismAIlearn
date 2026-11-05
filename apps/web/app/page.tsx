@@ -1,6 +1,5 @@
 // Landing publique PrismAI : sombre, sobre, inspirée de Linear, construite en Tailwind.
 import Link from 'next/link';
-import Image from 'next/image';
 import { ThemeToggle } from './components/ThemeToggle';
 import { CtaForm } from './components/landing/CtaForm';
 import { LandingEffects } from './components/landing/LandingEffects';
@@ -182,7 +181,7 @@ export default function HomePage() {
         </section>
 
 
-        {/* Cameroun : le terrain de départ, en photos réelles de Douala. */}
+        {/* Cameroun : le terrain de départ, illustré par un décor de prisme. */}
         <section id="cameroun" className="mx-auto grid max-w-page scroll-mt-20 gap-10 px-5 pt-28 md:px-8 lg:grid-cols-12 lg:gap-8 lg:pt-40" aria-labelledby="cameroon-title">
           <div className="lg:col-span-5 lg:pt-4">
             <h2 id="cameroon-title" className="reveal text-[clamp(34px,4vw,56px)] font-semibold leading-[1.02] tracking-[-0.035em]">Pensé d’abord<br /> pour le Cameroun.</h2>
@@ -193,19 +192,9 @@ export default function HomePage() {
               <li className="facet">Administration : lettres, CV et demandes</li>
             </ul>
           </div>
-          <div className="grid grid-cols-2 gap-2 lg:col-span-7">
-            <figure className="photo reveal col-span-2">
-              <Image src="/landing/douala-circulation.webp" width="1600" height="1200" alt="Une avenue de Douala en saison sèche, voitures et motos sous le soleil" className="aspect-[16/10] w-full object-cover" loading="lazy" />
-              <figcaption>Une avenue de Douala, en saison sèche.</figcaption>
-            </figure>
-            <figure className="photo reveal [transition-delay:80ms]">
-              <Image src="/landing/douala-marche.webp" width="1000" height="1333" alt="Étals de légumes dans un marché de Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
-              <figcaption>Un marché de légumes à Douala.</figcaption>
-            </figure>
-            <figure className="photo reveal [transition-delay:160ms]">
-              <Image src="/landing/douala-bonamoussadi.webp" width="1000" height="1333" alt="Rue commerçante du quartier Bonamoussadi à Douala" className="aspect-[4/5] w-full object-cover" loading="lazy" />
-              <figcaption>Le quartier Bonamoussadi.</figcaption>
-            </figure>
+          <div className="cameroon-panel reveal lg:col-span-7" aria-hidden="true">
+            <span className="cameroon-prism" />
+            <span className="cameroon-glow" />
           </div>
         </section>
 
@@ -267,7 +256,7 @@ export default function HomePage() {
           <div className="col-span-2 md:col-span-4 md:col-start-9"><p className="text-soft">PrismAI</p><p className="mt-3 leading-[1.55]">Une IA pour tout ton travail.<br />Lancé au Cameroun.</p></div>
         </div>
         <div className="mt-16 flex flex-col items-start justify-between gap-4 text-[13px] leading-[1.5] text-soft sm:flex-row sm:items-center">
-          <p>© 2026 PrismAI · Photos via Wikimedia Commons : « Douala traffic » par Bmnda (CC0), « Vegetable market in Douala » par Adesolive (CC0), « Douala Bonamoussadi » par MimbaF7023 (<a className="underline underline-offset-2 hover:text-ink" href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>).</p>
+          <p>© 2026 PrismAI · Une IA pour tout ton travail.</p>
           <a href="#" className="shrink-0 rounded-lg bg-raise px-3 py-2 text-ink transition-colors hover:bg-edge">Revenir en haut</a>
         </div>
       </footer>
